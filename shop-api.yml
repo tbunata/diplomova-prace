@@ -1,0 +1,652 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/tbunata/shop/1.0.0
+info:
+  description: API for a shop
+  version: "1.0.0"
+  title: Simple Inventory API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: "user"
+    description: "User description"
+  - name: "product"
+    description: ""
+  - name: "cart"
+    description: ""
+  - name: "order"
+    description: ""
+paths:
+  # consider multiple types of user: customer, admin...
+  /user:
+    post:
+      tags:
+      - "user"
+      summary: "Create a new user"
+      description: ""
+      operationId: "createUser"
+      requestBody:
+        description: "Create a new user"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    format: "int64"
+                    example: "3141"
+        "400":
+          description: "Invalid input"
+  /users/{userId}:
+    get:
+      tags:
+      - "user"
+      summary: "Get user"
+      operationId: "getUser"
+      parameters:
+        - in: "path"
+          name: "userId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the user to get"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "404":
+          description: "User not found"
+    put:
+      tags:
+      - "user"
+      summary: "Edit user"
+      operationId: "editUser"
+      parameters:
+        - in: "path"
+          name: "userId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the user to edit"
+      requestBody:
+        description: "New values to be set"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        "200":
+          description: "OK"
+        "404":
+          description: "User not found"
+    delete:
+      tags:
+      - "user"
+      summary: "Delete user"
+      operationId: "deleteUser"
+      parameters:
+        - in: "path"
+          name: "userId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the user to delete"
+      responses:
+        "204":
+          description: "The user was deleted successfully"
+        "404":
+          description: "User not found"
+  /user/login:
+    get:
+      tags:
+      - "user"
+      summary: "logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      parameters:
+      - in: "query"
+        name: "userName"
+        description: "The user name for logim"
+        required: True
+        schema:
+          type: "string"
+      - in: "query"
+        name: "password"
+        description: "Password in plain text"
+        required: True
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "Succesful login"
+        "400":
+          description: "Invalid username/password"
+  /user/logout:
+    get:
+      tags:
+      - "user"
+      summary: "Logs out the current user"
+      operationId: "logoutUser"
+      parameters: []
+      responses:
+        "200":
+          description: "Succesful logout"
+  /product:
+    post:
+      tags:
+      - "product"
+      summary: "Create a new product"
+      description: ""
+      operationId: "createProduct"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  id:
+                    type: "integer"
+                    format: "int64"
+                    example: "42"
+        "400":
+          description: "Invalid input"
+  /products:
+    get:
+      tags:
+      - "product"
+      summary: "List products"
+      description: ""
+      operationId: "listProducts"
+      parameters:
+        - in: query
+          name: "minPrice"
+          required: false
+          schema:
+            type: "number"
+        - in: query
+          name: "maxPrice"
+          required: false
+          schema:
+            type: "number"
+        - in: query
+          name: "statuses"
+          required: false
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        - in: query
+          name: "categories"
+          required: false
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        - in: query
+          name: "brands"
+          required: false
+          schema:
+            type: "array"
+            items:
+              type: "string"
+      responses:
+        "200":
+          description: "Succesful operation"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Product"
+        "400":
+          description: "Invalid input"
+  /products/{productId}:
+    get:
+      tags:
+      - "product"
+      summary: "Get product"
+      operationId: "getProduct"
+      parameters:
+        - in: "path"
+          name: "productId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the product to get"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "404":
+          description: "Product not found"
+    put:
+      tags:
+      - "product"
+      summary: "Edit product"
+      operationId: "editProduct"
+      parameters:
+        - in: "path"
+          name: "productId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the product to edit"
+      requestBody:
+        description: "New values to be set"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        "200":
+          description: "OK"
+        "404":
+          description: "Product not found"
+    delete:
+      tags:
+      - "product"
+      summary: "Delete product"
+      operationId: "deleteProduct"
+      parameters:
+        - in: "path"
+          name: "productId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the product to delete"
+      responses:
+        "204":
+          description: "The product was deleted successfully"
+        "404":
+          description: "Product not found"
+  # consider hieararchic structure of categories - would need parent ids
+  /product/category:
+    get:
+      tags:
+      - "product"
+      summary: "List all categories"
+      operationId: "listCategories"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: '#/components/schemas/Category'
+  /product/category/{categoryId}:
+    get:
+      tags:
+      - "product"
+      summary: "List products in a given category"
+      operationId: "listCategoryProducts"
+      parameters:
+        - in: "path"
+          name: "categoryId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the category"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: '#/components/schemas/Product'
+        "404":
+          description: "Category not found"
+  /cart/{userId}: # possibly /user/{userId}/cart
+    post:
+      tags:
+      - "cart"
+      summary: "Create an empty cart for given user"
+      operationId: "createCart"
+      parameters:
+        - in: "path"
+          name: "userId"
+          schema:
+            type: integer
+          required: true
+      responses:
+        "200":
+          description: "Succesful operation"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  cartId:
+                    type: "integer"
+                    format: "int64"
+                    example: "698"
+        "404":
+          description: "User not found"
+  /cart/{cartId}:
+    get:
+      tags:
+      - "cart"
+      summary: "List items in a given cart"
+      parameters:
+        - in: "path"
+          name: "cartId"
+          schema:
+            type: "integer"
+          required: true
+      responses:
+        "200":
+          description: "Succesful operation. Returns list of cart items"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CartItem"
+        "404":
+          description: "Cart not found"
+  /cart/{cartId}/addItem:
+    post:
+      tags:
+      - "cart"
+      summary: "Insert an item into given cart"
+      operationId: "cartAddItem"
+      parameters:
+      - in: "path"
+        name: "cartId"
+        schema:
+          type: "integer"
+        required: true
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                quantity:
+                  type: "integer"
+                productId:
+                  type: "integer"
+      responses:
+        "200":
+          description: "Succesful operation"
+        "404":
+          description: "Cart/product not found"
+  /cart/{cartId}/editItem:
+    post:
+      tags:
+      - "cart"
+      summary: "Edit an item in a given cart"
+      operationId: "cartEditItem"
+      parameters:
+      - in: "path"
+        name: "cartId"
+        schema:
+          type: "integer"
+        required: true
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItem"
+      responses:
+        "200":
+          description: "Succesful operation"
+        "400":
+          description: "Invalid data"
+        "404":
+          description: "Cart/product not found"
+  /cart/{cartId}/emptyCart:
+    get:
+      tags:
+      - "cart"
+      summary: "Delete all items from given cart"
+      operationId: "emptyCart"
+      parameters:
+      - in: "path"
+        name: "cartId"
+        schema:
+          type: "integer"
+        required: true
+      responses:
+        "200":
+          description: "Succesful operation"
+        "404":
+          description: "Cart/product not found"
+  /cart/{cartId}/checkout:
+    post:
+      tags:
+      - "cart"
+      summary: "Checkout the given cart"
+      parameters:
+      - in: "path"
+        name: "cartId"
+        schema:
+          type: "integer"
+        required: true
+      responses:
+        "200":
+          description: "Succesful operation"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  orderId:
+                    type: "integer"
+                    format: "int64"
+        "404":
+          description: "Cart not found"
+  /orders:
+    get:
+      tags:
+      - "order"
+      summary: "List all orders according to the parameters"
+      parameters:
+        - in: "query"
+          name: "userId"
+          schema:
+            type: "integer"
+          required: false
+        - in: "query"
+          name: "dateFrom"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "dateTo"
+          schema:
+            type: "string"
+          required: false
+        - in: "query"
+          name: "status"
+          schema:
+            type: "string"
+          required: false
+      responses:
+        "200":
+          description: "Succesful operation"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Order"
+  /orders/{orderId}:
+    get:
+      tags:
+      - "order"
+      summary: "Get order detail"
+      parameters:
+      - in: "path"
+        name: "orderId"
+        schema:
+          type: "integer"
+        required: true
+      responses:
+        "200":
+          description: "Succesful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+    put:
+      tags:
+      - "order"
+      summary: "Edit a given order"
+      parameters:
+      - in: "path"
+        name: "orderId"
+        schema:
+          type: "integer"
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Order"
+        required: true
+      responses:
+        "200":
+          description: "Succesful operation"
+
+components:
+  schemas:
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          example: 3120
+        username:
+          type: "string"
+          example: "svimes"
+        firstName:
+          type: "string"
+          example: "Samuel"
+        lastName:
+          type: "string"
+          example: "Vimes"
+        email:
+          type: "string"
+          example: "commander@citywatch.am"
+        password:
+          type: "string"
+        phone:
+          type: "string"
+          example: "555431609"
+        userStatus:
+          type: "integer"
+          format: "int32"
+          description: "User Status"
+    Category:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+    Product:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          example: 42
+        category:
+          $ref: "#/components/schemas/Category"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        status:
+          type: "string"
+        price:
+          type: "number"
+        brand:
+          type: "string"
+    CartItem:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          example: 16
+        product:
+          $ref: "#/components/schemas/Product"
+        productPrice:
+          type: "number"
+        quantity:
+          type: "integer"
+          format: "int32"
+    Cart:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          example: 16
+        totalPrice:
+          type: "number"
+        items:
+          type: "array"
+          items: 
+            $ref: "#/components/schemas/CartItem"
+    Order:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          example: 16
+        totalPrice:
+          type: "number"
+        items:
+          type: "array"
+          items: 
+            $ref: "#/components/schemas/CartItem"
+        status:
+          type: "string"
+        createdDate:
+          type: "string"
+# todo add order manipulation to user resource
