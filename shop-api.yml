@@ -4,17 +4,15 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/tbunata/shop/1.0.0
 info:
-  description: API for a shop
+  description: Simple shop API for the purposes of diploma thesis
   version: "1.0.0"
-  title: Simple Inventory API
-  contact:
-    email: you@your-company.com
+  title: Shop API
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 tags:
   - name: "user"
-    description: "User description"
+    description: ""
   - name: "product"
     description: ""
   - name: "cart"
@@ -149,6 +147,106 @@ paths:
       responses:
         "200":
           description: "Succesful logout"
+  /user/{userId}/changePassword:
+    put:
+      tags:
+      - "user"
+      summary: "Change password for a given user"
+      operationId: "changePassword"
+      parameters:
+        - in: "path"
+          name: "userId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the user to edit"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                oldPassword:
+                  type: "string"
+                newPassword:
+                  type: "string"
+      responses:
+        "200":
+          description: "OK"
+        "404":
+          description: "User not found"
+  /user/{userId}/myOrders:
+    get:
+      tags:
+      - "user"
+      summary: "Lists all orders for a given user"
+      operationId: "myOrders"
+      parameters:
+      - in: "path"
+        name: "userId"
+        required: true
+        schema:
+          type: "integer"
+      responses:
+        "200":
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Order"
+        "404":
+          description: "User not found"
+  /user/{userId}/myOrders{orderId}:
+    get:
+      tags:
+      - "user"
+      summary: "Lists all orders for a given user"
+      operationId: "userOrderDetail"
+      parameters:
+      - in: "path"
+        name: "userId"
+        required: true
+        schema:
+          type: "integer"
+      - in: "path"
+        name: "orderId"
+        required: true
+        schema:
+          type: "integer"
+      responses:
+        "200":
+          description: "Successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: "User/order not found"
+  /user/{userId}/myOrders/{orderId}/cancelOrder:
+    delete:
+      tags:
+      - "user"
+      summary: "Cancel target order for given user"
+      parameters:
+      - in: "path"
+        name: "userId"
+        required: true
+        schema:
+          type: "integer"
+      - in: "path"
+        name: "orderId"
+        required: true
+        schema:
+          type: "integer"
+      responses:
+        "204":
+          description: "Order successfully canceled"
+        "404":
+          description: "User/order not found"
   /product:
     post:
       tags:
@@ -578,6 +676,12 @@ components:
           type: "integer"
           format: "int32"
           description: "User Status"
+        roles:
+          type: "array"
+          items:
+              type: "integer"
+              format: "int64"
+              description: "Role id"
     Category:
       type: "object"
       properties:
