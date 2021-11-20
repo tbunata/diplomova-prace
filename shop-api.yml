@@ -651,7 +651,7 @@ paths:
         required: true
       responses:
         "200":
-          description: "Succesful operation"
+          description: "Successful operation"
 
 components:
   schemas:
@@ -662,9 +662,6 @@ components:
           type: "integer"
           format: "int64"
           example: 3120
-        username:
-          type: "string"
-          example: "svimes"
         firstName:
           type: "string"
           example: "Samuel"
@@ -679,6 +676,12 @@ components:
         phone:
           type: "string"
           example: "555431609"
+        address:
+          type: "string"
+        city:
+          type: "string"
+        zipCode:
+          type: "string"
         userStatus:
           type: "integer"
           format: "int32"
@@ -692,9 +695,6 @@ components:
     CreateUser:
       type: "object"
       properties:
-        username:
-          type: "string"
-          example: "svimes"
         firstName:
           type: "string"
           example: "Samuel"
@@ -709,6 +709,12 @@ components:
         phone:
           type: "string"
           example: "555431609"
+        address:
+          type: "string"
+        city:
+          type: "string"
+        zipCode:
+          type: "string"
         roles:
           type: "array"
           items:

@@ -1,3 +1,5 @@
 prisma vs typeorm: https://stackshare.io/stackups/prisma-vs-typeorm
 dockerize: https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
 pres docker compose spustit db a proti ni appku
+prisma s expressem: https://www.prisma.io/express
+crud api typescript a express: https://auth0.com/blog/node-js-and-typescript-tutorial-build-a-crud-api/
