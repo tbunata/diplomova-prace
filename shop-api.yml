@@ -20,7 +20,6 @@ tags:
   - name: "order"
     description: ""
 paths:
-  # consider multiple types of user: customer, admin...
   /user:
     post:
       tags:
@@ -34,16 +33,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/CreateUser'
       responses:
-        "200":
-          description: "OK"
+        "201":
+          description: "User created"
           content:
             application/json:
               schema:
                 type: "object"
                 properties:
-                  id:
+                  userId:
                     type: "integer"
                     format: "int64"
                     example: "3141"
@@ -204,7 +203,7 @@ paths:
     get:
       tags:
       - "user"
-      summary: "Lists all orders for a given user"
+      summary: "Get detail of a user's order"
       operationId: "userOrderDetail"
       parameters:
       - in: "path"
@@ -260,10 +259,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/CreateProduct'
       responses:
-        "200":
-          description: "OK"
+        "201":
+          description: "Product created"
           content:
             application/json:
               schema:
@@ -388,7 +387,6 @@ paths:
           description: "The product was deleted successfully"
         "404":
           description: "Product not found"
-  # consider hieararchic structure of categories - would need parent ids
   /product/category:
     get:
       tags:
@@ -429,7 +427,7 @@ paths:
                   $ref: '#/components/schemas/Product'
         "404":
           description: "Category not found"
-  /cart/{userId}: # possibly /user/{userId}/cart
+  /cart/{userId}:
     post:
       tags:
       - "cart"
@@ -442,8 +440,8 @@ paths:
             type: integer
           required: true
       responses:
-        "200":
-          description: "Succesful operation"
+        "201":
+          description: "Cart operation"
           content:
             application/json:
               schema:
@@ -481,7 +479,7 @@ paths:
     post:
       tags:
       - "cart"
-      summary: "Insert an item into given cart"
+      summary: "Add an item into given cart"
       operationId: "cartAddItem"
       parameters:
       - in: "path"
@@ -502,12 +500,21 @@ paths:
                 productId:
                   type: "integer"
       responses:
-        "200":
-          description: "Succesful operation"
+        "201":
+          description: "Item added to cart"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  cartId:
+                    type: "integer"
+                    format: "int64"
+                    example: "3141"
         "404":
           description: "Cart/product not found"
   /cart/{cartId}/editItem:
-    post:
+    put:
       tags:
       - "cart"
       summary: "Edit an item in a given cart"
@@ -533,7 +540,7 @@ paths:
         "404":
           description: "Cart/product not found"
   /cart/{cartId}/emptyCart:
-    get:
+    delete:
       tags:
       - "cart"
       summary: "Delete all items from given cart"
@@ -545,8 +552,8 @@ paths:
           type: "integer"
         required: true
       responses:
-        "200":
-          description: "Succesful operation"
+        "204":
+          description: "Cart deleted"
         "404":
           description: "Cart/product not found"
   /cart/{cartId}/checkout:
@@ -561,8 +568,8 @@ paths:
           type: "integer"
         required: true
       responses:
-        "200":
-          description: "Succesful operation"
+        "201":
+          description: "Order created"
           content:
             application/json:
               schema:
@@ -682,6 +689,32 @@ components:
               type: "integer"
               format: "int64"
               description: "Role id"
+    CreateUser:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+          example: "svimes"
+        firstName:
+          type: "string"
+          example: "Samuel"
+        lastName:
+          type: "string"
+          example: "Vimes"
+        email:
+          type: "string"
+          example: "commander@citywatch.am"
+        password:
+          type: "string"
+        phone:
+          type: "string"
+          example: "555431609"
+        roles:
+          type: "array"
+          items:
+              type: "integer"
+              format: "int64"
+              description: "Role id"
     Category:
       type: "object"
       properties:
@@ -709,6 +742,21 @@ components:
           type: "number"
         brand:
           type: "string"
+    CreateProduct:
+      type: "object"
+      properties:
+        category:
+          $ref: "#/components/schemas/Category"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        status:
+          type: "string"
+        price:
+          type: "number"
+        brand:
+          type: "string"
     CartItem:
       type: "object"
       properties:
@@ -716,9 +764,17 @@ components:
           type: "integer"
           format: "int64"
           example: 16
-        product:
-          $ref: "#/components/schemas/Product"
+        productId:
+          type: "integer"
+          format: "int64"
+          example: 16
+        productName:
+            type: "string"
+        productDescription:
+          type: "string"
         productPrice:
+          type: "number"
+        itemPrice:
           type: "number"
         quantity:
           type: "integer"
@@ -753,4 +809,3 @@ components:
           type: "string"
         createdDate:
           type: "string"
-# todo add order manipulation to user resource
