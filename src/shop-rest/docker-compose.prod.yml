@@ -2,32 +2,6 @@ version: '3'
 services:
   shop-rest-api:
     container_name: shop-rest-api
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
-    volumes:
-      - ./src:/app/src
-      - ./nodemon.json:/app/nodemon.json
-    expose:
-      - 3000
-    ports:
-      - 3000:3000
-    depends_on:
-      - postgres
-    env_file:
-      - .env
+    environment:
+      - NODE_ENV=production
     command: npm run start
-
-  postgres:
-    image: postgres
-    container_name: postgres
-    restart: always
-    ports:
-      - 5432:5432
-    env_file:
-      - .env
-    volumes:
-      - database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
-volumes:
-  database-data:
