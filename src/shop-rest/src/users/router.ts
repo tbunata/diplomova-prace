@@ -1,22 +1,29 @@
 import express, { Request, Response } from "express"
+import { logger } from '../logger'
 import * as UserService from "./service"
 import { BaseUser, User } from "./interface"
 
 export const usersRouter = express.Router()
 
 
-// GET users
+const handleError = (e: unknown, res: Response) => {
+    logger.error(e)
+    let message = "Server error"
+    if (e instanceof Error) {
+        message = e.message
+    }
+    res.status(500).send(message)
+}
 
+
+// GET users
 usersRouter.get('/', async (req: Request, res: Response) => {
     try {
+        logger.info('hello from GET users')
         const users = await UserService.findAll()
         res.status(200).send(users)
     } catch (e) {
-        let message = "Server error"
-        if (e instanceof Error) {
-            message = e.message
-        }
-        res.status(500).send(message)
+        handleError(e, res)
     }
 })
 
@@ -32,11 +39,7 @@ usersRouter.get('/:id', async (req: Request, res: Response) => {
 
         res.status(404).send('User not found')
     } catch (e) {
-        let message = "Server error"
-        if (e instanceof Error) {
-            message = e.message
-        }
-        res.status(500).send(message)
+        handleError(e, res)
     }
 })
 
@@ -49,11 +52,7 @@ usersRouter.post('/', async (req: Request, res: Response) => {
 
         res.status(201).json(newUser)
     } catch (e) {
-        let message = "Server error"
-        if (e instanceof Error) {
-            message = e.message
-        }
-        res.status(500).send(message)
+        handleError(e, res)
     }
 })
 
@@ -71,12 +70,7 @@ usersRouter.put('/:id', async (req: Request, res: Response) => {
         
         res.status(404).send('User not found')
     } catch (e) {
-        let message = "Server error"
-        if (e instanceof Error) {
-            message = e.message
-        }
-        
-        res.status(500).send(message)
+        handleError(e, res)
     }
 })
 
@@ -89,11 +83,6 @@ usersRouter.delete('/:id', async (req: Request, res: Response) => {
         
         res.status(204).send('User deleted')
     } catch (e) {
-        let message = "Server error"
-        if (e instanceof Error) {
-            message = e.message
-        }
-        
-        res.status(500).send(message)
+        handleError(e, res)
     }
 })
