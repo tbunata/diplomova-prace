@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: base
+      target: production
     volumes:
       - ./src:/app/src
       - ./nodemon.json:/app/nodemon.json
@@ -17,7 +17,7 @@ services:
       - postgres
     env_file:
       - .env
-    command: npm run start:dev
+    command: npm run start
 
   postgres:
     image: postgres

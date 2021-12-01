@@ -1,4 +1,4 @@
-FROM node:17
+FROM node:17 as base
 
 WORKDIR /app
 
@@ -9,6 +9,6 @@ RUN npm install
 
 COPY . .
 
+FROM base as production
 
-EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+ENV NODE_ENV=production
