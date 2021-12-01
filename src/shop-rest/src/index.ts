@@ -1,5 +1,5 @@
-import express, { Request, Response } from 'express'
-import { usersRouter } from './users/users.router'
+import express from 'express'
+import { usersRouter } from './users/router'
 
 const app = express()
 const port = process.env.PORT || 3000

@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express"
-import * as UserService from "./users.service"
-import { BaseUser, User } from "./user.interface"
+import * as UserService from "./service"
+import { BaseUser, User } from "./interface"
 
 export const usersRouter = express.Router()
 

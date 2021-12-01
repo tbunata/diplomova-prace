@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { BaseUser, User } from "./user.interface"
+import { BaseUser, User } from "./interface"
 
 const prisma = new PrismaClient()
 
