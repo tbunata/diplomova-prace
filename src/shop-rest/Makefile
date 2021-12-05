@@ -6,3 +6,6 @@ up-prod:
 
 down:
 	docker-compose -p shop-api down
+
+test:
+	npm run test

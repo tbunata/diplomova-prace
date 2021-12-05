@@ -19,7 +19,6 @@ const handleError = (e: unknown, res: Response) => {
 // GET users
 usersRouter.get('/', async (req: Request, res: Response) => {
     try {
-        logger.info('hello from GET users')
         const users = await UserService.findAll()
         res.status(200).send(users)
     } catch (e) {
@@ -31,13 +30,14 @@ usersRouter.get('/', async (req: Request, res: Response) => {
 usersRouter.get('/:id', async (req: Request, res: Response) => {
     const id: number = parseInt(req.params.id, 10)
     try {
-        const user: User | null = await UserService.find(id)
+        const user = await UserService.find(id)
 
         if (user) {
             return res.status(200).send(user)
         }
 
         res.status(404).send('User not found')
+        logger.error(`GET: User with id: ${id} not found`)
     } catch (e) {
         handleError(e, res)
     }
@@ -69,6 +69,7 @@ usersRouter.put('/:id', async (req: Request, res: Response) => {
         }
         
         res.status(404).send('User not found')
+        logger.error(`PUT: User with id: ${id} not found`)
     } catch (e) {
         handleError(e, res)
     }
