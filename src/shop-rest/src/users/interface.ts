@@ -3,10 +3,10 @@ export interface BaseUser {
     lastName: string
     email: string
     password:  string
-    phone:     string | null
-    address:   string | null
-    city:      string | null
-    zipCode:   string | null
+    phone?:     string | null
+    address?:   string | null
+    city?:      string | null
+    zipCode?:   string | null
 
 }
 
