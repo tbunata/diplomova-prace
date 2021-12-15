@@ -13,4 +13,5 @@ export interface BaseUser {
 export interface User extends BaseUser {
     statusId: number
     id: number
+    token?: string
 }

@@ -2,6 +2,7 @@ import express, { Request, Response } from "express"
 import { logger } from '../logger'
 import * as UserService from "./service"
 import { BaseUser, User } from "./interface"
+import { verifyToken } from '../middleware/auth'
 
 export const usersRouter = express.Router()
 
@@ -17,7 +18,7 @@ const handleError = (e: unknown, res: Response) => {
 
 
 // GET users
-usersRouter.get('/', async (req: Request, res: Response) => {
+usersRouter.get('/', verifyToken, async (req: Request, res: Response) => {
     try {
         const users = await UserService.findAll()
         res.status(200).send(users)
@@ -27,7 +28,8 @@ usersRouter.get('/', async (req: Request, res: Response) => {
 })
 
 //  GET user
-usersRouter.get('/:id', async (req: Request, res: Response) => {
+usersRouter.get('/:id', verifyToken, async (req: Request, res: Response) => {
+    logger.info('user calling this endpoint', req.user.exp)
     const id: number = parseInt(req.params.id, 10)
     try {
         const user = await UserService.find(id)
@@ -57,7 +59,7 @@ usersRouter.post('/', async (req: Request, res: Response) => {
 })
 
 //  PUT user
-usersRouter.put('/:id', async (req: Request, res: Response) => {
+usersRouter.put('/:id', verifyToken, async (req: Request, res: Response) => {
     try {
         const id: number = parseInt(req.params.id, 10)
         const userUpdate: User = req.body
@@ -76,13 +78,31 @@ usersRouter.put('/:id', async (req: Request, res: Response) => {
 })
 
 // DELETE user
-usersRouter.delete('/:id', async (req: Request, res: Response) => {
+usersRouter.delete('/:id', verifyToken, async (req: Request, res: Response) => {
     try {
         const id: number = parseInt(req.params.id, 10)
 
         await UserService.remove(id)
         
         res.status(204).send('User deleted')
+    } catch (e) {
+        handleError(e, res)
+    }
+})
+
+// LOGIN user
+usersRouter.post('/login', verifyToken, async (req: Request, res: Response) => {
+    try {
+        const {email, password} = req.body
+        if (!email || !password) {
+            return res.status(400).send('Missing data')
+        }
+        const loggedInUser = await UserService.login(email, password)
+        if (loggedInUser) {
+            logger.info(loggedInUser)
+            return res.status(200).send(loggedInUser)
+        }
+        return res.status(401).send('Unauthorized')
     } catch (e) {
         handleError(e, res)
     }
