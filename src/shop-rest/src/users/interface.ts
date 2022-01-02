@@ -14,4 +14,10 @@ export interface User extends BaseUser {
     statusId: number
     id: number
     token?: string
+    refreshToken?: string
+}
+
+export interface RefreshToken {
+    userEmail: string
+    token: string
 }

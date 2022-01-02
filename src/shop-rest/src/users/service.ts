@@ -1,12 +1,12 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client'
-import { BaseUser, User } from "./interface"
+import { BaseUser, User, RefreshToken } from "./interface"
+import { uid } from 'rand-token'
 
 const prisma = new PrismaClient()
 
 
-// todo implement filtering
 export const findAll = async () => {
     const users = await prisma.user.findMany()
     return users
@@ -100,6 +100,7 @@ export const remove = async (id: number) => {
     })
 }
 
+
 export const login = async (email: string, password:string) => {
     const user: User | null = await findByEmail(email)
     if (user && await bcrypt.compare(password, user.password)) {
@@ -110,9 +111,49 @@ export const login = async (email: string, password:string) => {
                 expiresIn: "2h"
             }
         )
-        user.token = token
-        return user
+        const refreshToken = uid(256)
+        const tokens = {
+            token: token,
+            refreshToken: refreshToken
+        }
+        await prisma.refreshToken.upsert({
+            where: {
+                userEmail: email 
+            },
+            update: {
+                token: refreshToken
+            },
+            create: {
+                userEmail: email,
+                token: refreshToken
+            }
+        })
+        return tokens
     }
 
     return null
+}
+
+
+export const refreshToken = async (email: string, refreshToken: string) => {
+    const tokenObject = await prisma.refreshToken.findFirst({
+        where: {
+            userEmail: email
+        }
+    })
+    if(tokenObject && tokenObject.token === refreshToken) {
+        const user = await findByEmail(email)
+        if (!user) {
+            return null
+        }
+        const token = jwt.sign(
+            { user_id: user.id, email},
+            "process.env.TOKEN_KEY", // todo
+            {
+                expiresIn: "2h"
+            }
+        )
+        console.log(token)
+        return {token: token}
+    }
 }

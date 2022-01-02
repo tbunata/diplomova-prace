@@ -1,3 +1,5 @@
+build:
+	docker-compose -p shop-api build
 up:
 	docker-compose -p shop-api up
 

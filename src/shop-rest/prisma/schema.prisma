@@ -11,21 +11,29 @@ datasource db {
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  email     String     @unique
-  firstName String
-  lastName  String
-  password  String
-  phone     String?
-  address   String?
-  city      String?
-  zipCode   String?
-  status    UserStatus @relation(fields: [statusId], references: [id])
-  statusId  Int
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  firstName    String
+  lastName     String
+  password     String
+  phone        String?
+  address      String?
+  city         String?
+  zipCode      String?
+  status       UserStatus     @relation(fields: [statusId], references: [id])
+  statusId     Int
+  RefreshToken RefreshToken[]
 }
 
 model UserStatus {
   id   Int    @id @default(autoincrement())
   name String
   User User[]
+}
+
+model RefreshToken {
+  id        Int    @id @default(autoincrement())
+  userEmail String @unique
+  user      User   @relation(fields: [userEmail], references: [email])
+  token     String
 }

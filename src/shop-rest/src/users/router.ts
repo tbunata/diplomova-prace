@@ -29,7 +29,7 @@ usersRouter.get('/', verifyToken, async (req: Request, res: Response) => {
 
 //  GET user
 usersRouter.get('/:id', verifyToken, async (req: Request, res: Response) => {
-    logger.info('user calling this endpoint', req.user.exp)
+    console.log('user calling this endpoint', req.user)
     const id: number = parseInt(req.params.id, 10)
     try {
         const user = await UserService.find(id)
@@ -91,16 +91,32 @@ usersRouter.delete('/:id', verifyToken, async (req: Request, res: Response) => {
 })
 
 // LOGIN user
-usersRouter.post('/login', verifyToken, async (req: Request, res: Response) => {
+usersRouter.post('/login', async (req: Request, res: Response) => {
     try {
         const {email, password} = req.body
         if (!email || !password) {
             return res.status(400).send('Missing data')
         }
-        const loggedInUser = await UserService.login(email, password)
-        if (loggedInUser) {
-            logger.info(loggedInUser)
-            return res.status(200).send(loggedInUser)
+        const token = await UserService.login(email, password)
+        if (token) {
+            return res.status(200).send(token)
+        }
+        return res.status(401).send('Unauthorized')
+    } catch (e) {
+        handleError(e, res)
+    }
+})
+
+// REFRESH token
+usersRouter.post('/token', async (req: Request, res: Response) => {
+    try {
+        const {email, refreshToken} = req.body
+        if (!email || !refreshToken) {
+            return res.status(400).send('Missing data')
+        }
+        const token = await UserService.refreshToken(email, refreshToken)
+        if (token) {
+            return res.status(200).send(token)
         }
         return res.status(401).send('Unauthorized')
     } catch (e) {

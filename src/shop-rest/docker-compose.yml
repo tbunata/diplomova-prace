@@ -16,7 +16,7 @@ services:
       - postgres
     env_file:
       - .env
-    command: bash -c "npx prisma migrate dev && npm run start:dev"
+    command: bash -c "npx prisma migrate deploy && npm run start:dev"
 
   postgres:
     image: postgres
