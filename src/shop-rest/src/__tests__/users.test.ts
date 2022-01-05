@@ -13,14 +13,14 @@ beforeAll(async () => {
             {
                 firstName: "Havelock",
                 lastName: "Vetinari",
-                email: "lord.vetinari@ankh-morpork.dw",
-                password: "vetinariho",
+                email: "lord.vetinari@discworld.am",
+                password: "$2a$10$lC9VVx2ZxbpukoFL65t4BuDwV5VWgEwZLZIxWrLKXPVh/qJ7nhjmi",
                 statusId: 2
             }, {
                 firstName: "Samuel",
                 lastName: "Vimes",
-                email: "samuel.vimes@ankh-morpork.dw",
-                password: "vimesovo",
+                email: "samuel.vimes@discworld.amq",
+                password: "$2a$10$gct2PaN4PfYS/N5X/jR0gOu.h5JRg6iDP2Ua370AuFTteeXH2txB2",
                 statusId: 1
             }
         ]
@@ -42,8 +42,10 @@ afterAll(async () => {
 
 describe("GET /users", () => {
     it("should get a list of users", async () => {
+        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
         await supertest(app)
             .get("/users")
+            .send({token: loginResponse.body.token})
             .expect(200)
             .then(async (res) => {
                 expect(res.body.length).toBe(2)
@@ -55,15 +57,17 @@ describe("GET /users", () => {
 
 describe("GET /users/:id", () => {
     it("should get user's data", async () => {
+        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
         await supertest(app)
             .get("/users/1")
+            .send({token: loginResponse.body.token})
             .expect(200)
             .expect({
                 id: 1,
                 firstName: "Havelock",
                 lastName: "Vetinari",
-                email: "lord.vetinari@ankh-morpork.dw",
-                password: "vetinariho",
+                email: "lord.vetinari@discworld.am",
+                password: "$2a$10$lC9VVx2ZxbpukoFL65t4BuDwV5VWgEwZLZIxWrLKXPVh/qJ7nhjmi",
                 statusId: 2,
                 phone: null,
                 address: null,
@@ -72,14 +76,17 @@ describe("GET /users/:id", () => {
             })
     })
     it("should return 404 for not finding user", async () => {
+        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
         await supertest(app)
             .get("/users/6")
+            .send({token: loginResponse.body.token})
             .expect(404)
     })
 })
 
 describe("POST /users", () => {
     it('should create 1 new user', async () => {
+        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
         const user = {
             firstName: "Fred",
             lastName: "Colon",
@@ -89,6 +96,7 @@ describe("POST /users", () => {
     
         await supertest(app)
             .post("/users")
+            .send({token: loginResponse.body.token})
             .send(user)
             .expect(201)
             .then(async res => {
@@ -96,7 +104,6 @@ describe("POST /users", () => {
                 expect(res.body.firstName).toBe("Fred")
                 expect(res.body.lastName).toBe("Colon")
                 expect(res.body.email).toBe("fred.colon@ankh-morpork.dw")
-                expect(res.body.password).toBe("colonovo")
             })
     
     })
@@ -104,6 +111,7 @@ describe("POST /users", () => {
 
 describe("PUT /users", () => {
     it('should update an existing user', async () => {
+        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
         const user = {
             firstName: "Samuel",
             lastName: "Vimes",
@@ -116,6 +124,7 @@ describe("PUT /users", () => {
     
         await supertest(app)
             .put("/users/2")
+            .send({token: loginResponse.body.token})
             .send(user)
             .expect(200)
             .then(async res => {
@@ -123,7 +132,6 @@ describe("PUT /users", () => {
                 expect(res.body.firstName).toBe("Samuel")
                 expect(res.body.lastName).toBe("Vimes")
                 expect(res.body.email).toBe("samuel.vimes@cit_watch.am")
-                expect(res.body.password).toBe("vimesovo")
                 expect(res.body.statusId).toBe(2)
                 expect(res.body.address).toBe("Ramkin Residence, Scoone Avenue")
                 expect(res.body.city).toBe("Ankh")
@@ -131,16 +139,20 @@ describe("PUT /users", () => {
     
     })
     it("should return 404 for not finding user", async () => {
+        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
         await supertest(app)
             .get("/users/6")
+            .send({token: loginResponse.body.token})
             .expect(404)
     })
 })
 
 describe("DELETE /users", () => {
     it('should delete a user', async () => {
+        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
         await supertest(app)
             .delete("/users/1")
+            .send({token: loginResponse.body.token})
             .expect(204)
         
         const user = await prisma.user.findUnique({
