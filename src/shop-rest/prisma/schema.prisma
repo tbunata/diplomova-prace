@@ -37,3 +37,43 @@ model RefreshToken {
   user      User   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
   token     String
 }
+
+model Product {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String
+  price       Int
+  statusId    Int
+  status      ProductStatus     @relation(fields: [statusId], references: [id])
+  brandId     Int
+  brand       Brand             @relation(fields: [brandId], references: [id])
+  category    ProductCategory[]
+}
+
+model ProductCategory {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String
+  product     ProductCategory[]
+}
+
+model ProductStatus {
+  id      Int       @id @default(autoincrement())
+  name    String
+  Product Product[]
+}
+
+model Brand {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  Product     Product[]
+}

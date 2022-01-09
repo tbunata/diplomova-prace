@@ -1,0 +1,15 @@
+{
+    "categoryIds": [
+        {
+            "categoryId": 1
+        },
+        {
+            "categoryId": 3
+        }
+    ],
+    "name": "Shirt",
+    "description": "Plain white shirt",
+    "statusId": 1,
+    "price": 1299,
+    "brandId": 1
+}

@@ -29,9 +29,8 @@ usersRouter.get('/', verifyToken, async (req: Request, res: Response) => {
 
 //  GET user
 usersRouter.get('/:id', verifyToken, async (req: Request, res: Response) => {
-    console.log('user calling this endpoint', req.user)
-    const id: number = parseInt(req.params.id, 10)
     try {
+        const id: number = parseInt(req.params.id, 10)
         const user = await UserService.find(id)
 
         if (user) {
