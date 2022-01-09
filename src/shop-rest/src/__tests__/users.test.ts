@@ -1,29 +1,17 @@
 import supertest from "supertest";
 import { PrismaClient } from '@prisma/client'
+import { users } from "../../prisma/seeds/users";
+import { userStatuses } from "../../prisma/seeds/userStatuses";
 import {app} from "../app"
 
 const prisma = new PrismaClient()
 
 beforeAll(async () => {
     await prisma.userStatus.createMany({
-        data: [{name: "created"}, {name: "approved"}]
+        data: userStatuses
     })
     await prisma.user.createMany({
-        data: [
-            {
-                firstName: "Havelock",
-                lastName: "Vetinari",
-                email: "lord.vetinari@discworld.am",
-                password: "$2a$10$lC9VVx2ZxbpukoFL65t4BuDwV5VWgEwZLZIxWrLKXPVh/qJ7nhjmi",
-                statusId: 2
-            }, {
-                firstName: "Samuel",
-                lastName: "Vimes",
-                email: "samuel.vimes@discworld.amq",
-                password: "$2a$10$gct2PaN4PfYS/N5X/jR0gOu.h5JRg6iDP2Ua370AuFTteeXH2txB2",
-                statusId: 1
-            }
-        ]
+        data: users
     })
 })
 
@@ -68,11 +56,11 @@ describe("GET /users/:id", () => {
                 lastName: "Vetinari",
                 email: "lord.vetinari@discworld.am",
                 password: "$2a$10$lC9VVx2ZxbpukoFL65t4BuDwV5VWgEwZLZIxWrLKXPVh/qJ7nhjmi",
-                statusId: 2,
-                phone: null,
-                address: null,
-                city: null,
-                zipCode: null,
+                phone: '777 666 555',
+                address: "Patrician's Palace",
+                city: 'Ankh-Morpork',
+                zipCode: '100 00',
+                statusId: 1
             })
     })
     it("should return 404 for not finding user", async () => {
