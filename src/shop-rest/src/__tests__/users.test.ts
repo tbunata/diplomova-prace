@@ -7,6 +7,7 @@ import {app} from "../app"
 const prisma = new PrismaClient()
 
 beforeAll(async () => {
+    console.log("Users beforeAll")
     await prisma.userStatus.createMany({
         data: userStatuses
     })
@@ -16,6 +17,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
+    console.log("Users afterAll")
     const deleteUsers = prisma.user.deleteMany()
     const deleteUserStatus = prisma.userStatus.deleteMany()
 
@@ -23,8 +25,6 @@ afterAll(async () => {
         deleteUsers,
         deleteUserStatus
     ])
-
-    await prisma.$disconnect()
 })
 
 
