@@ -22,7 +22,7 @@ const handleError = (e: unknown, res: Response) => {
 productsRouter.get('/', verifyToken, async (req: Request, res: Response) => {
     try {
         const products = await ProductService.findAll()
-        res.status(200).send(products)
+        return res.status(200).send(products)
     } catch (e) {
         handleError(e, res)
     }
@@ -38,8 +38,8 @@ productsRouter.get('/:id', verifyToken, async (req: Request, res: Response) => {
             return res.status(200).send(product)
         }
 
-        res.status(404).send('Product not found')
         logger.error(`GET: Product with id: ${id} not found`)
+        return res.status(404).send('Product not found')
     } catch (e) {
         handleError(e, res)
     }
@@ -68,8 +68,8 @@ productsRouter.put('/:id', verifyToken, async (req: Request, res: Response) => {
             return res.status(200).send(updatedProduct)
         }
         
-        res.status(404).send('Product not found')
         logger.error(`PUT: Product with id: ${id} not found`)
+        return res.status(404).send('Product not found')
     } catch (e) {
         handleError(e, res)
     }
@@ -82,7 +82,7 @@ productsRouter.delete('/:id', verifyToken, async (req: Request, res: Response) =
 
         await ProductService.remove(id)
         
-        res.status(204).send('Product deleted')
+        return res.status(204).send('Product deleted')
     } catch (e) {
         handleError(e, res)
     }
