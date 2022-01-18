@@ -33,12 +33,12 @@ usersRouter.get('/:id', verifyToken, async (req: Request, res: Response) => {
         const id: number = parseInt(req.params.id, 10)
         const user = await UserService.find(id)
 
-        if (user) {
-            return res.status(200).send(user)
+        if (!user) {
+            logger.error(`GET: User with id: ${id} not found`)
+            return res.status(404).send('User not found')
         }
-
-        res.status(404).send('User not found')
-        logger.error(`GET: User with id: ${id} not found`)
+        
+        return res.status(200).send(user)
     } catch (e) {
         handleError(e, res)
     }
@@ -58,28 +58,28 @@ usersRouter.post('/', async (req: Request, res: Response) => {
 })
 
 //  PUT user
-usersRouter.put('/:id', verifyToken, async (req: Request, res: Response) => {
+usersRouter.put('/', verifyToken, async (req: Request, res: Response) => {
     try {
-        const id: number = parseInt(req.params.id, 10)
+        const id: number = req.user.user_id
         const userUpdate: User = req.body
 
         const updatedUser = await UserService.update(id, userUpdate)
 
-        if(updatedUser) {
-            return res.status(200).send(updatedUser)
+        if(!updatedUser) {
+            logger.error(`PUT: User with id: ${id} not found`)
+            return res.status(404).send('User not found')
         }
         
-        res.status(404).send('User not found')
-        logger.error(`PUT: User with id: ${id} not found`)
+        return res.status(200).send(updatedUser)
     } catch (e) {
         handleError(e, res)
     }
 })
 
 // DELETE user
-usersRouter.delete('/:id', verifyToken, async (req: Request, res: Response) => {
+usersRouter.delete('/', verifyToken, async (req: Request, res: Response) => {
     try {
-        const id: number = parseInt(req.params.id, 10)
+        const id: number = req.user.user_id
 
         await UserService.remove(id)
         
@@ -107,7 +107,7 @@ usersRouter.post('/login', async (req: Request, res: Response) => {
 })
 
 // REFRESH token
-usersRouter.post('/token', async (req: Request, res: Response) => {
+usersRouter.post('/refresh', async (req: Request, res: Response) => {
     try {
         const {email, refreshToken} = req.body
         if (!email || !refreshToken) {

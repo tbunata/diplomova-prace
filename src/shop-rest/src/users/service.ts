@@ -98,6 +98,7 @@ export const remove = async (id: number) => {
             id:id
         }
     })
+    return null
 }
 
 

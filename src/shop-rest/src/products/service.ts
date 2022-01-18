@@ -3,31 +3,33 @@ import { BaseProduct, Product } from "./interface"
 
 const prisma = new PrismaClient()
 
-
-export const findAll = async () => {
-    const products = await prisma.product.findMany({
-        include: {
+const includeRelatedTables = {
+    category: {
+        select: {
+            categoryId: true,
             category: {
-                select: {
-                    categoryId: true,
-                    category: {
-                        select: {
-                            name: true
-                        }
-                    }
-                }
-            },
-            status: {
-                select: {
-                    name: true
-                }
-            },
-            brand: {
                 select: {
                     name: true
                 }
             }
         }
+    },
+    status: {
+        select: {
+            name: true
+        }
+    },
+    brand: {
+        select: {
+            name: true
+        }
+    }
+}
+
+
+export const findAll = async () => {
+    const products = await prisma.product.findMany({
+        include: includeRelatedTables
     })
     return products
 }
@@ -37,28 +39,7 @@ export const find = async (id: number) => {
         where: {
             id: id
         },
-        include: {
-            category: {
-                select: {
-                    categoryId: true,
-                    category: {
-                        select: {
-                            name: true
-                        }
-                    }
-                }
-            },
-            status: {
-                select: {
-                    name: true
-                }
-            },
-            brand: {
-                select: {
-                    name: true
-                }
-            }
-        }
+        include: includeRelatedTables
     })
     return product
 }
@@ -81,28 +62,7 @@ export const create = async (newProduct: BaseProduct) => {
                 }
             }
         },
-        include: {
-            category: {
-                select: {
-                    categoryId: true,
-                    category: {
-                        select: {
-                            name: true
-                        }
-                    }
-                }
-            },
-            status: {
-                select: {
-                    name: true
-                }
-            },
-            brand: {
-                select: {
-                    name: true
-                }
-            }
-        }
+        include: includeRelatedTables
     })
     return product
 }
@@ -139,28 +99,7 @@ export const update = async (id: number, productUpdate: Product) => {
 
             }
         },
-        include: {
-            category: {
-                select: {
-                    categoryId: true,
-                    category: {
-                        select: {
-                            name: true
-                        }
-                    }
-                }
-            },
-            status: {
-                select: {
-                    name: true
-                }
-            },
-            brand: {
-                select: {
-                    name: true
-                }
-            }
-        }
+        include: includeRelatedTables
     })
     return updatedProduct
 }
@@ -174,7 +113,7 @@ export const remove = async (id: number) => {
     })
 
     if (!product) {
-        return
+        return null
     }
 
     await prisma.$transaction([
@@ -189,4 +128,5 @@ export const remove = async (id: number) => {
             }
         })
     ])
+    return null
 }

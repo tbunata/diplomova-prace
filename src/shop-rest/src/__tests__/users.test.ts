@@ -99,11 +99,11 @@ describe("POST /users", () => {
 
 describe("PUT /users", () => {
     it('should update an existing user', async () => {
-        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
+        const loginResponse = await supertest(app).post('/users/login').send({email: "samuel.vimes@discworld.am", password: "vimesovo"})
         const user = {
-            firstName: "Samuel",
+            firstName: "Sam",
             lastName: "Vimes",
-            email: "samuel.vimes@cit_watch.am",
+            email: "samuel.vimes@discworld.am",
             password: "vimesovo",
             statusId: 2,
             address: "Ramkin Residence, Scoone Avenue",
@@ -111,41 +111,34 @@ describe("PUT /users", () => {
         }
     
         await supertest(app)
-            .put("/users/2")
+            .put("/users")
             .send({token: loginResponse.body.token})
             .send(user)
             .expect(200)
             .then(async res => {
                 expect(res.body.id).toBeTruthy()
-                expect(res.body.firstName).toBe("Samuel")
+                expect(res.body.firstName).toBe("Sam")
                 expect(res.body.lastName).toBe("Vimes")
-                expect(res.body.email).toBe("samuel.vimes@cit_watch.am")
+                expect(res.body.email).toBe("samuel.vimes@discworld.am")
                 expect(res.body.statusId).toBe(2)
                 expect(res.body.address).toBe("Ramkin Residence, Scoone Avenue")
                 expect(res.body.city).toBe("Ankh")
             })
     
     })
-    it("should return 404 for not finding user", async () => {
-        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
-        await supertest(app)
-            .get("/users/6")
-            .send({token: loginResponse.body.token})
-            .expect(404)
-    })
 })
 
 describe("DELETE /users", () => {
     it('should delete a user', async () => {
-        const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
+        const loginResponse = await supertest(app).post('/users/login').send({email: "samuel.vimes@discworld.am", password: "vimesovo"})
         await supertest(app)
-            .delete("/users/1")
+            .delete("/users")
             .send({token: loginResponse.body.token})
             .expect(204)
         
         const user = await prisma.user.findUnique({
             where: {
-                id: 1
+                id: 2
             }
         })
         expect(user).toBeNull()
