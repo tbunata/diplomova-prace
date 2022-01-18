@@ -23,7 +23,15 @@ const handleError = (e: unknown, res: Response) => {
 // TODO filtering
 productsRouter.get('/', async (req: Request, res: Response) => {
     try {
-        const products = await ProductService.findAll()
+        let product_ids = []
+        if(req.query.product_ids){
+            product_ids = JSON.parse(req.query.product_ids as string)
+        }
+        let min_price = null
+        if (req.query.min_price) {
+            min_price = parseInt(req.query.min_price as string, 10)
+        }
+        const products = await ProductService.findAll(product_ids, min_price)
         return res.status(200).send(products)
     } catch (e) {
         handleError(e, res)

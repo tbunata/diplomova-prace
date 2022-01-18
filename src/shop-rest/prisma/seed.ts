@@ -5,6 +5,7 @@ import { users } from './seeds/users'
 import { brands } from './seeds/brands'
 import { categories } from './seeds/categories'
 import { productStatuses } from './seeds/productStatuses'
+import { products } from './seeds/products'
 
 const prisma = new PrismaClient()
 
@@ -25,6 +26,9 @@ async function main() {
     })
     await prisma.productStatus.createMany({
         data: productStatuses
+    })
+    await prisma.product.createMany({
+        data: products
     })
 }
 
