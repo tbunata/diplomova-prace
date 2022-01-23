@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express"
+import { GetProductsRequest } from "./requests"
 import { logger } from '../logger'
 import * as ProductService from "./service"
 import { verifyToken } from '../middleware/auth'
@@ -20,18 +21,21 @@ const handleError = (e: unknown, res: Response) => {
 
 
 // GET products
-// TODO filtering
-productsRouter.get('/', async (req: Request, res: Response) => {
+productsRouter.get('/', async (req: GetProductsRequest, res: Response) => {
     try {
-        let product_ids = []
-        if(req.query.product_ids){
-            product_ids = JSON.parse(req.query.product_ids as string)
+        let productIds: number[] = []
+        if(req.query.productIds){
+            productIds = req.query.productIds.map(Number)
         }
-        let min_price = null
-        if (req.query.min_price) {
-            min_price = parseInt(req.query.min_price as string, 10)
+        let minPrice = null
+        if (req.query.minPrice) {
+            minPrice = parseInt(req.query.minPrice, 10)
         }
-        const products = await ProductService.findAll(product_ids, min_price)
+        let maxPrice = null
+        if (req.query.maxPrice) {
+            maxPrice = parseInt(req.query.maxPrice, 10)
+        }
+        const products = await ProductService.findAll(productIds, minPrice, maxPrice)
         return res.status(200).send(products)
     } catch (e) {
         handleError(e, res)

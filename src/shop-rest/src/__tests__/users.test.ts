@@ -16,17 +16,6 @@ beforeAll(async () => {
     })
 })
 
-afterAll(async () => {
-    console.log("Users afterAll")
-    const deleteUsers = prisma.user.deleteMany()
-    const deleteUserStatus = prisma.userStatus.deleteMany()
-
-    await prisma.$transaction([
-        deleteUsers,
-        deleteUserStatus
-    ])
-})
-
 
 describe("GET /users", () => {
     it("should get a list of users", async () => {

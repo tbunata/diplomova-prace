@@ -8,11 +8,11 @@ export const productCategories = [
         categoryId: 4
     },
     {
-        productId: 1,
+        productId: 2,
         categoryId: 1
     },
     {
-        productId: 1,
+        productId: 2,
         categoryId: 5
     },
 ]

@@ -27,9 +27,9 @@ const includeRelatedTables = {
 }
 
 
-export const findAll = async (ids:number[]=[], min_price:number|null) => {
+export const findAll = async (ids:number[]=[], minPrice:number|null, maxPrice:number|null) => {
     let where: any = {}
-    if (ids) {
+    if (ids.length > 0) {
         where = {
             ...where,
             id: {
@@ -37,23 +37,35 @@ export const findAll = async (ids:number[]=[], min_price:number|null) => {
             }
         }
     }
-    if (min_price) {
+    let price = {}
+    if (minPrice !== null) {
+        price = {
+            ...price,
+            gte: minPrice
+        }
+    }
+    if (maxPrice !== null) {
+        price = {
+            ...price,
+            lte: maxPrice
+        }
+    }
+    if (price != {}){
         where = {
             ...where,
-                price: {
-                    gte: min_price
-                }
+            price
         }
     }
     let query: any = {
         include: includeRelatedTables
     }
-    if(where) {
-        query = {
-            ...query,
-            where
-        }
+
+    query = {
+        ...query,
+        where
     }
+
+    console.log(query)
     const products = await prisma.product.findMany(query)
     return products
 }
