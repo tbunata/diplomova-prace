@@ -1,0 +1,9 @@
+# LaTeX temporary files
+*.aux
+*.lof
+*.log
+*.out
+*.toc
+
+# PDF output
+DP_Bunata_Tomas_2022.pdf
