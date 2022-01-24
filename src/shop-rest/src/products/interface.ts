@@ -5,7 +5,7 @@ export interface BaseProduct {
     statusId: number
     price: number
     brandId: number
-
+    quantity: number
 }
 
 export interface Product extends BaseProduct {

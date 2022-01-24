@@ -47,6 +47,7 @@ model Product {
   status      ProductStatus     @relation(fields: [statusId], references: [id])
   brandId     Int
   brand       Brand             @relation(fields: [brandId], references: [id])
+  quantity    Int
   category    ProductCategory[]
 }
 

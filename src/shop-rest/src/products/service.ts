@@ -86,6 +86,7 @@ export const create = async (newProduct: BaseProduct) => {
             name: newProduct.name,
             description: newProduct.description,
             price: newProduct.price,
+            quantity: newProduct.quantity,
             status: {
                 connect: {id: newProduct.statusId}
             },
@@ -121,6 +122,7 @@ export const update = async (id: number, productUpdate: Product) => {
             name: productUpdate.name,
             description: productUpdate.description,
             price: productUpdate.price,
+            quantity: productUpdate.quantity,
             status: {
                 connect: {id: productUpdate.statusId}
             },

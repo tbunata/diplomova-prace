@@ -94,7 +94,8 @@ describe("POST /products", () => {
             description: "For those nights you don't want to be seen",
             statusId: 1,
             price: 999,
-            brandId: 1
+            brandId: 1,
+            quantity: 2
         }
         await supertest(app)
             .post("/products")
@@ -105,7 +106,8 @@ describe("POST /products", () => {
                 expect(res.body.id).toBeTruthy()
                 expect(res.body.name).toBe("Black shirt")
                 expect(res.body.description).toBe("For those nights you don't want to be seen")
-                expect(res.body.price).toBe(999)
+                expect(res.body.price).toBe(999),
+                expect(res.body.quantity).toBe(2)
             })
     })
 })
@@ -114,7 +116,7 @@ describe("PUT /products", () => {
     it("should update an existing product", async () => {
         const loginResponse = await supertest(app).post('/users/login').send({email: "lord.vetinari@discworld.am", password: "vetinariho"})
         const updatedProduct = {
-            id: 1,
+            id: 3,
             categoryIds: [
                 {categoryId: 1}
             ],
@@ -122,7 +124,8 @@ describe("PUT /products", () => {
             description: "For those nights you want to be seen",
             statusId: 1,
             price: 999,
-            brandId: 1
+            brandId: 1,
+            quantity: 0
         }
         await supertest(app)
             .put("/products/3")

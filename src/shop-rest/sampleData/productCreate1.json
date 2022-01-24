@@ -11,5 +11,6 @@
     "description": "Plain white shirt",
     "statusId": 1,
     "price": 1299,
-    "brandId": 1
+    "brandId": 1,
+    "quantity": 51
 }
