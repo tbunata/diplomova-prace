@@ -3,18 +3,9 @@ import { logger } from '../logger'
 import * as UserService from "./service"
 import { BaseUser, User } from "./interface"
 import { verifyToken } from '../middleware/auth'
+import { handleError } from '../helper/errors'
 
 export const usersRouter = express.Router()
-
-
-const handleError = (e: unknown, res: Response) => {
-    logger.error(e)
-    let message = "Server error"
-    if (e instanceof Error) {
-        message = e.message
-    }
-    res.status(500).send(message)
-}
 
 
 // GET users

@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import { usersRouter } from './users/router'
 import { productsRouter } from './products/router';
 import { categoriesRouter } from './categories/router';
+import { cartsRouter } from './carts/router';
 
 export const app = express()
 
@@ -12,3 +13,4 @@ app.use(express.json())
 app.use('/users', usersRouter)
 app.use('/products', productsRouter)
 app.use('/categories', categoriesRouter)
+app.use('/carts', cartsRouter)

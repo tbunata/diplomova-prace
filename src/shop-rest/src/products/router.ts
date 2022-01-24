@@ -4,20 +4,11 @@ import { logger } from '../logger'
 import * as ProductService from "./service"
 import { verifyToken } from '../middleware/auth'
 import { BaseProduct, Product } from "./interface"
+import { handleError } from '../helper/errors'
 
 export const productsRouter = express.Router()
 
 productsRouter.use(verifyToken)
-
-
-const handleError = (e: unknown, res: Response) => {
-    logger.error(e)
-    let message = "Server error"
-    if (e instanceof Error) {
-        message = e.message
-    }
-    res.status(500).send(message)
-}
 
 
 // GET products

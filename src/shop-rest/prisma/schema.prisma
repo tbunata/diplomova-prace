@@ -23,6 +23,7 @@ model User {
   status       UserStatus     @relation(fields: [statusId], references: [id])
   statusId     Int
   RefreshToken RefreshToken[]
+  cart Cart?
 }
 
 model UserStatus {
@@ -49,6 +50,7 @@ model Product {
   brand       Brand             @relation(fields: [brandId], references: [id])
   quantity    Int
   category    ProductCategory[]
+  carts       CartItem[]
 }
 
 model ProductCategory {
@@ -57,6 +59,8 @@ model ProductCategory {
   product    Product  @relation(fields: [productId], references: [id])
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([productId, categoryId])
 }
 
 model Category {
@@ -77,4 +81,22 @@ model Brand {
   name        String
   description String
   Product     Product[]
+}
+
+model Cart {
+  id  Int @id @default(autoincrement())
+  items CartItem[]
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+}
+
+model CartItem {
+  id  Int @id @default(autoincrement())
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  cartId     Int
+  cart       Cart @relation(fields: [cartId], references: [id])
+  quantity  Int
+
+  @@unique([productId, cartId])
 }

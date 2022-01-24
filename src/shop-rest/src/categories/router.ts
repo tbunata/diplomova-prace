@@ -3,22 +3,14 @@ import { logger } from '../logger'
 import * as CategoryService from "./service"
 import { verifyToken } from '../middleware/auth'
 import { BaseCategory, Category } from "./interface"
+import { handleError } from '../helper/errors'
 
 export const categoriesRouter = express.Router()
 
-const handleError = (e: unknown, res: Response) => {
-    logger.error(e)
-    let message = "Server error"
-    if (e instanceof Error) {
-        message = e.message
-    }
-    res.status(500).send(message)
-}
-
+categoriesRouter.use(verifyToken)
 
 // GET categories
-// TODO filtering
-categoriesRouter.get('/', verifyToken, async (req: Request, res: Response) => {
+categoriesRouter.get('/', async (req: Request, res: Response) => {
     try {
         const categories = await CategoryService.findAll()
         res.status(200).send(categories)
@@ -27,7 +19,7 @@ categoriesRouter.get('/', verifyToken, async (req: Request, res: Response) => {
     }
 })
 
-categoriesRouter.get('/:id', verifyToken, async (req: Request, res: Response) => {
+categoriesRouter.get('/:id', async (req: Request, res: Response) => {
     try {
         const id: number = parseInt(req.params.id, 10)
         const category = await CategoryService.find(id)
@@ -42,7 +34,7 @@ categoriesRouter.get('/:id', verifyToken, async (req: Request, res: Response) =>
 })
 
 // POST category
-categoriesRouter.post('/', verifyToken, async (req: Request, res: Response) => {
+categoriesRouter.post('/', async (req: Request, res: Response) => {
     try {
         const category: BaseCategory = req.body
         const newCategory = await CategoryService.create(category)
@@ -53,7 +45,7 @@ categoriesRouter.post('/', verifyToken, async (req: Request, res: Response) => {
 })
 
 // PUT category
-categoriesRouter.put('/:id', verifyToken, async (req: Request, res: Response) => {
+categoriesRouter.put('/:id', async (req: Request, res: Response) => {
     try {
         const id: number = parseInt(req.params.id, 10)
         const categoryUpdate: Category = req.body
@@ -72,7 +64,7 @@ categoriesRouter.put('/:id', verifyToken, async (req: Request, res: Response) =>
 })
 
 //DELETE category
-categoriesRouter.delete('/:id', verifyToken, async (req: Request, res: Response) => {
+categoriesRouter.delete('/:id', async (req: Request, res: Response) => {
     try {
         const id: number = parseInt(req.params.id, 10)
 

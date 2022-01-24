@@ -65,7 +65,6 @@ export const findAll = async (ids:number[]=[], minPrice:number|null, maxPrice:nu
         where
     }
 
-    console.log(query)
     const products = await prisma.product.findMany(query)
     return products
 }
