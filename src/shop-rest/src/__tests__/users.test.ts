@@ -7,7 +7,6 @@ import {app} from "../app"
 const prisma = new PrismaClient()
 
 beforeAll(async () => {
-    console.log("Users beforeAll")
     await prisma.userStatus.createMany({
         data: userStatuses
     })

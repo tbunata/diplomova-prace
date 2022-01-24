@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { BaseCategory, Category } from "./interface"
+import { BaseCategory} from "./interface"
 
 const prisma = new PrismaClient()
 

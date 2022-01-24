@@ -24,12 +24,10 @@ export const detail = async(userId: number) => {
         }
     })
     let totalPrice = 0
-    cart.items.forEach((item:CartItem) => {
-        console.log(item);
-        
+    cart.items.forEach((item:CartItem) => {      
         totalPrice += item.product.price * item.quantity
     });
-    console.log(totalPrice)
+
     cart = {
         ...cart,
         totalPrice: totalPrice

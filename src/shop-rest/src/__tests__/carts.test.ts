@@ -1,8 +1,6 @@
 import {app} from "../app"
 import supertest from "supertest";
-import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
 
 describe("add item to cart", () => {
     it("should add first item to cart", async () => {

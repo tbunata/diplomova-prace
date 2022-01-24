@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client'
-import { BaseUser, User, RefreshToken } from "./interface"
+import { BaseUser, User } from "./interface"
 import { uid } from 'rand-token'
 
 const prisma = new PrismaClient()
@@ -154,7 +154,6 @@ export const refreshToken = async (email: string, refreshToken: string) => {
                 expiresIn: "2h"
             }
         )
-        console.log(token)
         return {token: token}
     }
 }
