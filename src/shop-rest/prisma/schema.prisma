@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -23,7 +24,8 @@ model User {
   status       UserStatus     @relation(fields: [statusId], references: [id])
   statusId     Int
   RefreshToken RefreshToken[]
-  cart Cart?
+  cart         Cart?
+  orders       Order[]
 }
 
 model UserStatus {
@@ -51,6 +53,7 @@ model Product {
   quantity    Int
   category    ProductCategory[]
   carts       CartItem[]
+  orders      OrderItem[]
 }
 
 model ProductCategory {
@@ -84,19 +87,49 @@ model Brand {
 }
 
 model Cart {
-  id  Int @id @default(autoincrement())
-  items CartItem[]
-  userId Int
-  user User @relation(fields: [userId], references: [id])
+  id     Int        @id @default(autoincrement())
+  items  CartItem[]
+  userId Int        @unique
+  user   User       @relation(fields: [userId], references: [id])
 }
 
 model CartItem {
-  id  Int @id @default(autoincrement())
-  productId  Int
-  product    Product  @relation(fields: [productId], references: [id])
-  cartId     Int
-  cart       Cart @relation(fields: [cartId], references: [id])
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  cartId    Int
+  cart      Cart    @relation(fields: [cartId], references: [id])
   quantity  Int
 
   @@unique([productId, cartId])
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  created       DateTime    @default(now())
+  updated       DateTime    @updatedAt
+  orderStatusId Int
+  status        OrderStatus @relation(fields: [orderStatusId], references: [id])
+  price         Int
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id])
+  orderItems    OrderItem[]
+}
+
+model OrderStatus {
+  id     Int     @id @default(autoincrement())
+  name   String
+  odrder Order[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  quantity  Int
+  price     Int
+
+  @@unique([productId, orderId])
 }

@@ -122,3 +122,68 @@ export const clearCart = async(userId: number) => {
     })
     return null
 }
+
+export const checkoutCart = async (userId: number) => {
+    const cart = await prisma.cart.findUnique({
+        where: {
+            userId: userId
+        },
+        include: {
+            items: {
+                include: {
+                    product: {}
+                }
+            }
+        }
+    })
+    if(!cart || cart.items.length === 0) {
+        return null
+    }
+    const order = await prisma.$transaction(async (prisma) => {
+        let totalPrice = 0
+        const orderItems = cart.items.map((item) => {
+            totalPrice += item.product.price * item.quantity
+            return {
+                productId: item.productId,
+                price: item.product.price,
+                quantity: item.quantity
+            }
+        })
+    
+        const newOrder = await prisma.order.create({
+            data: {
+                price: totalPrice,
+                orderStatusId: 1,
+                userId: userId,
+                orderItems: {
+                    createMany: {
+                        data: orderItems
+                    }
+                }
+            }
+        })
+
+        await Promise.all(cart.items.map(async (item) => {
+            if (item.quantity > item.product.quantity) {
+                throw new Error(`${item.product.name} sold out`)
+            }
+            await prisma.product.update({
+                where: {
+                    id: item.productId
+                },
+                data: {
+                    quantity: {
+                        decrement: item.quantity
+                    }
+                }
+            })
+        }))
+        await clearCart(userId)
+        return newOrder
+    }).catch(
+        (e) => console.log(e)
+    ).finally(() =>
+        prisma.$disconnect()
+    )
+    return order
+}
