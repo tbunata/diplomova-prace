@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { BaseCartItem, CartItem } from "./interface"
+import { UnprocessableEntityError, NotFoundError } from '../helper/errors'
 
 const prisma = new PrismaClient()
 
@@ -23,6 +24,9 @@ export const detail = async(userId: number) => {
             }
         }
     })
+    if (!cart) {
+        throw new NotFoundError(`Cart for user: ${userId} not found`)
+    }
     let totalPrice = 0
     cart.items.forEach((item:CartItem) => {      
         totalPrice += item.product.price * item.quantity
@@ -76,7 +80,7 @@ export const updateItem = async (userId: number, cartItem: BaseCartItem) => {
         }
     })
     if(!cart) {
-        return null
+        throw new NotFoundError(`Cart for user: ${userId} not found`)
     }
     if (cartItem.quantity === 0) {
         await prisma.cartItem.delete({
@@ -113,7 +117,7 @@ export const clearCart = async(userId: number) => {
         }
     })
     if(!cart) {
-        return null
+        throw new NotFoundError(`Cart for user: ${userId} not found`)
     }
     await prisma.cartItem.deleteMany({
         where: {
@@ -136,8 +140,10 @@ export const checkoutCart = async (userId: number) => {
             }
         }
     })
-    if(!cart || cart.items.length === 0) {
-        return null
+    if(!cart) {
+        throw new NotFoundError(`Cart for user: ${userId} not found`)
+    } else if (cart.items.length === 0) {
+        throw new UnprocessableEntityError(`Cart: ${cart.id} is empty`)
     }
     const order = await prisma.$transaction(async (prisma) => {
         let totalPrice = 0
@@ -165,7 +171,7 @@ export const checkoutCart = async (userId: number) => {
 
         await Promise.all(cart.items.map(async (item) => {
             if (item.quantity > item.product.quantity) {
-                throw new Error(`${item.product.name} sold out`)
+                throw new UnprocessableEntityError(`Item: ${item.id} named ${item.product.name} sold out`)
             }
             await prisma.product.update({
                 where: {
@@ -180,9 +186,9 @@ export const checkoutCart = async (userId: number) => {
         }))
         await clearCart(userId)
         return newOrder
-    }).catch(
-        (e) => console.log(e)
-    ).finally(() =>
+    }).catch((e) => {
+        throw e
+    }).finally(() =>
         prisma.$disconnect()
     )
     return order

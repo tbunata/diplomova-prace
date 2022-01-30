@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { NotFoundError } from '../helper/errors'
 import { BaseCategory} from "./interface"
 
 const prisma = new PrismaClient()
@@ -15,6 +16,9 @@ export const find = async (id: number) => {
             id: id
         }
     })
+    if (!category) {
+        throw new NotFoundError(`Category with id: ${id} not found`)
+    }
     return category
 }
 
@@ -35,7 +39,7 @@ export const update = async (id: number, updateCategory: BaseCategory) => {
         }
     })
     if (!category) {
-        return null
+        throw new NotFoundError(`Category with id: ${id} not found`)
     }
     const updatedCategory = await prisma.category.update({
         data: {
@@ -57,7 +61,7 @@ export const remove = async (id: number) => {
     })
 
     if (!category) {
-        return
+        throw new NotFoundError(`Category with id: ${id} not found`)
     }
 
     await prisma.category.delete({

@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express"
-import { logger } from '../logger'
 import * as CategoryService from "./service"
 import { verifyToken } from '../middleware/auth'
 import { BaseCategory, Category } from "./interface"
@@ -23,11 +22,7 @@ categoriesRouter.get('/:id', async (req: Request, res: Response) => {
     try {
         const id: number = parseInt(req.params.id, 10)
         const category = await CategoryService.find(id)
-        if (category) {
-            return res.status(200).send(category)
-        }
-        logger.error(`GET: Category with id: ${id} not found`)
-        return res.status(404).send('Category not found')
+        return res.status(200).send(category)
     } catch (e) {
         handleError(e, res)
     }
@@ -51,13 +46,7 @@ categoriesRouter.put('/:id', async (req: Request, res: Response) => {
         const categoryUpdate: Category = req.body
 
         const updatedCategory = await CategoryService.update(id, categoryUpdate)
-
-        if(updatedCategory) {
-            return res.status(200).send(updatedCategory)
-        }
-        
-        logger.error(`PUT: Category with id: ${id} not found`)
-        return res.status(404).send('Category not found')
+        return res.status(200).send(updatedCategory)
     } catch (e) {
         handleError(e, res)
     }
@@ -69,7 +58,6 @@ categoriesRouter.delete('/:id', async (req: Request, res: Response) => {
         const id: number = parseInt(req.params.id, 10)
 
         await CategoryService.remove(id)
-        
         res.status(204).send('Category deleted')
     } catch (e) {
         handleError(e, res)

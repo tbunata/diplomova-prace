@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express"
-import { logger } from '../logger'
 import * as UserService from "./service"
 import { BaseUser, User } from "./interface"
 import { verifyToken } from '../middleware/auth'
@@ -23,12 +22,6 @@ usersRouter.get('/:id', verifyToken, async (req: Request, res: Response) => {
     try {
         const id: number = parseInt(req.params.id, 10)
         const user = await UserService.find(id)
-
-        if (!user) {
-            logger.error(`GET: User with id: ${id} not found`)
-            return res.status(404).send('User not found')
-        }
-        
         return res.status(200).send(user)
     } catch (e) {
         handleError(e, res)
@@ -55,12 +48,6 @@ usersRouter.put('/', verifyToken, async (req: Request, res: Response) => {
         const userUpdate: User = req.body
 
         const updatedUser = await UserService.update(id, userUpdate)
-
-        if(!updatedUser) {
-            logger.error(`PUT: User with id: ${id} not found`)
-            return res.status(404).send('User not found')
-        }
-        
         return res.status(200).send(updatedUser)
     } catch (e) {
         handleError(e, res)
@@ -73,7 +60,6 @@ usersRouter.delete('/', verifyToken, async (req: Request, res: Response) => {
         const id: number = req.user.user_id
 
         await UserService.remove(id)
-        
         res.status(204).send('User deleted')
     } catch (e) {
         handleError(e, res)
@@ -88,10 +74,7 @@ usersRouter.post('/login', async (req: Request, res: Response) => {
             return res.status(400).send('Missing data')
         }
         const token = await UserService.login(email, password)
-        if (token) {
-            return res.status(200).send(token)
-        }
-        return res.status(401).send('Unauthorized')
+        return res.status(200).send(token)
     } catch (e) {
         handleError(e, res)
     }
@@ -105,10 +88,7 @@ usersRouter.post('/refresh', async (req: Request, res: Response) => {
             return res.status(400).send('Missing data')
         }
         const token = await UserService.refreshToken(email, refreshToken)
-        if (token) {
-            return res.status(200).send(token)
-        }
-        return res.status(401).send('Unauthorized')
+        return res.status(200).send(token)
     } catch (e) {
         handleError(e, res)
     }

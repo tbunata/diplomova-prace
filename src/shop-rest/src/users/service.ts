@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client'
 import { BaseUser, User } from "./interface"
 import { uid } from 'rand-token'
+import { NotFoundError, UnauthorizedError } from '../helper/errors';
 
 const prisma = new PrismaClient()
 
@@ -18,6 +19,9 @@ export const find = async (id: number) => {
             id: id
         }
     })
+    if (!user) {
+        throw new NotFoundError(`User with id: ${id} not found`)
+    }
     return user
 }
 
@@ -58,7 +62,7 @@ export const update = async (id: number, userUpdate: User) => {
     })
 
     if (!user) {
-        return null
+        throw new NotFoundError(`User with id: ${id} not found`)
     }
     const encryptedPassword = await bcrypt.hash(userUpdate.password, 10)
     const updatedUser = prisma.user.update({
@@ -90,7 +94,7 @@ export const remove = async (id: number) => {
     })
 
     if (!user) {
-        return null
+        throw new NotFoundError(`User with id: ${id} not found`)
     }
 
     await prisma.user.delete({
@@ -131,8 +135,7 @@ export const login = async (email: string, password:string) => {
         })
         return tokens
     }
-
-    return null
+    throw new UnauthorizedError(`Unauthorized login for user: ${email}`)
 }
 
 
@@ -145,7 +148,7 @@ export const refreshToken = async (email: string, refreshToken: string) => {
     if(tokenObject && tokenObject.token === refreshToken) {
         const user = await findByEmail(email)
         if (!user) {
-            return null
+            throw new UnauthorizedError(`Unauthorized login for user: ${email}`)
         }
         const token = jwt.sign(
             { user_id: user.id, email},
@@ -156,4 +159,5 @@ export const refreshToken = async (email: string, refreshToken: string) => {
         )
         return {token: token}
     }
+    throw new UnauthorizedError(`Unauthorized login for user: ${email}`)
 }

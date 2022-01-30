@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { NotFoundError } from '../helper/errors'
 import { BaseProduct, Product } from "./interface"
 
 const prisma = new PrismaClient()
@@ -76,6 +77,9 @@ export const find = async (id: number) => {
         },
         include: includeRelatedTables
     })
+    if (!product) {
+        throw new NotFoundError(`Product with id: ${id} not found`)
+    }
     return product
 }
 
@@ -111,7 +115,7 @@ export const update = async (id: number, productUpdate: Product) => {
     })
 
     if (!product) {
-        return null
+        throw new NotFoundError(`Product with id: ${id} not found`)
     }
     const updatedProduct = await prisma.product.update({
         where: {
@@ -150,7 +154,7 @@ export const remove = async (id: number) => {
     })
 
     if (!product) {
-        return null
+        throw new NotFoundError(`Product with id: ${id} not found`)
     }
 
     await prisma.$transaction([

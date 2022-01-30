@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express"
 import { GetProductsRequest } from "./requests"
-import { logger } from '../logger'
 import * as ProductService from "./service"
 import { verifyToken } from '../middleware/auth'
 import { BaseProduct, Product } from "./interface"
@@ -38,12 +37,6 @@ productsRouter.get('/:id', async (req: Request, res: Response) => {
     const id: number = parseInt(req.params.id, 10)
     try {
         const product = await ProductService.find(id)
-
-        if (!product) {
-            logger.error(`GET: Product with id: ${id} not found`)
-            return res.status(404).send('Product not found')
-        }
-
         return res.status(200).send(product)
     } catch (e) {
         handleError(e, res)
@@ -68,12 +61,6 @@ productsRouter.put('/:id', async (req: Request, res: Response) => {
         const productUpdate: Product = req.body
 
         const updatedProduct = await ProductService.update(id, productUpdate)
-
-        if(!updatedProduct) {
-            logger.error(`PUT: Product with id: ${id} not found`)
-            return res.status(404).send('Product not found')
-        }
-
         return res.status(200).send(updatedProduct)
     } catch (e) {
         handleError(e, res)
@@ -86,7 +73,6 @@ productsRouter.delete('/:id', async (req: Request, res: Response) => {
         const id: number = parseInt(req.params.id, 10)
 
         await ProductService.remove(id)
-
         return res.status(204).send('Product deleted')
     } catch (e) {
         handleError(e, res)
