@@ -171,3 +171,15 @@ export const remove = async (id: number) => {
     ])
     return null
 }
+
+export const getQuantity = async(id: number) => {
+    const product = await prisma.product.findUnique({
+        where: {
+            id: id
+        }
+    })
+    if (!product) {
+        throw new NotFoundError(`Product with id: ${id} not found`)
+    }
+    return product.quantity
+}
