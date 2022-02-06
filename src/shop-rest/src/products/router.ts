@@ -83,7 +83,7 @@ productsRouter.delete('/:id', async (req: Request, res: Response) => {
 productsRouter.ws('/:id/quantity', async (ws, req: Request) => {
     try{
         const id: number = parseInt(req.params.id, 10)
-        let timer = setInterval(async () => {
+        const timer = setInterval(async () => {
                 const quantity = await ProductService.getQuantity(id).catch((e) => {
                     let message = "Server error"
                     if (e instanceof NotFoundError) {
@@ -105,6 +105,9 @@ productsRouter.ws('/:id/quantity', async (ws, req: Request) => {
     } catch(e) {
         logger.error(e)
         let message = "Server error"
+        if (e instanceof Error) {
+            message = e.message
+        }
         ws.send(`${message}. Terminating connection`)
         ws.terminate()
     }
