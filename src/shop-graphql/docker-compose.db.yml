@@ -1,0 +1,14 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    container_name: postgres-graphql
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - database-data:/var/lib/postgresql_graphql/data/ # persist data even if container shuts down
+volumes:
+  database-data:
