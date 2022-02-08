@@ -3,8 +3,8 @@ import { GetProductsRequest } from "./requests"
 import * as ProductService from "./service"
 import { verifyToken } from '../middleware/auth'
 import { BaseProduct, Product } from "./interface"
-import { handleError } from '../helper/errors'
-
+import { handleError, NotFoundError } from '../helper/errors'
+import { logger } from "../logger"
 export const productsRouter = express.Router()
 
 productsRouter.use(verifyToken)
@@ -76,5 +76,39 @@ productsRouter.delete('/:id', async (req: Request, res: Response) => {
         return res.status(204).send('Product deleted')
     } catch (e) {
         handleError(e, res)
+    }
+})
+
+
+productsRouter.ws('/:id/quantity', async (ws, req: Request) => {
+    try{
+        const id: number = parseInt(req.params.id, 10)
+        const timer = setInterval(async () => {
+                const quantity = await ProductService.getQuantity(id).catch((e) => {
+                    let message = "Server error"
+                    if (e instanceof NotFoundError) {
+                        message = `${e.message}. Terminating connection`
+                    }
+                    ws.send(message)
+                    ws.terminate()
+                    clearInterval(timer)
+                })
+                const data = {
+                    timestamp: Date.now(),
+                    quantity: quantity
+                };
+                ws.send(JSON.stringify(data))
+            }, 1000)
+        ws.on('close', () => {
+            console.log('WebSocket was closed')
+        })
+    } catch(e) {
+        logger.error(e)
+        let message = "Server error"
+        if (e instanceof Error) {
+            message = e.message
+        }
+        ws.send(`${message}. Terminating connection`)
+        ws.terminate()
     }
 })

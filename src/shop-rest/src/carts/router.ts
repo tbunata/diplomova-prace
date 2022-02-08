@@ -10,7 +10,7 @@ cartsRouter.use(verifyToken)
 
 cartsRouter.get("/detail", async (req: Request, res: Response) => {
     try {
-        const cartDetail = await CartService.detail(req.user.user_id)
+        const cartDetail = await CartService.detail(1)
         return res.status(200).json(cartDetail)
     } catch (e) {
         handleError(e, res)
@@ -23,7 +23,7 @@ cartsRouter.post("/addItem", async (req: Request, res: Response) => {
         if(cartItem.quantity <= 0) {
             return res.status(400).send("Quantity must be greater than zero")
         }
-        const newItem = await CartService.addItem(req.user.user_id, cartItem)
+        const newItem = await CartService.addItem(1, cartItem)
         return res.status(201).json(newItem)
     } catch (e) {
         handleError(e, res)
@@ -51,7 +51,7 @@ cartsRouter.delete("/clearCart", async (req: Request, res: Response) => {
 
 cartsRouter.post("/checkout", async (req: Request, res: Response) => {
     try {
-        const order = await CartService.checkoutCart(req.user.user_id)
+        const order = await CartService.checkoutCart(1)
         return res.status(200).json(order)
     } catch (e) {
         handleError(e, res)
