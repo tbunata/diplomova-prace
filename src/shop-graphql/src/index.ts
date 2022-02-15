@@ -4,6 +4,12 @@ import Express from 'express'
 import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { UserResolver } from './resolvers/Users'
+import { verifyToken } from './auth/auth-middleware'
+import { authChecker } from './auth/auth-checker'
+
+const app = Express()
+app.use(Express.json())
+app.use(verifyToken)
 
 
 const main = async () => {
@@ -13,19 +19,24 @@ const main = async () => {
         ],
         emitSchemaFile: true,
         validate: false,
+        authChecker: authChecker,
     })
 
     const server = new ApolloServer({
         schema,
         plugins: [ ApolloServerPluginLandingPageGraphQLPlayground ],
+        context: ({ req }) => {
+            const context = {
+                req,
+                user: req.user,
+            }
+            return context
+        }
     })
 
-    const app = Express()
-
     await server.start()
-
     server.applyMiddleware({ app })
-
+    
     app.listen({ port: 3333 }, () =>
         console.log(
             `🚀 Server ready and listening at ==> http://localhost:3333${server.graphqlPath}`

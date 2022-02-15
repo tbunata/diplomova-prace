@@ -10,7 +10,7 @@ down:
 	docker-compose -p shop-api down
 
 make db-up:
-	docker-compose -f docker-compose.db.yml -p shop-api up
+	docker-compose -f docker-compose.db.yml -p shop-api up -d
 
 down db-down:
 	docker-compose -p shop-api down

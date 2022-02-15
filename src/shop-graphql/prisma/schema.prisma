@@ -1,14 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  firstName    String
+  lastName     String
+  password     String
+  phone        String?
+  address      String?
+  city         String?
+  zipCode      String?
+  status       UserStatus     @relation(fields: [statusId], references: [id])
+  statusId     Int
+  RefreshToken RefreshToken[]
+  cart         Cart?
+  orders       Order[]
+}
+
+model UserStatus {
+  id   Int    @id @default(autoincrement())
+  name String
+  User User[]
+}
+
+model RefreshToken {
+  id        Int    @id @default(autoincrement())
+  userEmail String @unique
+  user      User   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+  token     String
+}
+
+model Product {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String
+  price       Int
+  statusId    Int
+  status      ProductStatus     @relation(fields: [statusId], references: [id])
+  brandId     Int
+  brand       Brand             @relation(fields: [brandId], references: [id])
+  quantity    Int
+  category    ProductCategory[]
+  carts       CartItem[]
+  orders      OrderItem[]
+}
+
+model ProductCategory {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([productId, categoryId])
+}
+
+model Category {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String
+  product     ProductCategory[]
+}
+
+model ProductStatus {
+  id      Int       @id @default(autoincrement())
+  name    String
+  Product Product[]
+}
+
+model Brand {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  Product     Product[]
+}
+
+model Cart {
+  id     Int        @id @default(autoincrement())
+  items  CartItem[]
+  userId Int        @unique
+  user   User       @relation(fields: [userId], references: [id])
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  cartId    Int
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  quantity  Int
+
+  @@unique([productId, cartId])
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  created       DateTime    @default(now())
+  updated       DateTime    @updatedAt
+  orderStatusId Int
+  status        OrderStatus @relation(fields: [orderStatusId], references: [id])
+  price         Int
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id])
+  orderItems    OrderItem[]
+}
+
+model OrderStatus {
+  id     Int     @id @default(autoincrement())
+  name   String
+  odrder Order[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  quantity  Int
+  price     Int
+
+  @@unique([productId, orderId])
 }

@@ -3,12 +3,64 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Mutation {
+  addUser(newUserData: NewUserInput!): User!
+  loginUser(email: String!, password: String!): UserTokens!
+  refreshToken(email: String!, token: String!): RefreshedToken!
+  removeUser(id: Float!): Boolean!
+  updateUser(id: Float!, updateUserData: UpdateUserInput!): User
+}
+
+input NewUserInput {
+  address: String
+  city: String
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  phone: String
+  zipCode: String
+}
+
 type Query {
-  allUsers: [User!]
-  hello: String
+  allUsers: [User!]!
+  getUser(id: Float!): User
+}
+
+type RefreshedToken {
+  token: String!
+}
+
+input UpdateUserInput {
+  address: String
+  city: String
+  email: String
+  firstName: String
+  lastName: String
+  password: String
+  phone: String
+  statusId: Float
+  zipCode: String
 }
 
 type User {
+  address: String
+  city: String
   email: String!
-  name: String
+  firstName: String!
+  id: Float!
+  lastName: String!
+  phone: String
+  status: UserStatus!
+  zipCode: String
+}
+
+type UserStatus {
+  id: Float!
+  name: String!
+}
+
+type UserTokens {
+  refreshToken: String!
+  token: String!
 }
