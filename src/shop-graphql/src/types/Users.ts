@@ -4,111 +4,111 @@ import { ObjectType, Field, InputType} from 'type-graphql'
 @InputType()
 export class NewUserInput {
     @Field()
-    email: string
+        email: string
 
     @Field()
-    firstName: string
+        firstName: string
 
     @Field()
-    lastName: string
+        lastName: string
 
     @Field()
-    password: string
+        password: string
 
     @Field({nullable: true})
-    phone: string
+        phone: string
 
     @Field({nullable: true})
-    address: string
+        address: string
 
     @Field({nullable: true})
-    city: string
+        city: string
 
     @Field({nullable: true})
-    zipCode: string
+        zipCode: string
 }
 
 
 @ObjectType()
 class UserStatus {
     @Field()
-    id: number
+        id: number
 
     @Field()
-    name: string
+        name: string
 }
 
 @ObjectType()
 export class User {
     @Field()
-    id: number
+        id: number
 
     @Field()
-    email: string
+        email: string
 
     @Field()
-    firstName: string
+        firstName: string
 
     @Field()
-    lastName: string
+        lastName: string
 
     @Field({nullable: true})
-    phone: string
+        phone: string
 
     @Field({nullable: true})
-    address: string
+        address: string
 
     @Field({nullable: true})
-    city: string
+        city: string
 
     @Field({nullable: true})
-    zipCode: string
+        zipCode: string
 
     @Field()
-    status: UserStatus
+        status: UserStatus
 }
 
 @InputType()
 export class UpdateUserInput {
     @Field({nullable: true})
-    email: string
+        email: string
 
     @Field({nullable: true})
-    firstName: string
+        firstName: string
 
     @Field({nullable: true})
-    lastName: string
+        lastName: string
 
     @Field({nullable: true})
-    password: string
+        password: string
 
     @Field({nullable: true})
-    phone: string
+        phone: string
 
     @Field({nullable: true})
-    address: string
+        address: string
 
     @Field({nullable: true})
-    city: string
+        city: string
 
     @Field({nullable: true})
-    zipCode: string
+        zipCode: string
 
     @Field({nullable: true})
-    statusId: number
+        statusId: number
 }
 
 @ObjectType()
 export class UserTokens {
     @Field()
-    token: string
+        token: string
     
     @Field()
-    refreshToken: string
+        refreshToken: string
 }
 
 @ObjectType()
 export class RefreshedToken {
     @Field()
-    token: string
+        token: string
 }

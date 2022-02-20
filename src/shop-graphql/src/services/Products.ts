@@ -29,7 +29,7 @@ const includeRelatedTables = {
 }
 
 const transformProduct = (product: any) => {
-    let categories: ProductCategory[] = [];
+    const categories: ProductCategory[] = []
     product.category.forEach( (category: any) => {
         categories.push({
             id: category.categoryId,

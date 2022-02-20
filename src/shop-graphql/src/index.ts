@@ -7,6 +7,7 @@ import { UserResolver } from './resolvers/Users'
 import { ProductResolver } from './resolvers/Products'
 import { verifyToken } from './auth/auth-middleware'
 import { authChecker } from './auth/auth-checker'
+import { CategoryResolver } from './resolvers/Categories'
 
 const app = Express()
 app.use(Express.json())
@@ -16,6 +17,7 @@ app.use(verifyToken)
 const main = async () => {
     const schema = await buildSchema({
         resolvers: [
+            CategoryResolver,
             ProductResolver,
             UserResolver,
         ],

@@ -3,15 +3,29 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Category {
+  description: String!
+  id: Float!
+  name: String!
+}
+
 type Mutation {
+  addCategory(newCategoryData: NewCategoryInput!): Category!
   addProduct(newProductData: NewProductInput!): Product!
   addUser(newUserData: NewUserInput!): User!
   loginUser(email: String!, password: String!): UserTokens!
   refreshToken(email: String!, token: String!): RefreshedToken!
+  removeCategory(id: Float!): Boolean!
   removeProduct(id: Float!): Boolean!
   removeUser(id: Float!): Boolean!
+  updateCategory(id: Float!, updateCategoryData: UpdateCategoryInput!): Category
   updateProduct(id: Float!, updateProductData: UpdateProductInput!): Product!
   updateUser(id: Float!, updateUserData: UpdateUserInput!): User
+}
+
+input NewCategoryInput {
+  description: String!
+  name: String!
 }
 
 input NewProductInput {
@@ -57,14 +71,21 @@ type ProductStatus {
 }
 
 type Query {
+  allCategories: [Category!]!
   allProducts: [Product!]!
   allUsers: [User!]!
+  getCategory(id: Float!): Category
   getProduct(id: Float!): Product!
   getUser(id: Float!): User
 }
 
 type RefreshedToken {
   token: String!
+}
+
+input UpdateCategoryInput {
+  description: String
+  name: String
 }
 
 input UpdateProductInput {

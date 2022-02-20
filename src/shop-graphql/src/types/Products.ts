@@ -14,83 +14,83 @@ class ProductStatus {
 @ObjectType()
 export class ProductCategory {
     @Field({nullable: true})
-    name: string
+        name: string
 
     @Field({nullable: true})
-    id: number
+        id: number
 }
 
 @ObjectType()
 export class Product {
     @Field()
-    id: number
+        id: number
 
     @Field()
-    name: string
+        name: string
     
     @Field()
-    description: string
+        description: string
 
     @Field()
-    price: number
+        price: number
 
     @Field()
-    quantity: number
+        quantity: number
 
     @Field(type => [ProductCategory])
-    categories: ProductCategory[]
+        categories: ProductCategory[]
 
     @Field()
-    brandId: number
+        brandId: number
 
     @Field()
-    status: ProductStatus
+        status: ProductStatus
 }
 
 @InputType()
 export class NewProductInput {
     @Field()
-    name: string
+        name: string
     
     @Field()
-    description: string
+        description: string
 
     @Field()
-    price: number
+        price: number
 
     @Field()
-    quantity: number
+        quantity: number
 
     @Field(type => [Int])
-    categoryIds: number[]
+        categoryIds: number[]
 
     @Field()
-    brandId: number
+        brandId: number
 
     @Field()
-    statusId: number
+        statusId: number
 }
 
 @InputType()
 export class UpdateProductInput {
     @Field({nullable: true})
-    name: string
+        name: string
     
     @Field({nullable: true})
-    description: string
+        description: string
 
     @Field({nullable: true})
-    price: number
+        price: number
 
     @Field({nullable: true})
-    quantity: number
+        quantity: number
 
     @Field(type => [Int], {nullable: true})
-    categoryIds: number[]
+        categoryIds: number[]
 
     @Field({nullable: true})
-    brandId: number
+        brandId: number
 
     @Field({nullable: true})
-    statusId: number
+        statusId: number
 }
