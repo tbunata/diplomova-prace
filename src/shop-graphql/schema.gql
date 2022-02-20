@@ -4,11 +4,24 @@
 # -----------------------------------------------
 
 type Mutation {
+  addProduct(newProductData: NewProductInput!): Product!
   addUser(newUserData: NewUserInput!): User!
   loginUser(email: String!, password: String!): UserTokens!
   refreshToken(email: String!, token: String!): RefreshedToken!
+  removeProduct(id: Float!): Boolean!
   removeUser(id: Float!): Boolean!
+  updateProduct(id: Float!, updateProductData: UpdateProductInput!): Product!
   updateUser(id: Float!, updateUserData: UpdateUserInput!): User
+}
+
+input NewProductInput {
+  brandId: Float!
+  categoryIds: [Int!]!
+  description: String!
+  name: String!
+  price: Float!
+  quantity: Float!
+  statusId: Float!
 }
 
 input NewUserInput {
@@ -22,13 +35,46 @@ input NewUserInput {
   zipCode: String
 }
 
+type Product {
+  brandId: Float!
+  categories: [ProductCategory!]!
+  description: String!
+  id: Float!
+  name: String!
+  price: Float!
+  quantity: Float!
+  status: ProductStatus!
+}
+
+type ProductCategory {
+  id: Float
+  name: String
+}
+
+type ProductStatus {
+  id: Float!
+  name: String!
+}
+
 type Query {
+  allProducts: [Product!]!
   allUsers: [User!]!
+  getProduct(id: Float!): Product!
   getUser(id: Float!): User
 }
 
 type RefreshedToken {
   token: String!
+}
+
+input UpdateProductInput {
+  brandId: Float
+  categoryIds: [Int!]
+  description: String
+  name: String
+  price: Float
+  quantity: Float
+  statusId: Float
 }
 
 input UpdateUserInput {
