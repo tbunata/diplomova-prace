@@ -3,6 +3,22 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Cart {
+  id: Float!
+  items: [CartItem!]!
+  totalPrice: Float!
+  userId: Float!
+}
+
+type CartItem {
+  description: String!
+  id: Float!
+  name: String!
+  price: String!
+  productId: Float!
+  quantity: Float!
+}
+
 type Category {
   description: String!
   id: Float!
@@ -11,16 +27,24 @@ type Category {
 
 type Mutation {
   addCategory(newCategoryData: NewCategoryInput!): Category!
+  addItemToCart(newCartItemData: NewCartItemInput!, userId: Float!): Cart!
   addProduct(newProductData: NewProductInput!): Product!
   addUser(newUserData: NewUserInput!): User!
+  clearCart(userId: Float!): Cart!
   loginUser(email: String!, password: String!): UserTokens!
   refreshToken(email: String!, token: String!): RefreshedToken!
   removeCategory(id: Float!): Boolean!
   removeProduct(id: Float!): Boolean!
   removeUser(id: Float!): Boolean!
+  updateCartItem(updateCartItemData: UpdateCartItemInput!, userId: Float!): Cart!
   updateCategory(id: Float!, updateCategoryData: UpdateCategoryInput!): Category
   updateProduct(id: Float!, updateProductData: UpdateProductInput!): Product!
   updateUser(id: Float!, updateUserData: UpdateUserInput!): User
+}
+
+input NewCartItemInput {
+  productId: Float!
+  quantity: Float!
 }
 
 input NewCategoryInput {
@@ -71,9 +95,11 @@ type ProductStatus {
 }
 
 type Query {
+  allCarts: [Cart!]!
   allCategories: [Category!]!
   allProducts: [Product!]!
   allUsers: [User!]!
+  getCart(userId: Float!): Cart
   getCategory(id: Float!): Category
   getProduct(id: Float!): Product!
   getUser(id: Float!): User
@@ -81,6 +107,11 @@ type Query {
 
 type RefreshedToken {
   token: String!
+}
+
+input UpdateCartItemInput {
+  productId: Float!
+  quantity: Float!
 }
 
 input UpdateCategoryInput {

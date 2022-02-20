@@ -3,11 +3,13 @@ import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-co
 import Express from 'express'
 import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
-import { UserResolver } from './resolvers/Users'
-import { ProductResolver } from './resolvers/Products'
 import { verifyToken } from './auth/auth-middleware'
 import { authChecker } from './auth/auth-checker'
+
 import { CategoryResolver } from './resolvers/Categories'
+import { CartResolver } from './resolvers/Carts'
+import { ProductResolver } from './resolvers/Products'
+import { UserResolver } from './resolvers/Users'
 
 const app = Express()
 app.use(Express.json())
@@ -17,6 +19,7 @@ app.use(verifyToken)
 const main = async () => {
     const schema = await buildSchema({
         resolvers: [
+            CartResolver,
             CategoryResolver,
             ProductResolver,
             UserResolver,
