@@ -3,6 +3,7 @@ import { Resolver, Mutation, Arg, Query, Authorized, Ctx } from 'type-graphql'
 import { Cart, NewCartItemInput, UpdateCartItemInput } from '../types/Carts'
 import * as CartService from '../services/Carts'
 import { Context } from '../auth/auth-checker'
+import { Order } from '../types/Orders'
 
 @Resolver(Cart)
 export class CartResolver {
@@ -41,5 +42,13 @@ export class CartResolver {
     ) {
         const emptyCart = await CartService.clearCart(userId)
         return emptyCart
+    }
+
+    @Mutation(returns => Order)
+    async checkoutCart(
+        @Arg('userId') userId: number
+    ) {
+        const order = await CartService.checkoutCart(userId)
+        return order
     }
 }

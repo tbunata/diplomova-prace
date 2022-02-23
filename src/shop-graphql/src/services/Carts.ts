@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { UserInputError } from 'apollo-server-core'
-import { Cart, CartItem, NewCartItemInput, UpdateCartItemInput } from '../types/Carts'
+import { Cart, NewCartItemInput, UpdateCartItemInput } from '../types/Carts'
+import { Order } from '../types/Orders'
 
 const prisma = new PrismaClient()
 
@@ -13,7 +14,8 @@ const cartItemDetail = {
                     id: true,
                     name: true,
                     description: true,
-                    price: true
+                    price: true,
+                    quantity: true
                 }
             }
         }
@@ -30,7 +32,7 @@ const transformCart = (cart: any) => {
             productId: item.product.id,
             name: item.product.name,
             description: item.product.description,
-            price: item.product.id,
+            price: item.product.price,
             quantity: item.quantity
         }
     })
@@ -41,11 +43,26 @@ const transformCart = (cart: any) => {
     } as Cart
 }
 
+// refactor and move to order
+const transformOrder = (order: any) => {
+    order.items = order.orderItems.map((item: any) => {
+        return {
+            id: item.id,
+            productId: item.product.id,
+            name: item.product.name,
+            description: item.product.description,
+            price: item.price,
+            quantity: item.quantity
+        }
+    })
+
+    return order as Order
+}
+
 export const findAll = async () => {
     const carts = await prisma.cart.findMany({
         include: cartItemDetail
     })
-    console.log(carts)
     return carts.map((cart) => transformCart(cart))
 }
 
@@ -157,69 +174,72 @@ export const clearCart = async(userId: number) => {
     return find(userId)
 }
 
-// export const checkoutCart = async (userId: number) => {
-//     const cart = await prisma.cart.findUnique({
-//         where: {
-//             userId: userId
-//         },
-//         include: {
-//             items: {
-//                 include: {
-//                     product: {}
-//                 }
-//             }
-//         }
-//     })
-//     if(!cart) {
-//         throw new NotFoundError(`Cart for user: ${userId} not found`)
-//     } else if (cart.items.length === 0) {
-//         throw new UnprocessableEntityError(`Cart: ${cart.id} is empty`)
-//     }
-//     const order = await prisma.$transaction(async (prisma) => {
-//         let totalPrice = 0
-//         const orderItems = cart.items.map((item) => {
-//             totalPrice += item.product.price * item.quantity
-//             return {
-//                 productId: item.productId,
-//                 price: item.product.price,
-//                 quantity: item.quantity
-//             }
-//         })
+export const checkoutCart = async (userId: number) => {
+    const cart = await prisma.cart.findUnique({
+        where: {
+            userId: userId
+        },
+        include: cartItemDetail
+    })
+    if(!cart) {
+        throw new UserInputError(`Cart for user: ${userId} not found`)
+    } else if (cart.items.length === 0) {
+        throw new UserInputError(`Cart: ${cart.id} is empty`)
+    }
+    const order = await prisma.$transaction(async (prisma) => {
+        let totalPrice = 0
+        const orderItems = cart.items.map((item) => {
+            totalPrice += item.product.price * item.quantity
+            return {
+                productId: item.productId,
+                price: item.product.price,
+                quantity: item.quantity
+            }
+        })
     
-//         const newOrder = await prisma.order.create({
-//             data: {
-//                 price: totalPrice,
-//                 orderStatusId: 1,
-//                 userId: userId,
-//                 orderItems: {
-//                     createMany: {
-//                         data: orderItems
-//                     }
-//                 }
-//             }
-//         })
+        const newOrder = await prisma.order.create({
+            data: {
+                price: totalPrice,
+                orderStatusId: 1,
+                userId: userId,
+                orderItems: {
+                    createMany: {
+                        data: orderItems
+                    }
+                }
+            },
+            include: {
+                orderItems: {
+                    include: {
+                        product: true
+                    }
+                },
+                status: true
+            }
+        })
 
-//         await Promise.all(cart.items.map(async (item) => {
-//             if (item.quantity > item.product.quantity) {
-//                 throw new UnprocessableEntityError(`Item: ${item.id} named ${item.product.name} sold out`)
-//             }
-//             await prisma.product.update({
-//                 where: {
-//                     id: item.productId
-//                 },
-//                 data: {
-//                     quantity: {
-//                         decrement: item.quantity
-//                     }
-//                 }
-//             })
-//         }))
-//         await clearCart(userId)
-//         return newOrder
-//     }).catch((e) => {
-//         throw e
-//     }).finally(() =>
-//         prisma.$disconnect()
-//     )
-//     return order
-// }
+        await Promise.all(cart.items.map(async (item) => {
+            if (item.quantity > item.product.quantity) {
+                throw new UserInputError(`Item: ${item.id} named ${item.product.name} sold out`)
+            }
+            await prisma.product.update({
+                where: {
+                    id: item.productId
+                },
+                data: {
+                    quantity: {
+                        decrement: item.quantity
+                    }
+                }
+            })
+        }))
+
+        await clearCart(userId)
+        return transformOrder(newOrder)
+    }).catch((e) => {
+        throw e
+    }).finally(() =>
+        prisma.$disconnect()
+    )
+    return order
+}

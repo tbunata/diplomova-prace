@@ -1,6 +1,5 @@
 import 'reflect-metadata'
 import { ObjectType, Field, InputType} from 'type-graphql'
-import { Product } from './Products'
 
 
 @ObjectType()

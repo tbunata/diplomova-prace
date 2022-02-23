@@ -24,9 +24,10 @@ const main = async () => {
             ProductResolver,
             UserResolver,
         ],
+        authChecker: authChecker,
+        dateScalarMode: 'isoDate',
         emitSchemaFile: true,
         validate: false,
-        authChecker: authChecker,
     })
 
     const server = new ApolloServer({
