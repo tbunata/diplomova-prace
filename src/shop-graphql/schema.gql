@@ -35,6 +35,7 @@ type Mutation {
   addItemToCart(newCartItemData: NewCartItemInput!, userId: Float!): Cart!
   addProduct(newProductData: NewProductInput!): Product!
   addUser(newUserData: NewUserInput!): User!
+  cancelOrder(id: Float!): Boolean!
   checkoutCart(userId: Float!): Order!
   clearCart(userId: Float!): Cart!
   loginUser(email: String!, password: String!): UserTokens!
@@ -44,6 +45,7 @@ type Mutation {
   removeUser(id: Float!): Boolean!
   updateCartItem(updateCartItemData: UpdateCartItemInput!, userId: Float!): Cart!
   updateCategory(id: Float!, updateCategoryData: UpdateCategoryInput!): Category
+  updateOrderStatus(id: Float!, statusId: Float!): Order!
   updateProduct(id: Float!, updateProductData: UpdateProductInput!): Product!
   updateUser(id: Float!, updateUserData: UpdateUserInput!): User
 }
@@ -127,10 +129,12 @@ type ProductStatus {
 type Query {
   allCarts: [Cart!]!
   allCategories: [Category!]!
+  allOrders(userId: Float!): [Order!]!
   allProducts: [Product!]!
   allUsers: [User!]!
   getCart(userId: Float!): Cart
   getCategory(id: Float!): Category
+  getOrder(id: Float!): Order
   getProduct(id: Float!): Product!
   getUser(id: Float!): User
 }

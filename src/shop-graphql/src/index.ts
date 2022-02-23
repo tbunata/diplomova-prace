@@ -6,8 +6,9 @@ import { buildSchema } from 'type-graphql'
 import { verifyToken } from './auth/auth-middleware'
 import { authChecker } from './auth/auth-checker'
 
-import { CategoryResolver } from './resolvers/Categories'
 import { CartResolver } from './resolvers/Carts'
+import { CategoryResolver } from './resolvers/Categories'
+import { OrderResolver } from './resolvers/Orders'
 import { ProductResolver } from './resolvers/Products'
 import { UserResolver } from './resolvers/Users'
 
@@ -21,6 +22,7 @@ const main = async () => {
         resolvers: [
             CartResolver,
             CategoryResolver,
+            OrderResolver,
             ProductResolver,
             UserResolver,
         ],

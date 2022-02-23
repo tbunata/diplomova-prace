@@ -8,7 +8,9 @@ import { Context } from '../auth/auth-checker'
 export class UserResolver {
     @Authorized()
     @Query(returns => [User])
-    async allUsers(@Ctx() ctx: Context) {
+    async allUsers(
+        @Ctx() ctx: Context
+    ) {
         const users = await UserService.findAll()
         return users
     }

@@ -8,8 +8,8 @@ import { Context } from '../auth/auth-checker'
 export class CategoryResolver {
     @Query(returns => [Category])
     async allCategories() {
-        const users = await CategoryService.findAll()
-        return users
+        const categories = await CategoryService.findAll()
+        return categories
     }
 
     // @Authorized()

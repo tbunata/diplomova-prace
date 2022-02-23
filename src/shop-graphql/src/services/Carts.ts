@@ -3,6 +3,7 @@ import { UserInputError } from 'apollo-server-core'
 import { Cart, NewCartItemInput, UpdateCartItemInput } from '../types/Carts'
 import { Order } from '../types/Orders'
 
+
 const prisma = new PrismaClient()
 
 
@@ -20,6 +21,15 @@ const cartItemDetail = {
             }
         }
     }
+}
+
+const orderDetail = {
+    orderItems: {
+        include: {
+            product: true
+        }
+    },
+    status: true
 }
 
 
@@ -197,6 +207,7 @@ export const checkoutCart = async (userId: number) => {
             }
         })
     
+        // move this to order service
         const newOrder = await prisma.order.create({
             data: {
                 price: totalPrice,
@@ -208,14 +219,7 @@ export const checkoutCart = async (userId: number) => {
                     }
                 }
             },
-            include: {
-                orderItems: {
-                    include: {
-                        product: true
-                    }
-                },
-                status: true
-            }
+            include: orderDetail
         })
 
         await Promise.all(cart.items.map(async (item) => {
