@@ -8,7 +8,7 @@ import { Context } from '../auth/auth-checker'
 export class OrderResolver {
     @Query(returns => [Order])
     async allOrders(
-        @Arg("userId") userId: number
+        @Arg('userId') userId: number
     ) {
         const orders = await OrderService.findAll(userId)
         return orders

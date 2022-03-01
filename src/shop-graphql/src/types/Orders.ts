@@ -4,53 +4,53 @@ import { ObjectType, Field, InputType} from 'type-graphql'
 @ObjectType()
 class OrderItem {
     @Field()
-    id: number
+        id: number
 
     @Field()
-    productId: number
+        productId: number
 
     @Field()
-    name: string
+        name: string
 
     @Field()
-    description: string
+        description: string
 
     @Field()
-    price: number
+        price: number
 
     @Field()
-    quantity: number
+        quantity: number
 }
 
 @ObjectType()
 class OrderStatus {
     @Field()
-    id: number
+        id: number
 
     @Field()
-    name: string
+        name: string
 }
 
 @ObjectType()
 export class Order {
     @Field()
-    id: number
+        id: number
 
     @Field()
-    userId: number
+        userId: number
 
     @Field()
-    created: Date
+        created: Date
 
     @Field()
-    updated: Date
+        updated: Date
 
     @Field()
-    status: OrderStatus
+        status: OrderStatus
 
     @Field()
-    price: number
+        price: number
 
     @Field(type => [OrderItem])
-    items: OrderItem[]
+        items: OrderItem[]
 }

@@ -77,7 +77,7 @@ export const findAll = async () => {
 }
 
 export const find = async (userId: number) => {
-    let cart:any = await prisma.cart.findUnique({
+    const cart:any = await prisma.cart.findUnique({
         where: {
             userId: userId
         },
@@ -122,7 +122,7 @@ export const addItem = async (userId: number, newCartItemData: NewCartItemInput)
         }
     })
 
-    let updatedCart = await prisma.cart.findUnique({
+    const updatedCart = await prisma.cart.findUnique({
         where: {
             userId: userId
         },

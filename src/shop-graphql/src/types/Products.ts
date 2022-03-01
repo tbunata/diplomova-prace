@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { ObjectType, Field, InputType, Int} from 'type-graphql'
+import { ObjectType, Field, InputType, Int, ArgsType} from 'type-graphql'
 
 
 @ObjectType()
@@ -93,4 +93,10 @@ export class UpdateProductInput {
 
     @Field({nullable: true})
         statusId: number
+}
+
+@ArgsType()
+export class QuantityUpdateArgs {
+    @Field(type => [Int], {nullable: true})
+        productIds: number[]
 }

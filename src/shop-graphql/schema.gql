@@ -143,6 +143,10 @@ type RefreshedToken {
   token: String!
 }
 
+type Subscription {
+  quantityUpdate(productIds: [Int!]): Product!
+}
+
 input UpdateCartItemInput {
   productId: Float!
   quantity: Float!

@@ -1,6 +1,6 @@
 import 'reflect-metadata'
-import { Resolver, Mutation, Arg, Query, Authorized, Ctx } from 'type-graphql'
-import { NewProductInput, Product, UpdateProductInput } from '../types/Products'
+import { Resolver, Mutation, Arg, Args, Query, Authorized, Ctx, Subscription, Root, PubSub, PubSubEngine } from 'type-graphql'
+import { NewProductInput, Product, QuantityUpdateArgs, UpdateProductInput } from '../types/Products'
 import * as ProductService from '../services/Products'
 import { Context } from '../auth/auth-checker'
 
@@ -31,9 +31,13 @@ export class ProductResolver {
     @Mutation(returns => Product)
     async updateProduct(
         @Arg('id') id: number,
-        @Arg('updateProductData') updateProductData: UpdateProductInput
+        @Arg('updateProductData') updateProductData: UpdateProductInput,
+        @PubSub() pubSub: PubSubEngine
     ) {
-        return await ProductService.update(id, updateProductData)
+        const updatedProduct = await ProductService.update(id, updateProductData)
+        const payload = { quantity: updatedProduct.quantity }
+        await pubSub.publish('PRODUCT', updatedProduct)
+        return updatedProduct
     }
 
     @Mutation(returns => Boolean)
@@ -42,5 +46,18 @@ export class ProductResolver {
     ) {
         await ProductService.remove(id)
         return true
+    }
+
+    @Subscription({
+        topics: 'PRODUCT',
+        filter: ({payload, args}) => {
+            return args.productIds.includes(payload.id)
+        }
+    })
+    quantityUpdate(
+        @Root() product: Product,
+        @Args() args: QuantityUpdateArgs
+    ): Product {
+        return product
     }
 }

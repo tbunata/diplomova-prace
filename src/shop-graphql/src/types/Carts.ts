@@ -5,53 +5,53 @@ import { ObjectType, Field, InputType} from 'type-graphql'
 @ObjectType()
 export class Cart {
     @Field()
-    id: number
+        id: number
 
     @Field()
-    userId: number
+        userId: number
 
     @Field(type => [CartItem])
-    items: CartItem[]
+        items: CartItem[]
 
     @Field()
-    totalPrice: number
+        totalPrice: number
 }
 
 @ObjectType()
 export class CartItem {
     @Field()
-    id: number
+        id: number
 
     @Field()
-    productId: number
+        productId: number
 
     @Field()
-    name: string
+        name: string
 
     @Field()
-    description: string
+        description: string
 
     @Field()
-    price: string
+        price: string
 
     @Field()
-    quantity: number
+        quantity: number
 }
 
 @InputType()
 export class NewCartItemInput {
     @Field()
-    productId: number
+        productId: number
 
     @Field()
-    quantity: number
+        quantity: number
 }
 
 @InputType()
 export class UpdateCartItemInput {
     @Field()
-    productId: number
+        productId: number
 
     @Field()
-    quantity: number
+        quantity: number
 }

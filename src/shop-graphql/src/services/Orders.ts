@@ -56,6 +56,15 @@ export const find = async (id: number, userId: number) => {
     return transformOrder(order)
 }
 
+// todo refactor data
+export const createOrder = async (data: any) => {
+    const newOrder = await prisma.order.create({
+        data: data,
+        include: orderDetail
+    })
+    return transformOrder(newOrder)
+}
+
 // todo add user validation
 export const updateStatus = async (id: number, status: number) => {
     const order = await prisma.order.findUnique({
