@@ -6,7 +6,7 @@ import { Context } from '../auth/auth-checker'
 
 @Resolver(User)
 export class UserResolver {
-    @Authorized()
+    // @Authorized()
     @Query(returns => [User])
     async allUsers(
         @Ctx() ctx: Context
