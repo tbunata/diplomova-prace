@@ -6,7 +6,7 @@ import { Context } from '../auth/auth-checker'
 
 @Resolver(User)
 export class UserResolver {
-    // @Authorized()
+    @Authorized()
     @Query(returns => [User])
     async allUsers(
         @Ctx() ctx: Context
@@ -15,7 +15,7 @@ export class UserResolver {
         return users
     }
 
-    // @Authorized()
+    @Authorized()
     @Query(returns => User, {nullable: true})
     async getUser(
         @Arg('id') id: number
@@ -48,7 +48,6 @@ export class UserResolver {
         return true
     }
 
-    @Authorized()
     @Mutation(returns => UserTokens)
     async loginUser(
         @Arg('email') email: string,

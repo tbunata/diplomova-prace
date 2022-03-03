@@ -58,8 +58,12 @@ export const create = async (newUser: NewUserInput) => {
             status: {
                 connect: {id: 1}
             }
+        },
+        include: {
+            status: true
         }
     })
+    console.log(user)
     return user
 }
 
@@ -82,7 +86,10 @@ export const update = async (id: number, userUpdate: UpdateUserInput) => {
         where: {
             id: id
         },
-        data: userUpdate
+        data: userUpdate,
+        include: {
+            status: true
+        }
     })
     return updatedUser
 }

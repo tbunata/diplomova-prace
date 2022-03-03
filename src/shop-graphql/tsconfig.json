@@ -2,7 +2,7 @@
     "compilerOptions": {                        
       "target": "esnext",                               
       "module": "commonjs",
-      "rootDir": "./src",                           
+      "rootDirs": ["./src", "./prisma"],                           
       "outDir": "./dist",                              
       "strict": true,
       "moduleResolution": "node",
