@@ -13,6 +13,28 @@ import { productCategories } from '../../prisma/seeds/productCategories'
 const prisma = new PrismaClient()
 let server: Server
 
+beforeAll(async () => {
+    await prisma.brand.createMany({
+        data: brands
+    })
+    await prisma.category.createMany({
+        data: categories
+    })
+    await prisma.productStatus.createMany({
+        data: productStatuses
+    })
+    await prisma.$transaction([
+        prisma.product.createMany({
+            data: products
+        }),
+        prisma.productCategory.createMany({
+            data: productCategories
+        })
+    ])
+    server = await createApp({port:0})
+})
+
+
 const productToFetch = {
     id: 1,
     name: 'Burnished-Leather Jacket',
@@ -61,28 +83,7 @@ const productToCreate = {
     },
 }
 
-beforeAll(async () => {
-    await prisma.brand.createMany({
-        data: brands
-    })
-    await prisma.category.createMany({
-        data: categories
-    })
-    await prisma.productStatus.createMany({
-        data: productStatuses
-    })
-    await prisma.$transaction([
-        prisma.product.createMany({
-            data: products
-        }),
-        prisma.productCategory.createMany({
-            data: productCategories
-        })
-    ])
-    server = await createApp({port:0})
-})
-
-export const loginUser = async (email: string, password: string) => {
+const loginUser = async (email: string, password: string) => {
     const loginData = {
         query: `mutation { 
             loginUser(
@@ -339,7 +340,6 @@ describe('MUTATION updateProduct', () => {
             .expect(200)
             .then(async (res) => {
                 const payload = res.body.data.updateProduct
-                console.log(payload)
                 expect(payload).toEqual(updatedProduct)
             })
     })
