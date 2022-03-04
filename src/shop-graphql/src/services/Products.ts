@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { AuthenticationError, UserInputError } from 'apollo-server-errors'
-import { NewProductInput, UpdateProductInput, Product, ProductCategory } from '../types/Products'
+import { NewProductInput, UpdateProductInput, Product, ProductCategory, ProductFilterInput } from '../types/Products'
 
 
 const prisma = new PrismaClient()
@@ -11,19 +11,23 @@ const includeRelatedTables = {
             categoryId: true,
             category: {
                 select: {
-                    name: true
+                    name: true,
+                    description: true
                 }
             }
         }
     },
     status: {
         select: {
+            id: true, 
             name: true
         }
     },
     brand: {
         select: {
-            name: true
+            id: true,
+            name: true,
+            description: true
         }
     }
 }
@@ -33,7 +37,8 @@ const transformProduct = (product: any) => {
     product.category.forEach( (category: any) => {
         categories.push({
             id: category.categoryId,
-            name: category.category.name
+            name: category.category.name,
+            description: category.category.description
         })
     })
 
@@ -42,27 +47,27 @@ const transformProduct = (product: any) => {
 }
 
 
-export const findAll = async (ids:number[]=[], minPrice:number|null, maxPrice:number|null) => {
+export const findAll = async (productFilterData: ProductFilterInput) => {
     let where: any = {}
-    if (ids.length > 0) {
+    if (productFilterData?.ids && productFilterData?.ids.length > 0) {
         where = {
             ...where,
             id: {
-                in: ids
+                in: productFilterData.ids
             }
         }
     }
     let price = {}
-    if (minPrice !== null) {
+    if (productFilterData?.minPrice) {
         price = {
             ...price,
-            gte: minPrice
+            gte: productFilterData.minPrice
         }
     }
-    if (maxPrice !== null) {
+    if (productFilterData?.maxPrice) {
         price = {
             ...price,
-            lte: maxPrice
+            lte: productFilterData.maxPrice
         }
     }
     if (price != {}){

@@ -106,7 +106,7 @@ type OrderStatus {
 }
 
 type Product {
-  brandId: Float!
+  brand: ProductBrand!
   categories: [ProductCategory!]!
   description: String!
   id: Float!
@@ -116,9 +116,22 @@ type Product {
   status: ProductStatus!
 }
 
+type ProductBrand {
+  description: String
+  id: Float!
+  name: String!
+}
+
 type ProductCategory {
-  id: Float
-  name: String
+  description: String
+  id: Float!
+  name: String!
+}
+
+input ProductFilterInput {
+  ids: [Int!]
+  maxPrice: Float
+  minPrice: Float
 }
 
 type ProductStatus {
@@ -130,7 +143,7 @@ type Query {
   allCarts: [Cart!]!
   allCategories: [Category!]!
   allOrders(userId: Float!): [Order!]!
-  allProducts: [Product!]!
+  allProducts(productFilterData: ProductFilterInput): [Product!]!
   allUsers: [User!]!
   getCart(userId: Float!): Cart
   getCategory(id: Float!): Category

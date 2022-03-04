@@ -12,12 +12,27 @@ class ProductStatus {
 }
 
 @ObjectType()
-export class ProductCategory {
-    @Field({nullable: true})
+class ProductBrand {
+    @Field()
+        id: number
+
+    @Field()
         name: string
 
     @Field({nullable: true})
+        description: string
+}
+
+@ObjectType()
+export class ProductCategory {
+    @Field()
         id: number
+
+    @Field()
+        name: string
+
+    @Field({nullable: true})
+        description: string
 }
 
 @ObjectType()
@@ -41,10 +56,22 @@ export class Product {
         categories: ProductCategory[]
 
     @Field()
-        brandId: number
+        brand: ProductBrand
 
     @Field()
         status: ProductStatus
+}
+
+@InputType()
+export class ProductFilterInput {
+    @Field(type => [Int], {nullable: true})
+    ids: number[]
+
+@Field({nullable: true})
+    minPrice: number
+
+@Field({nullable: true})
+    maxPrice: number
 }
 
 @InputType()

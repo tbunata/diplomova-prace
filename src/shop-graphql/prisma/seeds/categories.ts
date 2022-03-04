@@ -18,5 +18,9 @@ export const categories = [
     {
         name: 'Socks',
         description: 'Most liked Xmas presents'
+    },
+    {
+        name: 'Shirts',
+        description: 'High quality shirts from London'
     }
 ]
