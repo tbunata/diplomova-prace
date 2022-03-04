@@ -9,7 +9,7 @@ import { userStatuses } from '../../prisma/seeds/userStatuses'
 const prisma = new PrismaClient()
 let server: Server
 
-const loginUser = async (email: string, password: string) => {
+export const loginUser = async (email: string, password: string) => {
     const loginData = {
         query: `mutation { 
             loginUser(
@@ -129,7 +129,6 @@ describe('QUERY getUser', () => {
             .expect(200)
             .then(async (res) => {
                 const payload = res.body.errors
-                // console.log(payload)
                 expect(payload.length).toBe(1)
                 expect(payload[0].message).toBe('User with id: 404 not found')
             })
@@ -137,7 +136,7 @@ describe('QUERY getUser', () => {
 })
 
 describe('MUTATION addUser', () => {
-    it('should get user\'s data', async () => {
+    it('should create a  user', async () => {
         const queryData = {
             query: `mutation {
                 addUser(newUserData: {
@@ -181,7 +180,7 @@ describe('MUTATION addUser', () => {
 })
 
 describe('MUTATION updateUser', () => {
-    it('should get user\'s data', async () => {
+    it('should update user\'s data', async () => {
         const loginInfo = await loginUser('fred.colon@ankh-morpork.dw', 'colonovo')
         const queryData = {
             query: `mutation {
@@ -215,9 +214,7 @@ describe('MUTATION updateUser', () => {
             .send(queryData)
             .expect(200)
             .then(async (res) => {
-                console.log(res.body)
                 const payload = res.body.data.updateUser
-                console.log(payload)
                 expect(payload.id).toBe(3)
                 expect(payload.email).toBe('alfred.colon@ankh-morpork.dw')
                 expect(payload.firstName).toBe('Alfred')
@@ -233,7 +230,7 @@ describe('MUTATION updateUser', () => {
 
 
 describe('MUTATION removeUser', () => {
-    it('should get user\'s data', async () => {
+    it('should remove a product', async () => {
         const loginInfo = await loginUser('alfred.colon@ankh-morpork.dw', 'colonovo')
         const queryData = {
             query: `mutation {

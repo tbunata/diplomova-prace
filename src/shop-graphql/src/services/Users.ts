@@ -63,7 +63,6 @@ export const create = async (newUser: NewUserInput) => {
             status: true
         }
     })
-    console.log(user)
     return user
 }
 
@@ -117,7 +116,6 @@ export const remove = async (id: number) => {
 export const login = async (email: string, password:string) => {
     const user = await findByEmail(email)
     if (user && await bcrypt.compare(password, user.password)) {
-        console.log('authorized')
         const token = jwt.sign(
             { user_id: user.id, email},
             'process.env.TOKEN_KEY', // todo
