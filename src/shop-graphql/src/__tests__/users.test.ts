@@ -9,7 +9,7 @@ import { userStatuses } from '../../prisma/seeds/userStatuses'
 const prisma = new PrismaClient()
 let server: Server
 
-export const loginUser = async (email: string, password: string) => {
+const loginUser = async (email: string, password: string) => {
     const loginData = {
         query: `mutation { 
             loginUser(

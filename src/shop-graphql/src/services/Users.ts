@@ -117,7 +117,7 @@ export const login = async (email: string, password:string) => {
     const user = await findByEmail(email)
     if (user && await bcrypt.compare(password, user.password)) {
         const token = jwt.sign(
-            { user_id: user.id, email},
+            { id: user.id, email},
             'process.env.TOKEN_KEY', // todo
             {
                 expiresIn: '2h'

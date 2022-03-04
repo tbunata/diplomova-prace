@@ -32,18 +32,18 @@ scalar DateTime
 
 type Mutation {
   addCategory(newCategoryData: NewCategoryInput!): Category!
-  addItemToCart(newCartItemData: NewCartItemInput!, userId: Float!): Cart!
+  addItemToCart(newCartItemData: NewCartItemInput!): Cart!
   addProduct(newProductData: NewProductInput!): Product!
   addUser(newUserData: NewUserInput!): User!
   cancelOrder(id: Float!): Boolean!
-  checkoutCart(userId: Float!): Order!
-  clearCart(userId: Float!): Cart!
+  checkoutCart: Order!
+  clearCart: Cart!
   loginUser(email: String!, password: String!): UserTokens!
   refreshToken(email: String!, token: String!): RefreshedToken!
   removeCategory(id: Float!): Boolean!
   removeProduct(id: Float!): Boolean!
   removeUser(id: Float!): Boolean!
-  updateCartItem(updateCartItemData: UpdateCartItemInput!, userId: Float!): Cart!
+  updateCartItem(updateCartItemData: UpdateCartItemInput!): Cart!
   updateCategory(id: Float!, updateCategoryData: UpdateCategoryInput!): Category
   updateOrderStatus(id: Float!, statusId: Float!): Order!
   updateProduct(id: Float!, updateProductData: UpdateProductInput!): Product!
@@ -145,7 +145,7 @@ type Query {
   allOrders(userId: Float!): [Order!]!
   allProducts(productFilterData: ProductFilterInput): [Product!]!
   allUsers: [User!]!
-  getCart(userId: Float!): Cart
+  getCart: Cart
   getCategory(id: Float!): Category
   getOrder(id: Float!): Order
   getProduct(id: Float!): Product!
