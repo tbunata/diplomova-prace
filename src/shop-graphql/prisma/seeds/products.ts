@@ -14,5 +14,13 @@ export const products = [
         price: 25,
         brandId: 1,
         quantity: 37
+    },
+    {
+        name: 'Destroyer 3000 XL',
+        description: 'A superior crossbow ',
+        statusId: 1,
+        price: 22000,
+        brandId: 2,
+        quantity: 3
     }
 ]

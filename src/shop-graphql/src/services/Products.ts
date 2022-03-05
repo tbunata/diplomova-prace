@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { AuthenticationError, UserInputError } from 'apollo-server-errors'
 import { NewProductInput, UpdateProductInput, Product, ProductCategory, ProductFilterInput } from '../types/Products'
-
+import { PRODUCT_DELETED_STATUS } from '../constants'
 
 const prisma = new PrismaClient()
 
@@ -48,7 +48,11 @@ const transformProduct = (product: any) => {
 
 
 export const findAll = async (productFilterData: ProductFilterInput) => {
-    let where: any = {}
+    let where: any = {
+        NOT: {
+            statusId: PRODUCT_DELETED_STATUS
+        }
+    }
     if (productFilterData?.ids && productFilterData?.ids.length > 0) {
         where = {
             ...where,
@@ -97,7 +101,7 @@ export const find = async (id: number) => {
         },
         include: includeRelatedTables
     })
-    if (!product) {
+    if (!product || product.statusId === PRODUCT_DELETED_STATUS) {
         throw new UserInputError(`Product with id: ${id} not found`)
     }
     return transformProduct(product)
@@ -138,7 +142,7 @@ export const update = async (id: number, updateProductData: UpdateProductInput) 
         }
     })
 
-    if (!product) {
+    if (!product || product.statusId === PRODUCT_DELETED_STATUS) {
         throw new UserInputError(`Product with id: ${id} not found`)
     }
     let data: any = {
@@ -197,7 +201,7 @@ export const remove = async (id: number) => {
         }
     })
 
-    if (!product) {
+    if (!product || product.statusId === PRODUCT_DELETED_STATUS) {
         throw new UserInputError(`Product with id: ${id} not found`)
     }
 
@@ -207,9 +211,17 @@ export const remove = async (id: number) => {
                 productId: id
             }
         }),
-        prisma.product.delete({
+        prisma.cartItem.deleteMany({
             where: {
-                id: id
+                productId: id
+            }
+        }),
+        prisma.product.update({
+            where: {
+                id: id,
+            },
+            data: {
+                statusId: PRODUCT_DELETED_STATUS
             }
         })
     ])

@@ -3,15 +3,10 @@ import { PrismaClient } from '@prisma/client'
 import { createApp } from '../app'
 import { Server } from 'http'
 
-import { orderStatuses } from '../../prisma/seeds/orderStatuses'
-
 const prisma = new PrismaClient()
 let server: Server
 
 beforeAll(async () => {
-    await prisma.orderStatus.createMany({
-        data: orderStatuses
-    })
     server = await createApp({port:0})
 })
 
@@ -277,11 +272,7 @@ describe("cart walkthrough - checkout", () => {
             .send(queryData)
             .expect(200)
             .then(async (res) => {
-                console.log(res.text);
-                
                 const payload = res.body.data.checkoutCart
-                console.log(payload);
-                
                 expect(payload.userId).toBe(1)
                 expect(payload.items.length).toBe(1)
                 expect(payload.price).toBe(4830)

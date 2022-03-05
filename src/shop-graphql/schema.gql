@@ -142,7 +142,7 @@ type ProductStatus {
 type Query {
   allCarts: [Cart!]!
   allCategories: [Category!]!
-  allOrders(userId: Float!): [Order!]!
+  allOrders: [Order!]!
   allProducts(productFilterData: ProductFilterInput): [Product!]!
   allUsers: [User!]!
   getCart: Cart

@@ -8,12 +8,13 @@ import { productStatuses } from './seeds/productStatuses'
 import { products } from './seeds/products'
 import { productCategories } from './seeds/productCategories'
 import { orderStatuses } from './seeds/orderStatuses'
+import { orderItems } from './seeds/orderItems'
+import { orders } from './seeds/orders'
 
 const prisma = new PrismaClient()
 
 
-
-async function main() {
+export const seed = async () => {
     await prisma.userStatus.createMany({
         data: userStatuses
     })
@@ -38,9 +39,15 @@ async function main() {
     await prisma.orderStatus.createMany({
         data: orderStatuses
     })
+    await prisma.order.createMany({
+        data: orders
+    })
+    await prisma.orderItem.createMany({
+        data: orderItems
+    })
 }
 
-main()
+seed()
     .catch((e) => {
         console.error(e)
         process.exit(1)

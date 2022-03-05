@@ -7,5 +7,8 @@ export const productStatuses = [
     },
     {
         name: 'Damaged',
+    },
+    {
+        name: 'Deleted'
     }
 ]

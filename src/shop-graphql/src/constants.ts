@@ -1,0 +1,1 @@
+export const PRODUCT_DELETED_STATUS = 4

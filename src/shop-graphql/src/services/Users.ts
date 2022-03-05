@@ -28,7 +28,7 @@ export const find = async (id: number) => {
     })
     
     if (!user) {
-        throw new UserInputError(`User with id: ${id} not found`) //todo
+        throw new UserInputError(`User with id: ${id} not found`)
     }
 
     return user
@@ -74,7 +74,7 @@ export const update = async (id: number, userUpdate: UpdateUserInput) => {
     })
 
     if (!user) {
-        throw new UserInputError(`User with id: ${id} not found`) //todo
+        throw new UserInputError(`User with id: ${id} not found`)
     }
 
     if (userUpdate.password) {
@@ -101,14 +101,16 @@ export const remove = async (id: number) => {
     })
 
     if (!user) {
-        throw new UserInputError(`User with id: ${id} not found`) //todo
+        throw new UserInputError(`User with id: ${id} not found`)
     }
 
-    await prisma.user.delete({
-        where: {
-            id:id
-        }
-    })
+    await prisma.$transaction([
+        prisma.user.delete({
+            where: {
+                id:id
+            }
+        })
+    ])
     return null
 }
 
@@ -142,7 +144,7 @@ export const login = async (email: string, password:string) => {
         })
         return tokens
     }
-    throw new AuthenticationError(`Unauthorized login for user: ${email}`) //todo
+    throw new AuthenticationError(`Unauthorized login for user: ${email}`)
 }
 
 
@@ -155,7 +157,7 @@ export const refreshToken = async (email: string, refreshToken: string) => {
     if(tokenObject && tokenObject.token === refreshToken) {
         const user = await findByEmail(email)
         if (!user) {
-            throw new AuthenticationError(`Unauthorized login for user: ${email}`) //todo
+            throw new AuthenticationError(`Unauthorized login for user: ${email}`)
         }
         const token = jwt.sign(
             { user_id: user.id, email},
@@ -166,5 +168,5 @@ export const refreshToken = async (email: string, refreshToken: string) => {
         )
         return {token: token}
     }
-    throw new AuthenticationError(`Unauthorized login for user: ${email}`) //todo
+    throw new AuthenticationError(`Unauthorized login for user: ${email}`)
 }

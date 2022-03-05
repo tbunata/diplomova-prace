@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { UserInputError } from 'apollo-server-core'
+import { PRODUCT_DELETED_STATUS } from '../constants'
 import { Cart, NewCartItemInput, UpdateCartItemInput } from '../types/Carts'
 import { Order } from '../types/Orders'
 
@@ -103,6 +104,18 @@ export const addItem = async (userId: number, newCartItemData: NewCartItemInput)
             }
         })
     }
+
+    const product = await prisma.product.findUnique({
+        where: {
+            id: newCartItemData.productId
+        }
+    })
+    if (!product || product.statusId === PRODUCT_DELETED_STATUS) {
+        throw new UserInputError(`Product with id : ${newCartItemData.productId} not found`)
+    } else if (product.quantity < newCartItemData.quantity) {
+        throw new UserInputError(`Not enough stock for product with id: ${newCartItemData.productId}`)
+    }
+
     const newItem = await prisma.cartItem.upsert({
         where: {
             productId_cartId: {
@@ -141,6 +154,18 @@ export const updateItem = async (userId: number, updateCartItemData: UpdateCartI
     if(!cart) {
         throw new UserInputError(`Cart for user: ${userId} not found`)
     }
+
+    const product = await prisma.product.findUnique({
+        where: {
+            id: updateCartItemData.productId
+        }
+    })
+    if (!product || product.statusId === PRODUCT_DELETED_STATUS) {
+        throw new UserInputError(`Product with id : ${updateCartItemData.productId} not found`)
+    } else if (product.quantity < updateCartItemData.quantity) {
+        throw new UserInputError(`Not enough stock for product with id: ${updateCartItemData.productId}`)
+    }
+
     if (updateCartItemData.quantity === 0) {
         await prisma.cartItem.delete({
             where: {

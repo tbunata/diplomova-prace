@@ -3,34 +3,12 @@ import { PrismaClient } from '@prisma/client'
 import { createApp } from '../app'
 import { Server } from 'http'
 
-import { brands } from '../../prisma/seeds/brands'
-import { categories } from '../../prisma/seeds/categories'
-import { productStatuses } from '../../prisma/seeds/productStatuses'
-import { products } from '../../prisma/seeds/products'
-import { productCategories } from '../../prisma/seeds/productCategories'
-
+import { PRODUCT_DELETED_STATUS } from '../constants'
 
 const prisma = new PrismaClient()
 let server: Server
 
 beforeAll(async () => {
-    await prisma.brand.createMany({
-        data: brands
-    })
-    await prisma.category.createMany({
-        data: categories
-    })
-    await prisma.productStatus.createMany({
-        data: productStatuses
-    })
-    await prisma.$transaction([
-        prisma.product.createMany({
-            data: products
-        }),
-        prisma.productCategory.createMany({
-            data: productCategories
-        })
-    ])
     server = await createApp({port:0})
 })
 
@@ -62,7 +40,7 @@ const productToFetch = {
 }
 
 const productToCreate = {
-    id: 3,
+    id: 4,
     name: 'White shirt',
     description: 'A really white shirt',
     quantity: 6,
@@ -138,7 +116,7 @@ describe('QUERY allProducts', () => {
             .expect(200)
             .then(async (res) => {
                 const payload = res.body.data.allProducts
-                expect(payload.length).toBe(2)
+                expect(payload.length).toBe(3)
                 expect(payload[0]).toEqual(productToFetch)
                 expect(payload[1].name).toBe('Striped Cotton-Blend Socks')
             })
@@ -285,7 +263,7 @@ describe('MUTATION updateProduct', () => {
         const queryData = {
             query: `mutation { 
                 updateProduct(
-                    id: 3,
+                    id: 4,
                     updateProductData: {
                         name: "Black shirt",
                         description: "When you don't want to be seen",
@@ -372,7 +350,7 @@ describe('MUTATION removeProduct', () => {
     it('should remove a product', async () => {
         const queryData = {
             query: `mutation {
-                removeProduct(id: 3) 
+                removeProduct(id: 4) 
             }`,
         }
 
@@ -389,9 +367,9 @@ describe('MUTATION removeProduct', () => {
 
         const removedProduct = await prisma.product.findUnique({
             where: {
-                id: 3
+                id: 4
             }
         })
-        expect(removedProduct).toBeNull()
+        expect(removedProduct?.statusId).toBe(PRODUCT_DELETED_STATUS)
     })
 })

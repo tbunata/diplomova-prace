@@ -65,8 +65,7 @@ export const createOrder = async (data: any) => {
     return transformOrder(newOrder)
 }
 
-// todo add user validation
-export const updateStatus = async (id: number, status: number) => {
+export const updateStatus = async (id: number, status: number, userId: number) => {
     const order = await prisma.order.findUnique({
         where: {
             id: id
@@ -75,6 +74,8 @@ export const updateStatus = async (id: number, status: number) => {
 
     if (!order) {
         throw new UserInputError(`Order with id: ${id} not found`)
+    } else if(order.userId !== userId) {
+        throw new AuthenticationError(`Unauthorized to view order with id: ${id}`)
     }
     const updatedOrder = await prisma.order.update({
         where: {
@@ -89,7 +90,7 @@ export const updateStatus = async (id: number, status: number) => {
 }
 
 
-export const cancelOrder = async (id: number) => {
+export const cancelOrder = async (id: number, userId: number) => {
     const order = await prisma.order.findUnique({
         where: {
             id: id
@@ -99,7 +100,10 @@ export const cancelOrder = async (id: number) => {
 
     if (!order) {
         throw new UserInputError(`Order with id: ${id} not found`)
-    } else if (order.status.id == 5) {
+    } else if (order.userId !== userId) {
+        throw new AuthenticationError(`Unauthorized to edit order with id: ${id}`)
+    }
+    else if (order.status.id == 5) {
         throw new UserInputError(`Order with id: ${id} is already cancelled`)
     }
 

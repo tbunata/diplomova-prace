@@ -15,4 +15,16 @@ export const productCategories = [
         productId: 2,
         categoryId: 5
     },
+    {
+        productId: 3,
+        categoryId: 1
+    },
+    {
+        productId: 3,
+        categoryId: 2
+    },
+    {
+        productId: 3,
+        categoryId: 3
+    }
 ]

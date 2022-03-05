@@ -6,15 +6,16 @@ import { Context } from '../auth/auth-checker'
 
 @Resolver(Order)
 export class OrderResolver {
+    @Authorized()
     @Query(returns => [Order])
     async allOrders(
-        @Arg('userId') userId: number
+        @Ctx() ctx: Context,
     ) {
-        const orders = await OrderService.findAll(userId)
+        const orders = await OrderService.findAll(ctx.user!.id)
         return orders
     }
 
-    // @Authorized()
+    @Authorized()
     @Query(returns => Order, {nullable: true})
     async getOrder(
         @Ctx() ctx: Context,
@@ -23,20 +24,23 @@ export class OrderResolver {
         return await OrderService.find(id, ctx.user!.id)
     }
 
+    @Authorized()
     @Mutation(returns => Order)
     async updateOrderStatus(
         @Arg('id') id: number,
-        @Arg('statusId') statusId: number
+        @Arg('statusId') statusId: number,
+        @Ctx() ctx: Context
     ) {
-        return await OrderService.updateStatus(id, statusId)
+        return await OrderService.updateStatus(id, statusId, ctx.user!.id)
     }
 
-    // @Authorized()
+    @Authorized()
     @Mutation(returns => Boolean)
     async cancelOrder(
-        @Arg('id') id: number
+        @Arg('id') id: number,
+        @Ctx() ctx: Context
     ) {
-        await OrderService.cancelOrder(id)
+        await OrderService.cancelOrder(id, ctx.user!.id)
         return true
     }
 }
