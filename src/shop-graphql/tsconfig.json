@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {                        
+      "target": "esnext",                               
+      "module": "commonjs",
+      "rootDirs": ["./src", "./prisma"],                           
+      "outDir": "./dist",                              
+      "strict": true,
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "strictPropertyInitialization": false,
+      "typeRoots": ["./src/types", "./node_modules/@types"]                       
+    },
+    "exclude":[
+      "./node_modules",
+      "./prisma"
+    ]
+  }
