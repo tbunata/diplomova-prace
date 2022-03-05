@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package categories.v1;
+
+import "google/protobuf/empty.proto";
+
+service CategoryRegister {
+    rpc GetCategory (GetCategoryRequest) returns (GetCategoryResponse) {};
+    rpc ListCategories (ListCategoriesRequest) returns (ListCategoriesResponse) {};
+    rpc CreateCategory (CreateCategoryRequest) returns (CreateCategoryResponse) {};
+    rpc UpdateCategory (UpdateCategoryRequest) returns (UpdateCategoryResponse) {};
+    rpc DeleteCategory (DeleteCategoryRequest) returns (google.protobuf.Empty) {};
+
+}
+
+message Category {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message GetCategoryRequest {
+    int64 id = 1;
+}
+
+message GetCategoryResponse {
+    Category Category = 1;
+}
+
+message ListCategoriesRequest {}
+
+message ListCategoriesResponse {
+    repeated Category Categories = 1;
+}
+
+message CreateCategoryRequest {
+    string name = 1;
+    string description = 2;
+}
+
+message CreateCategoryResponse {
+    Category Category = 1;
+}
+
+message UpdateCategoryRequest {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message UpdateCategoryResponse {
+    Category category = 1;
+}
+
+message DeleteCategoryRequest {
+    int64 id = 1;
+}

@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package carts.v1;
+
+import "google/protobuf/empty.proto";
+import "order/order.proto";
+
+service CartRegister {
+    rpc GetCart (GetCartRequest) returns (GetCartResponse) {};
+    rpc ListCarts (ListCartsRequest) returns (ListCartsResponse) {};
+    rpc AddCartItem (AddCartItemRequest) returns (AddCartItemResponse) {};
+    rpc UpdateCartItem (UpdateCartItemRequest) returns (UpdateCartItemResponse) {};
+    rpc ClearCart (ClearCartRequest) returns (google.protobuf.Empty) {};
+    rpc CheckoutCart (CheckoutCartRequest) returns (CheckoutCartResponse) {};
+}
+
+message CartItem {
+    int64 id = 1;
+    int64 product_id = 2;
+    string name = 3;
+    string description = 4;
+    int64 price = 5;
+    int64 quantity = 6;
+}
+
+message Cart {
+    int64 id = 1;
+    int64 user_id = 2;
+    repeated CartItem cart_items = 3;
+    int64 total_price = 4;
+}
+
+message GetCartRequest {}
+
+message GetCartResponse {
+    Cart cart = 1;
+}
+
+message ListCartsRequest {}
+
+message ListCartsResponse {
+    repeated Cart carts = 1;
+}
+
+message AddCartItemRequest {
+    int64 product_id = 1;
+    int64 quantity = 2;
+}
+
+message AddCartItemResponse {
+    Cart cart = 1;
+}
+
+message UpdateCartItemRequest {
+    int64 product_id = 1;
+    int64 quantity = 2;
+}
+
+message UpdateCartItemResponse {
+    Cart cart = 1;
+}
+
+message ClearCartRequest {}
+
+message CheckoutCartRequest {}
+
+message CheckoutCartResponse {
+    orders.v1.Order order = 1;
+}
