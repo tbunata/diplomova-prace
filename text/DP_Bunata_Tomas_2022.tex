@@ -54,10 +54,20 @@
 % \newacronym{FIT}{FIT}{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}
 
 \begin{introduction}
-	Tvorba webových aplikací se dá rozdělit na dvě hlavní části: frontend (část se kterou interaguje uživatel v prohlížeči) a backend (serverová část, která slouží k ukládání a  manipulaci s daty). V této práci se věnuji té druhé části - backendu, konkrétně srovnání tří populárních technologií pro tvorbu backendu: REST, GraphQL a gRPC.
-	REST je z těchto technologií nejstarší a v současnosti také nejpopulárnější. Princip je takový, že každá entita je identifikována unikátním URI a pomocí HTTP je s těmito entitami manipulováno. % todo
-	GraphQL vzniklo přibližně o deset let později a funguje zcela na odlišném principu - vystavuje jediný endpoint, na který se poté dotazujeme. % todo
-	gRPC je z těchto technologií nejmladší a jedná se o implementaci RPC od společnosti Google. % todo
+Webové aplikace jsou každodenní součástí našeho života. Setkáváme se s nimi při čtení ranních zpráv, komunikaci se svými přáteli nebo spravování financí přes internetové bankovnictví.
+Architektura webových aplikací se dá rozdělit na dvě hlavní části: frontend (část se kterou interaguje uživatel v prohlížeči) a backend (serverová část, která slouží k ukládání a  manipulaci s daty). V této práci se věnuji té druhé části - konkrétně backendovým technologiím zprostředkovávající komunikaci mezi serverem a klientem.
+Vzhledem k tomu, že webové technologie se velmi rychle vyvíjejí a posouvají vpřed, vývojáři velmi často narážejí na otázku výběru správné technologie pro svůj projekt. V této práci se pokusím na tuto otázku odpovědět. Porovnám mezi sebou následující: REST, GraphQL a gRPC.
+
+REST je z těchto technologií nejstarší a v současnosti také nejpopulárnější. Princip RESTu je takový, že každá entita je identifikována unikátním URI a pomocí HTTP metod je s těmito entitami manipulováno.
+GraphQL vzniklo přibližně o deset let později a funguje zcela na odlišném principu - vystavuje jediný endpoint, na který se poté dotazujeme speciálním jazykem, který strukturou velmi přípomína JSON.
+gRPC je z těchto technologií nejmladší a jedná se o open source implementaci RPC (volání vzdálené procedury) od společnosti Google.
+
+S každou z těchto technologií implementuji aplikační rozhraní pro eshop a následně je porovnám ze stránek uživatelské zkušenosti, podpory vývojářů a míry schopnosti zvládat zátěž.
+V teoretické části práce se budu věnovat představení těchto technologií. Poté se budu věnovat požadavkům na návrh backendu aplikace, na kterém tyto technologie budou demonstrovány. Další část se bude věnovat výběru databázového systému a dalších technologií potřebných pro správné fungování aplikace.
+V praktické části se budu nejdříve věnovat implementaci jednotlivých backendů, včetně otestování jejich správné funkčnosti, a poté otestuji jejich výkon zátěžovými testy. Poslední část se bude věnovat věnovat samotnému srovnání těchto technologií.
+
+
+	
 	
 \end{introduction}
 
@@ -79,7 +89,8 @@
 \chapter{Seznam použitých zkratek}
 % \printglossaries
 \begin{description}
-	\item[GUI] Graphical user interface
+	\item[REST] Representational state transfer
+	\item[RPC] Remote procedure call
 	\item[XML] Extensible markup language
 \end{description}
 
