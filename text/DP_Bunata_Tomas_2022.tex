@@ -66,16 +66,99 @@ S každou z těchto technologií implementuji aplikační rozhraní pro eshop a 
 V teoretické části práce se budu věnovat představení těchto technologií. Poté se budu věnovat požadavkům na návrh backendu aplikace, na kterém tyto technologie budou demonstrovány. Další část se bude věnovat výběru databázového systému a dalších technologií potřebných pro správné fungování aplikace.
 V praktické části se budu nejdříve věnovat implementaci jednotlivých backendů, včetně otestování jejich správné funkčnosti, a poté otestuji jejich výkon zátěžovými testy. Poslední část se bude věnovat věnovat samotnému srovnání těchto technologií.
 
-
-	
-	
 \end{introduction}
 
 \chapter{Cíl práce}
+Cílem práce je návrh a implementace  tří shodných API v REST, GraphQL a gRPC, která budou realizovat typické operace, které využívají eshopy - např. vytvoření účtu zákazníka, listování produktů nebo vytvoření objednávky. Tato API budou implementována nad Node.js.
+
+Teoretická část se zabývá samotným návrhem API, kde jsou prozkoumány různé služby, které by měly být integrované do systému. Návrh vychází z typických operací potřebných pro chod eshopu. V této části budou také popsány použité technologie.
+
+Cílem praktické části je implementace je navázat na předchozí část implementací navrženého API. Bude ukázány klíčové implementační kroky, které jsou potřeba pro realizaci API v daných technologií. Součástí implementace je také napsání testů, které ověří funkčnost vytvořených systémů.\\
+Dále zde bude popsána metodologie porovnání (dokumentace, rychlost vývoje, výkonnostní testování, ...) a na základě této metodologie budou tyto technologie porovnány.
+
+
 
 \chapter{Analýza a návrh}
+Před tím, než se začneme věnovat návrhu a implementaci API, je v hodné si nejdříve vysvětlit co znamená pojem API a následně představím co to je REST, GraphQL a gRPC. Současně také popíšu jaké knihovny jsem si vybral pro jejich implementaci. A poté představím samotný návrh API, které bude implementováno v praktické části.
+
+\section{API}
+Zkratka API označuje rozhraní pro programování aplikací. Jedná se o velmi důležitou součást vývoje, protože definuje způsob jak mezi sebou budou jednotlivé aplikace (nebo komponenty v rámci jedné aplikace) komunikovat. Dalo by se říci, že představuje smlouvu, kterou obě strany musí dodržet abz spolu mohli komunikovat\\
+API se skládá ze dvou částí: 
+\begin{itemize}
+    \item Technické specifikace, která popisuje možnosti komunikace - metody, které API vystavuje, vstupní data...
+    \item Softwarového rozhraní, které tuto specifikaci implementuje
+\end{itemize}
+
+API se dále mohou dělit podle dostupnosti na soukromá, partnerská nebo otevřená. Soukromá API se používají výhradně v rámci jedné organizace. Ikdyž aplikace, které tato API využívají mohou být veřejně dostupné, samotné rozhraní není.\\
+Partnerská APi jsou sdílená s business partnery a slouží hlavně k integraci systémů mezi partnery a společností, která poskytuje přístup k API.\\
+Otevřená API jsou volně dostupná všem vývojářům a je možné je využívat bez explicitního souhlasu poskytovatele těchto rozhraní nebo bez licenčních poplatků. Poplatky mohou být účtované za informace dostupné za rozhraním, ale dokumentace  a testovací data musí být veřejně dostupná.
+
+Aplikační programovací rozhraní jdou také dělit podle způsobu použití. Může se jednat třeba o databázové API, které umožnuje komunikaci mezi aplikací a databázovým systémem, nebo API operačního systému, které definuje jak programy mohou využívat zdroje a služby operačního systému.\\
+Nejběžnější, a z pohledu této práce také nejzajímavější, jsou však webová aplikační rozhraní, která poskytují data a funkcionality mezi webovými systémy reprezentující architekturu klient-server. Tato API typicky doručují požadavky z webových aplikací a odpovědi ze serverů prostřednictvím protokolu HTTP. Mezi jeden z nejpopulárnějších typů webových aplikační rozhraní patří REST, ikdyž v poslední době jeho popularita začíná pomalu klesat \cite{google-trends}.
+
+\section{REST}
+REST je velmi oblíbený architektonický styl pro tvorbu API, který vyniká svou jednoduchostí a čitelností. Na rozdíl např. od gRPC není orientován procedurálně, ale datově.\\
+Zkratka REST vyjadřuje pojem representational state transfer a v roce 2000 ji zavedl Roy Fielding ve své dizertační práci \cite{fielding00}. Než si vysvětlíme, jaké požadavkz musí REST API splňovat, je potřeba vysvětlit co to je zdroj.\\
+Jakákoli informace, kterou lze pojmenovat, může být zdrojem. Může to být například obrázek, dočasná služba nebo kolekce jiných zdrojů. Stav zdroje v čase nazýváme reprezentace zdroje. Skládá se ze tří částí - dat, metadat popisující tato data a hypermedia odkazů, která pomáhají klientům s přechodem do dalšho požadovaného stavu.
+
+Aby aplikační rozhraní mohlo být nazýváno RESTful, je potřeba aby splňovalo šest architektonických omezení \cite{restful_api}:
+
+\subsection{Uniform Interface}
+Aplikováním principu generality na rozhraní komponenty můžeme zjednodušit architekturu celého systému. Tomu pomáhá několik omezení.
+\begin{itemize}
+    \item \textbf{Identifikace zdrojů} - Rozhraní musí jednoznačně identifikovat každý zdroj, který je použit v interakci mezi klientem a serverem
+    \item \textbf{Manipulace se zdroji} skrz jejich reprezentaci - Zdroje v odpovědi serveru by měly mít jednotnou reprezentaci. Konzumenti API by pak měli použít tyto reprezentace k modifikování stavu zdrojů.
+    \item \textbf{Samopopisující se zprávy} - Každá reprezentace zdroje by měla obsahovat dostatek informací aby bylo jasné jak ji zpracovat. Měla by také obsahovat jaké další možné operace může klient se zdrojem provádět.
+    \item \textbf{Hypermedia jako aplikační stav} - Klient by měl mít pouze počáteční URI aplikace. Klientská aplikace by poté měla řídit veškeré interakce pomocí hyperlinků - serverová odpověď obsahuje seznam dostupných operací.
+\end{itemize}
+
+\subsection{Client-server}
+Návrhový vzor klient-server vynucuje oddělení zodpovědností, což pomáhá tomu aby se klientské a serverové komponenty mohly vyvíjet nezávisle na sobě. Zatímco se server a klient vyvíjí, je potřeba dávat pozor, aby rozhraní mezi nimi nebylo porušeno.
+Oddělením uživatelského rozhraní (klienta) a manipulaci s daty (serveru) umožníme nezávislost uživatelského rozhraní na konkrétní platformě a zároveň zlepšíme škálovatelnost serveru zjednodušením jeho komponent. Servery nebo klienti mohou být také nahrazeny, pokud nedojde ke změně rozhraní
+
+\subsection{Stateless}
+Bezestavovost požaduje, že každý požadavek z klienta na server musí obsahovat všechny dostupné informace potřebné k jeho zpracování. Server nemůže využívat žádných uložených informací z předchozích interakcí - chová se jako kdybz každý požadavek byl úplně nový. Z toho vyplývá, že klient je zodpovědný za udržování aplikačního stavu, pokud to je potřeba.
+
+\subsection{Cacheable}
+Toto omezení požaduje, že každá odpověď serveru by se měla označit jako cachovatelná nebo necachovatelná. Pokud je cachovatelná, klient má po omezenou dobu právo tyto informace přepoužít v dalších požadavcích
+
+\subsection{Layered system}
+REST umožnuje využití vrstvené architektury, kde například server A obsahuje API, na serveru B se ukládají data a na serveru C se autentizují požadavky. Klient nemůže zjistit, jestli je ke konkrétnímu serveru připojen přímo nebo přes prostřeníka.
+
+\subsection{Code on demand - volitelné}
+Umožnění rozšíření funkcionality klienta stažením a spuštěním kódu ve formě appletů nebo skriptů ze serveru. Výsledkem je zjednodušení klienta, který nemusí obsahovat tolik předinstalovaných funkcí.
+
+\subsection{HTTP}
+Pro přenos dat mezi klientem a servrem se nejčastěji používá protokol HTTP, ikdyž REST není vázaný na tento protokol. Protože ale se tato práce zabývá pouze webovými API, budu se v této práci věnovat pouze přenosu pomocí HTTP.
+HTTP definuje množinu metod, které slouží k indikaci jakou akci chceme se zdrojem provést. Tyto metody se také označují jako \textit{HTTP verbs} \cite{http_metods}
+
+\begin{itemize}
+    \item \textbf{GET} - slouží k získání reprezentace daného zdroje. Měla by být použita pouze k získávání informací.
+    \item \textbf{HEAD} - slouží k získání stejné odpovědi jako \textbf{GET}, ale bez těla odpovědi.
+    \item \textbf{POST} - slouží k odeslání entity k danému zdroji, která často způsobí změnu stavu nebo side-effect na serveru.
+    \item \textbf{PUT} - tato meto nahradí všechny současné reprezentace cílového zdroje za obsah požadavku
+    \item \textbf{DELETE} - slouží ke smazání cílového zdroje.
+    \item \textbf{PATCH} - slouží k částečné změně cílového zdroje
+\end{itemize}
+
+\section{GraphQL}
+
+\section{gRPC}
+
+\section{Node.js }
+\section{Návrh}
+Aby srovnání co nejvíce odpovídalo realitě, vybral jsem si jako vzor pro API, které budu implementovat, eshop. Je to typický příklad, se kterým se vývojář může setkat při své práci a zároveň je tento vzor dost obecný na to, aby si čtenář mohl jednoduše převést na jiný. Pro popis api jsem zvolil specifikaci OpenAPI.
+
+\subsection{OpenAPI}
+OpenAPI 
+
+\chapter{}
 
 \chapter{Realizace}
+
+\chapter{Testování}
+
+\chapter{Závěrečné srovnání}
 
 \begin{conclusion}
 	%sem napište závěr Vaší práce
