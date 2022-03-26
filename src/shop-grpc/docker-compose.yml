@@ -1,0 +1,19 @@
+version: "3"
+services:
+  shop-grpc-api:
+    container_name: shop-grpc-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/app/src
+      - ./nodemon.json:/app/nodemon.json
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    command: bash -c "npx prisma migrate deploy && npm run start:dev"
