@@ -1,114 +1,121 @@
-import express, { Request, Response } from "express"
-import { GetProductsRequest } from "./requests"
-import * as ProductService from "./service"
-import { verifyToken } from '../middleware/auth'
-import { BaseProduct, Product } from "./interface"
-import { handleError, NotFoundError } from '../helper/errors'
-import { logger } from "../logger"
-export const productsRouter = express.Router()
+import express, { Request, Response } from "express";
+import EventEmitter from "events";
+import { validate } from "class-validator";
+import { GetProductsRequest } from "./requests";
+import * as ProductService from "./service";
+import { verifyToken } from "../middleware/auth";
+import { NewProductInput, UpdateProductInput } from "./interface";
+import { BadRequestError, handleError } from "../helper/errors";
+import { logger } from "../logger";
 
-productsRouter.use(verifyToken)
+export const productsRouter = express.Router();
+export const productEmmiter = new EventEmitter();
 
+productsRouter.use(verifyToken);
 
 // GET products
-productsRouter.get('/', async (req: GetProductsRequest, res: Response) => {
-    try {
-        let productIds: number[] = []
-        if(req.query.productIds){
-            productIds = req.query.productIds.map(Number)
-        }
-        let minPrice = null
-        if (req.query.minPrice) {
-            minPrice = parseInt(req.query.minPrice, 10)
-        }
-        let maxPrice = null
-        if (req.query.maxPrice) {
-            maxPrice = parseInt(req.query.maxPrice, 10)
-        }
-        const products = await ProductService.findAll(productIds, minPrice, maxPrice)
-        return res.status(200).send(products)
-    } catch (e) {
-        handleError(e, res)
+productsRouter.get("/", async (req: GetProductsRequest, res: Response) => {
+  try {
+    let productIds: number[] = [];
+    if (req.query.productIds) {
+      productIds = req.query.productIds.map(Number);
     }
-})
+    let minPrice = null;
+    if (req.query.minPrice) {
+      minPrice = parseInt(req.query.minPrice, 10);
+    }
+    let maxPrice = null;
+    if (req.query.maxPrice) {
+      maxPrice = parseInt(req.query.maxPrice, 10);
+    }
+    const products = await ProductService.findAll(productIds, minPrice, maxPrice);
+    return res.status(200).send(products);
+  } catch (e) {
+    handleError(e, res);
+  }
+});
 
 // GET product
-productsRouter.get('/:id', async (req: Request, res: Response) => {
-    const id: number = parseInt(req.params.id, 10)
-    try {
-        const product = await ProductService.find(id)
-        return res.status(200).send(product)
-    } catch (e) {
-        handleError(e, res)
-    }
-})
+productsRouter.get("/:id", async (req: Request, res: Response) => {
+  const id: number = parseInt(req.params.id, 10);
+  try {
+    const product = await ProductService.find(id);
+    return res.status(200).send(product);
+  } catch (e) {
+    handleError(e, res);
+  }
+});
 
 // POST products
-productsRouter.post('/', async (req: Request, res: Response) => {
-    try {
-        const product: BaseProduct = req.body
-        const newProduct = await ProductService.create(product)
-        return res.status(201).json(newProduct)
-    } catch (e) {
-        handleError(e, res)
-    }
-})
+productsRouter.post("/", async (req: Request, res: Response) => {
+  try {
+    const newProductInput = new NewProductInput(req.body);
+    await validate(newProductInput).then((errors) => {
+      if (errors.length > 0) {
+        throw new BadRequestError(`Invalid input: ${errors}`);
+      }
+    });
+    const newProduct = await ProductService.create(newProductInput);
+    return res.status(201).json(newProduct);
+  } catch (e) {
+    handleError(e, res);
+  }
+});
 
 // PUT products
-productsRouter.put('/:id', async (req: Request, res: Response) => {
-    try {
-        const id: number = parseInt(req.params.id, 10)
-        const productUpdate: Product = req.body
-
-        const updatedProduct = await ProductService.update(id, productUpdate)
-        return res.status(200).send(updatedProduct)
-    } catch (e) {
-        handleError(e, res)
-    }
-})
+productsRouter.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const id: number = parseInt(req.params.id, 10);
+    const updateProductInput = new UpdateProductInput(req.body);
+    await validate(updateProductInput).then((errors) => {
+      if (errors.length > 0) {
+        throw new BadRequestError(`Invalid input: ${errors}`);
+      }
+    });
+    const updatedProduct = await ProductService.update(id, updateProductInput);
+    productEmmiter.emit("update");
+    return res.status(200).send(updatedProduct);
+  } catch (e) {
+    handleError(e, res);
+  }
+});
 
 //DELETE products
-productsRouter.delete('/:id', async (req: Request, res: Response) => {
-    try {
-        const id: number = parseInt(req.params.id, 10)
+productsRouter.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const id: number = parseInt(req.params.id, 10);
 
-        await ProductService.remove(id)
-        return res.status(204).send('Product deleted')
-    } catch (e) {
-        handleError(e, res)
+    await ProductService.remove(id);
+    return res.status(204).send("Product deleted");
+  } catch (e) {
+    handleError(e, res);
+  }
+});
+
+productsRouter.ws("/:id/quantity", async (ws, req: Request) => {
+  try {
+    const id: number = parseInt(req.params.id, 10);
+    const quantity = await ProductService.getQuantity(id);
+    const data = {
+      timestamp: Date.now(),
+      quantity: quantity,
+    };
+    ws.send(JSON.stringify(data));
+    productEmmiter.on("update", async () => {
+      const updatedProduct = await ProductService.find(id);
+      const data = {
+        timestamp: Date.now(),
+        quantity: updatedProduct.quantity,
+      };
+      ws.send(JSON.stringify(data));
+    });
+  } catch (e) {
+    logger.error(e);
+    let message = "Server error";
+    if (e instanceof Error) {
+      message = e.message;
     }
-})
-
-
-productsRouter.ws('/:id/quantity', async (ws, req: Request) => {
-    try{
-        const id: number = parseInt(req.params.id, 10)
-        const timer = setInterval(async () => {
-                const quantity = await ProductService.getQuantity(id).catch((e) => {
-                    let message = "Server error"
-                    if (e instanceof NotFoundError) {
-                        message = `${e.message}. Terminating connection`
-                    }
-                    ws.send(message)
-                    ws.terminate()
-                    clearInterval(timer)
-                })
-                const data = {
-                    timestamp: Date.now(),
-                    quantity: quantity
-                };
-                ws.send(JSON.stringify(data))
-            }, 1000)
-        ws.on('close', () => {
-            console.log('WebSocket was closed')
-        })
-    } catch(e) {
-        logger.error(e)
-        let message = "Server error"
-        if (e instanceof Error) {
-            message = e.message
-        }
-        ws.send(`${message}. Terminating connection`)
-        ws.terminate()
-    }
-})
+    ws.send(`${message}. Terminating connection`);
+    ws.terminate();
+  }
+});

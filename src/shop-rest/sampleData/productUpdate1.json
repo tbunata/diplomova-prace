@@ -1,13 +1,13 @@
 {
-    "categoryIds": [
-        {
-            "categoryId": 2
-        }
-    ],
-    "name": "Shirt updated",
-    "description": "Plain black shirt",
-    "statusId": 1,
-    "price": 1399,
-    "brandId": 1,
-    "id": 6
+  "categoryIds": [
+    {
+      "categoryId": 2
+    }
+  ],
+  "name": "Shirt updated",
+  "description": "Plain black shirt",
+  "statusId": 1,
+  "price": 1399,
+  "brandId": 1,
+  "id": 6
 }

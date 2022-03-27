@@ -61,7 +61,7 @@ model ProductCategory {
   productId  Int
   product    Product  @relation(fields: [productId], references: [id])
   categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([productId, categoryId])
 }
@@ -90,7 +90,7 @@ model Cart {
   id     Int        @id @default(autoincrement())
   items  CartItem[]
   userId Int        @unique
-  user   User       @relation(fields: [userId], references: [id])
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CartItem {
@@ -98,7 +98,7 @@ model CartItem {
   productId Int
   product   Product @relation(fields: [productId], references: [id])
   cartId    Int
-  cart      Cart    @relation(fields: [cartId], references: [id])
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
   quantity  Int
 
   @@unique([productId, cartId])
@@ -112,7 +112,7 @@ model Order {
   status        OrderStatus @relation(fields: [orderStatusId], references: [id])
   price         Int
   userId        Int
-  user          User        @relation(fields: [userId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderItems    OrderItem[]
 }
 
@@ -127,7 +127,7 @@ model OrderItem {
   productId Int
   product   Product @relation(fields: [productId], references: [id])
   orderId   Int
-  order     Order   @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   quantity  Int
   price     Int
 
