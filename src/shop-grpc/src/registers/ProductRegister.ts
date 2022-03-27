@@ -70,7 +70,7 @@ export const addProductServiceRegister = (app: ProtoCat<ServerContext>) => {
     getProductQuantityStream: async (stream) => {
       const id = stream.request.getId();
       const product = await ProductService.find(id);
-      let response = new GetProductQuantityStreamResponse().setQuantity(product.quantity);
+      const response = new GetProductQuantityStreamResponse().setQuantity(product.quantity);
       stream.write(response);
       productEmmiter.on("update", async (quantity: number | null) => {
         if (!quantity) {

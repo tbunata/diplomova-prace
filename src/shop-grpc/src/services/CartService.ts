@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Cart, NewCartItemInput, UpdateCartItemInput } from "../types/Carts";
 import { NotFoundError, UnprocessableEntityError } from "../helper/errors";
-import { Order } from "../types/Orders";
 import { transformOrder } from "./OrderService";
 import { ORDER_STATUS_NEW } from "../helper/constants";
 

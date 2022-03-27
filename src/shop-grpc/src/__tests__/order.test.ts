@@ -8,7 +8,7 @@ import { Order as OrderResponse } from "../../dist/api/order/order_pb";
 
 const prisma = new PrismaClient();
 const ADDRESS = "0.0.0.0:3336";
-let client = createClient(
+const client = createClient(
   {
     order: OrderRegisterClient,
     user: UserRegisterClient,
