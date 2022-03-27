@@ -1,18 +1,16 @@
-import request from 'supertest'
-import { PrismaClient } from '@prisma/client'
-import { createApp } from '../app'
-import { Server } from 'http'
+import request from "supertest";
+import { createApp } from "../app";
+import { Server } from "http";
 
-const prisma = new PrismaClient()
-let server: Server
+let server: Server;
 
 beforeAll(async () => {
-    server = await createApp({port:0})
-})
+  server = await createApp();
+});
 
 const loginUser = async (email: string, password: string) => {
-    const loginData = {
-        query: `mutation { 
+  const loginData = {
+    query: `mutation { 
             loginUser(
                 email: "${email}",
                 password: "${password}"
@@ -20,51 +18,48 @@ const loginUser = async (email: string, password: string) => {
                 token,
                 refreshToken
             }
-        }`
-    }
-    const loginResponse = await request(server)
-        .post('/graphql')
-        .send(loginData)
-        .expect(200)
-    return loginResponse.body.data.loginUser
-}
+        }`,
+  };
+  const loginResponse = await request(server).post("/graphql").send(loginData).expect(200);
+  return loginResponse.body.data.loginUser;
+};
 
 const cartWithFirstItem = {
-    id: 1,
-    userId: 1,
-    items: [
-      {
-        id: 1,
-        productId: 1,
-        name: 'Burnished-Leather Jacket',
-        description: "Orlando Oxfords' leather jacket",
-        price: '2415',
-        quantity: 2
-      }
-    ],
-    totalPrice: 4830
-}
+  id: 1,
+  userId: 1,
+  items: [
+    {
+      id: 1,
+      productId: 1,
+      name: "Burnished-Leather Jacket",
+      description: "Orlando Oxfords' leather jacket",
+      price: "2415",
+      quantity: 2,
+    },
+  ],
+  totalPrice: 4830,
+};
 
 const cartWithThirdItem = {
-    id: 1,
-    userId: 1,
-    items: [
-      {
-        id: 3,
-        productId: 1,
-        name: 'Burnished-Leather Jacket',
-        description: "Orlando Oxfords' leather jacket",
-        price: '2415',
-        quantity: 2
-      }
-    ],
-    totalPrice: 4830
-}
+  id: 1,
+  userId: 1,
+  items: [
+    {
+      id: 3,
+      productId: 1,
+      name: "Burnished-Leather Jacket",
+      description: "Orlando Oxfords' leather jacket",
+      price: "2415",
+      quantity: 2,
+    },
+  ],
+  totalPrice: 4830,
+};
 
 describe("cart walkthrough - clear at end", () => {
-    it("should add first item to cart", async () => {
-        const queryData = {
-            query: `mutation {
+  it("should add first item to cart", async () => {
+    const queryData = {
+      query: `mutation {
                 addItemToCart(newCartItemData: {
                     productId: 1,
                     quantity: 2
@@ -81,22 +76,22 @@ describe("cart walkthrough - clear at end", () => {
                     },
                     totalPrice
                 }
-            }`
-        }
-        const loginInfo = await loginUser('lord.vetinari@discworld.am', 'vetinariho')
-        await request(server)
-            .post("/graphql")
-            .set('x-access-token', loginInfo.token)
-            .send(queryData)
-            .expect(200)
-            .then(async (res) => {
-                const payload = res.body.data.addItemToCart
-                expect(payload).toEqual(cartWithFirstItem)
-            })
-    })
-    it("should add second item to cart", async () => {
-        const queryData = {
-            query: `mutation {
+            }`,
+    };
+    const loginInfo = await loginUser("lord.vetinari@discworld.am", "vetinariho");
+    await request(server)
+      .post("/graphql")
+      .set("x-access-token", loginInfo.token)
+      .send(queryData)
+      .expect(200)
+      .then(async (res) => {
+        const payload = res.body.data.addItemToCart;
+        expect(payload).toEqual(cartWithFirstItem);
+      });
+  });
+  it("should add second item to cart", async () => {
+    const queryData = {
+      query: `mutation {
                 addItemToCart(newCartItemData: {
                     productId: 2,
                     quantity: 1
@@ -104,44 +99,44 @@ describe("cart walkthrough - clear at end", () => {
                     id,
                     totalPrice
                 }
-            }`
-        }
-        const loginInfo = await loginUser('lord.vetinari@discworld.am', 'vetinariho')
-        await request(server)
-            .post("/graphql")
-            .set('x-access-token', loginInfo.token)
-            .send(queryData)
-            .expect(200)
-            .then(async (res) => {
-                const payload = res.body.data.addItemToCart
-                expect(payload.totalPrice).toBe(4855)
-            })
-    })
-    it("should get cart detail with 2 items", async () => {
-        const queryData = {
-            query: `{ getCart 
+            }`,
+    };
+    const loginInfo = await loginUser("lord.vetinari@discworld.am", "vetinariho");
+    await request(server)
+      .post("/graphql")
+      .set("x-access-token", loginInfo.token)
+      .send(queryData)
+      .expect(200)
+      .then(async (res) => {
+        const payload = res.body.data.addItemToCart;
+        expect(payload.totalPrice).toBe(4855);
+      });
+  });
+  it("should get cart detail with 2 items", async () => {
+    const queryData = {
+      query: `{ getCart 
                 {
                     items{
                         name
                     }
                     totalPrice
                 }
-            }`
-        }
-        const loginInfo = await loginUser('lord.vetinari@discworld.am', 'vetinariho')
-        await request(server)
-            .post("/graphql")
-            .set('x-access-token', loginInfo.token)
-            .send(queryData)
-            .expect(200)
-            .then(async (res) => {
-                const payload = res.body.data.getCart
-                expect(payload.totalPrice).toBe(4855)
-            })
-    })
-    it("should update item quantity in cart", async () => {
-        const queryData = {
-            query: `mutation {
+            }`,
+    };
+    const loginInfo = await loginUser("lord.vetinari@discworld.am", "vetinariho");
+    await request(server)
+      .post("/graphql")
+      .set("x-access-token", loginInfo.token)
+      .send(queryData)
+      .expect(200)
+      .then(async (res) => {
+        const payload = res.body.data.getCart;
+        expect(payload.totalPrice).toBe(4855);
+      });
+  });
+  it("should update item quantity in cart", async () => {
+    const queryData = {
+      query: `mutation {
                 updateCartItem(updateCartItemData: {
                     productId: 2,
                     quantity: 3
@@ -151,22 +146,22 @@ describe("cart walkthrough - clear at end", () => {
                     }
                     totalPrice
                 }
-            }`
-        }
-        const loginInfo = await loginUser('lord.vetinari@discworld.am', 'vetinariho')
-        await request(server)
-            .post("/graphql")
-            .set('x-access-token', loginInfo.token)
-            .send(queryData)
-            .expect(200)
-            .then(async (res) => {
-                const payload = res.body.data.updateCartItem
-                expect(payload.totalPrice).toBe(4905)
-            })
-    })
-    it("should get empty cart detail", async () => {
-        const queryData = {
-            query: `mutation {
+            }`,
+    };
+    const loginInfo = await loginUser("lord.vetinari@discworld.am", "vetinariho");
+    await request(server)
+      .post("/graphql")
+      .set("x-access-token", loginInfo.token)
+      .send(queryData)
+      .expect(200)
+      .then(async (res) => {
+        const payload = res.body.data.updateCartItem;
+        expect(payload.totalPrice).toBe(4905);
+      });
+  });
+  it("should clear a cart", async () => {
+    const queryData = {
+      query: `mutation {
                 clearCart {
                     userId
                     items{
@@ -174,24 +169,24 @@ describe("cart walkthrough - clear at end", () => {
                     }
                     totalPrice
                 }
-            }`
-        }
-        const loginInfo = await loginUser('lord.vetinari@discworld.am', 'vetinariho')
-        await request(server)
-            .post("/graphql")
-            .set('x-access-token', loginInfo.token)
-            .send(queryData)
-            .expect(200)
-            .then(async (res) => {
-                const payload = res.body.data.clearCart
-                expect(payload.userId).toBe(1)
-                expect(payload.items.length).toBe(0)
-                expect(payload.totalPrice).toBe(0)
-            })
-    })
-    it('should return error for checking out empty cart', async () => {
-        const queryData = {
-            query: `mutation {
+            }`,
+    };
+    const loginInfo = await loginUser("lord.vetinari@discworld.am", "vetinariho");
+    await request(server)
+      .post("/graphql")
+      .set("x-access-token", loginInfo.token)
+      .send(queryData)
+      .expect(200)
+      .then(async (res) => {
+        const payload = res.body.data.clearCart;
+        expect(payload.userId).toBe(1);
+        expect(payload.items.length).toBe(0);
+        expect(payload.totalPrice).toBe(0);
+      });
+  });
+  it("should return error for checking out empty cart", async () => {
+    const queryData = {
+      query: `mutation {
                 checkoutCart {
                     id,
                     userId,
@@ -200,26 +195,26 @@ describe("cart walkthrough - clear at end", () => {
                     price
                 } 
             }`,
-        }
-        
-        const loginInfo = await loginUser('lord.vetinari@discworld.am', 'vetinariho')
-        await request(server)
-            .post('/graphql')
-            .set('x-access-token', loginInfo.token)
-            .send(queryData)
-            .expect(200)
-            .then(async (res) => {
-                const payload = res.body.errors
-                expect(payload.length).toBe(1)
-                expect(payload[0].message).toBe('Cart: 1 is empty')
-            })
-    })
-})
+    };
+
+    const loginInfo = await loginUser("lord.vetinari@discworld.am", "vetinariho");
+    await request(server)
+      .post("/graphql")
+      .set("x-access-token", loginInfo.token)
+      .send(queryData)
+      .expect(200)
+      .then(async (res) => {
+        const payload = res.body.errors;
+        expect(payload.length).toBe(1);
+        expect(payload[0].message).toBe("Cart: 1 is empty");
+      });
+  });
+});
 
 describe("cart walkthrough - checkout", () => {
-    it("should add first item to cart", async () => {
-        const queryData = {
-            query: `mutation {
+  it("should add first item to cart", async () => {
+    const queryData = {
+      query: `mutation {
                 addItemToCart(newCartItemData: {
                     productId: 1,
                     quantity: 2
@@ -236,22 +231,22 @@ describe("cart walkthrough - checkout", () => {
                     },
                     totalPrice
                 }
-            }`
-        }
-        const loginInfo = await loginUser('lord.vetinari@discworld.am', 'vetinariho')
-        await request(server)
-            .post("/graphql")
-            .set('x-access-token', loginInfo.token)
-            .send(queryData)
-            .expect(200)
-            .then(async (res) => {
-                const payload = res.body.data.addItemToCart
-                expect(payload).toEqual(cartWithThirdItem)
-            })
-    })
-    it('should create a new order', async () => {
-        const queryData = {
-            query: `mutation {
+            }`,
+    };
+    const loginInfo = await loginUser("lord.vetinari@discworld.am", "vetinariho");
+    await request(server)
+      .post("/graphql")
+      .set("x-access-token", loginInfo.token)
+      .send(queryData)
+      .expect(200)
+      .then(async (res) => {
+        const payload = res.body.data.addItemToCart;
+        expect(payload).toEqual(cartWithThirdItem);
+      });
+  });
+  it("should create a new order", async () => {
+    const queryData = {
+      query: `mutation {
                 checkoutCart {
                     id,
                     userId,
@@ -263,21 +258,21 @@ describe("cart walkthrough - checkout", () => {
                     }
                 } 
             }`,
-        }
-        
-        const loginInfo = await loginUser('lord.vetinari@discworld.am', 'vetinariho')
-        await request(server)
-            .post('/graphql')
-            .set('x-access-token', loginInfo.token)
-            .send(queryData)
-            .expect(200)
-            .then(async (res) => {
-                const payload = res.body.data.checkoutCart
-                expect(payload.userId).toBe(1)
-                expect(payload.items.length).toBe(1)
-                expect(payload.price).toBe(4830)
-                expect(payload.created).toBeTruthy()
-                expect(payload.updated).toBeTruthy()
-            })
-    })
-})
+    };
+
+    const loginInfo = await loginUser("lord.vetinari@discworld.am", "vetinariho");
+    await request(server)
+      .post("/graphql")
+      .set("x-access-token", loginInfo.token)
+      .send(queryData)
+      .expect(200)
+      .then(async (res) => {
+        const payload = res.body.data.checkoutCart;
+        expect(payload.userId).toBe(1);
+        expect(payload.items.length).toBe(1);
+        expect(payload.price).toBe(4830);
+        expect(payload.created).toBeTruthy();
+        expect(payload.updated).toBeTruthy();
+      });
+  });
+});

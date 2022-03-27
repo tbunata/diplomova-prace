@@ -9,10 +9,10 @@ up-prod:
 down:
 	docker-compose -p shop-api down
 
-make db-up:
+db-up:
 	docker-compose -f docker-compose.db.yml -p shop-api up -d
 
-down db-down:
+db-down:
 	docker-compose -p shop-api down
 
 test:

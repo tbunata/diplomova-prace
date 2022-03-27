@@ -1,14 +1,14 @@
 export const productStatuses = [
-    {
-        name: 'New',
-    },
-    {
-        name: 'Used',
-    },
-    {
-        name: 'Damaged',
-    },
-    {
-        name: 'Deleted'
-    }
-]
+  {
+    name: "New",
+  },
+  {
+    name: "Used",
+  },
+  {
+    name: "Damaged",
+  },
+  {
+    name: "Deleted",
+  },
+];
