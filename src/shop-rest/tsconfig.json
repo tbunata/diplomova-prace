@@ -1,14 +1,13 @@
 {
-  "compilerOptions": {                        
-    "target": "esnext",                               
-    "module": "commonjs",                           
-    "outDir": "./dist",                              
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "esnext",
+    "module": "commonjs",
+    "outDir": "./dist",
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "typeRoots": ["./src/types", "./node_modules/@types"]                       
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
-  "exclude":[
-    "./node_modules"
-  ]
+  "exclude": ["./node_modules"]
 }

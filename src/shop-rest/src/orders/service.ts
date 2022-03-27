@@ -1,117 +1,134 @@
-import { PrismaClient } from '@prisma/client'
-import { NotFoundError, UnauthorizedError, UnprocessableEntityError } from '../helper/errors'
+import { PrismaClient } from "@prisma/client";
+import { NotFoundError, UnauthorizedError, UnprocessableEntityError } from "../helper/errors";
+import { Order } from "./interface";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
+export const orderDetail = {
+  orderItems: {
+    include: {
+      product: true,
+    },
+  },
+  status: true,
+};
 
-const includeRelated = {
-    status: true,
-    orderItems: {
-        select: {
-            productId: true,
-            quantity: true,
-            product: {
-                select: {
-                    name: true,
-                }
-            }
-        }
-    }
-}
+export const transformOrder = (order: any) => {
+  order.items = order.orderItems.map((item: any) => {
+    return {
+      id: item.id,
+      productId: item.product.id,
+      name: item.product.name,
+      description: item.product.description,
+      price: item.price,
+      quantity: item.quantity,
+    };
+  });
+
+  return order as Order;
+};
 
 export const findAll = async (userId: number) => {
-    const orders = await prisma.order.findMany({
-        where: {
-            userId: userId
-        },
-        include: includeRelated
-    })
-    return orders
-}
+  const orders = await prisma.order.findMany({
+    where: {
+      userId: userId,
+    },
+    include: orderDetail,
+  });
+  return orders.map((order) => {
+    return transformOrder(order);
+  });
+};
 
 export const find = async (id: number, userId: number) => {
-    const order = await prisma.order.findUnique({
-        where: {
-            id: id
-        },
-        include: includeRelated
-    })
-    if (!order) {
-        throw new NotFoundError(`Order with id: ${id} not found`)
-    } else if (order.userId != userId) {
-        throw new UnauthorizedError(`Unauthorized to view order with id: ${id}`)
-    }
-    return order
-}
+  const order = await prisma.order.findUnique({
+    where: {
+      id: id,
+    },
+    include: orderDetail,
+  });
+  if (!order) {
+    throw new NotFoundError(`Order with id: ${id} not found`);
+  } else if (order.userId != userId) {
+    throw new UnauthorizedError(`Unauthorized to view order with id: ${id}`);
+  }
+  return transformOrder(order);
+};
 
-export const updateStatus = async (id: number, status: number) => {
-    const order = await prisma.order.findUnique({
-        where: {
-            id: id
-        }
-    })
+export const updateStatus = async (id: number, status: number, userId: number) => {
+  const order = await prisma.order.findUnique({
+    where: {
+      id: id,
+    },
+  });
 
-    if (!order) {
-        throw new NotFoundError(`Order with id: ${id} not found`)
-    }
-    const updatedOrder = await prisma.order.update({
-        where: {
-            id: id
-        },
-        data: {
-            orderStatusId: status
-        },
-        include: includeRelated
-    })
-    return updatedOrder
-}
+  if (!order) {
+    throw new NotFoundError(`Order with id: ${id} not found`);
+  } else if (order.userId !== userId) {
+    throw new UnauthorizedError(`Unauthorized to view order with id: ${id}`);
+  }
+  const updatedOrder = await prisma.order.update({
+    where: {
+      id: id,
+    },
+    data: {
+      orderStatusId: status,
+    },
+    include: orderDetail,
+  });
+  return transformOrder(updatedOrder);
+};
 
+export const cancelOrder = async (id: number, userId: number) => {
+  const order = await prisma.order.findUnique({
+    where: {
+      id: id,
+    },
+    include: orderDetail,
+  });
 
-export const cancelOrder = async (id: number) => {
-    const order = await prisma.order.findUnique({
-        where: {
-            id: id
-        },
-        include: includeRelated
-    })
+  if (!order) {
+    throw new NotFoundError(`Order with id: ${id} not found`);
+  } else if (order.userId !== userId) {
+    throw new UnauthorizedError(`Unauthorized to edit order with id: ${id}`);
+  } else if (order.status.id == 5) {
+    throw new UnprocessableEntityError(`Order with id: ${id} is already cancelled`);
+  }
 
-    if (!order) {
-        throw new NotFoundError(`Order with id: ${id} not found`)
-    } else if (order.status.id == 5) {
-        throw new UnprocessableEntityError(`Order with id: ${id} is already cancelled`)
-    }
+  await prisma
+    .$transaction(async (prisma) => {
+      const orderItems = order.orderItems.map((item) => {
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+        };
+      });
 
-    await prisma.$transaction(async (prisma) => {
-        const orderItems = order.orderItems.map((item) => {
-            return {
-                productId: item.productId,
-                quantity: item.quantity
-            }
-        })
-
-        await Promise.all(orderItems.map(async (item) => {
-            await prisma.product.update({
-                where: {
-                    id: item.productId
-                },
-                data: {
-                    quantity: {
-                        increment: item.quantity
-                    }
-                }
-            })
-        }))
-        await prisma.order.update({
+      await Promise.all(
+        orderItems.map(async (item) => {
+          await prisma.product.update({
             where: {
-                id: id
+              id: item.productId,
             },
             data: {
-                orderStatusId: 5
-            }
+              quantity: {
+                increment: item.quantity,
+              },
+            },
+          });
         })
-    }).catch((e) => {
-        throw e
-    }).finally(() =>
-        prisma.$disconnect()
-    )
-}
+      );
+      await prisma.order.update({
+        where: {
+          id: id,
+        },
+        data: {
+          orderStatusId: 5,
+        },
+      });
+    })
+    .catch((e) => {
+      throw e;
+    })
+    .finally(() => prisma.$disconnect());
+};

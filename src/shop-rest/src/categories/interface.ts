@@ -1,8 +1,33 @@
-export interface BaseCategory {
-    name: string
-    description: string
+import { IsNotEmpty } from "class-validator";
+
+export interface Category {
+  id: number;
+  name: string;
+  description: string;
 }
 
-export interface Category extends BaseCategory {
-    id: number
+export class NewCategoryInput {
+  constructor(request: any) {
+    this.name = request.name;
+    this.description = request.description;
+  }
+
+  @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
+  description: string;
+}
+
+export class UpdateCategoryInput {
+  constructor(request: any) {
+    this.name = request.name;
+    this.description = request.description;
+  }
+
+  @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
+  description: string;
 }
