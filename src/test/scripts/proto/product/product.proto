@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package products.v1;
+
+import "google/protobuf/empty.proto";
+
+service ProductRegister {
+    rpc GetProduct (GetProductRequest) returns (GetProductResponse) {};
+    rpc ListProducts (ListProductsRequest) returns (ListProductsResponse) {};
+    rpc CreateProduct (CreateProductRequest) returns (CreateProductResponse) {};
+    rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductResponse) {};
+    rpc DeleteProduct (DeleteProductRequest) returns (google.protobuf.Empty) {};
+    rpc GetProductQuantityStream (GetProductQuantityStreamRequest) returns (stream GetProductQuantityStreamResponse) {};
+}
+
+message ProductCategory {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message ProductBrand {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message ProductStatus {
+    int64 id = 1;
+    string name = 2;
+}
+
+message Product {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+    int64 price = 4;
+    int64 quantity = 5;
+    repeated ProductCategory categories = 6;
+    ProductBrand brand = 7;
+    ProductStatus status = 8;
+}
+
+message GetProductRequest {
+    int64 id = 1;
+}
+
+message GetProductResponse {
+    Product product = 1;
+}
+
+message ListProductsRequest {
+    repeated int64 ids = 1;
+    int64 min_price = 2;
+    int64 max_price = 3;
+}
+
+message ListProductsResponse{
+    repeated Product products = 1;
+}
+
+message CreateProductRequest {
+    string name = 1;
+    string description = 2;
+    int64 price = 3;
+    int64 quantity = 4;
+    repeated int64 category_ids = 5;
+    int64 brand_id = 6;
+    int64 status_id = 7;
+}
+
+message CreateProductResponse {
+    Product product = 1;
+}
+
+message UpdateProductRequest {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+    int64 price = 4;
+    int64 quantity = 5;
+    repeated int64 category_ids = 6;
+    int64 brand_id = 7;
+    int64 status_id = 8;
+}
+
+message UpdateProductResponse {
+    Product product = 1;
+}
+
+message DeleteProductRequest {
+    int64 id = 1;
+}
+
+message GetProductQuantityStreamRequest {
+    int64 id = 1;
+}
+
+message GetProductQuantityStreamResponse {
+    int64 quantity = 1;
+}
