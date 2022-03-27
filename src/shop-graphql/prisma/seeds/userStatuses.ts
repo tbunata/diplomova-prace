@@ -1,8 +1,8 @@
 export const userStatuses = [
-    {
-        name: 'Created'
-    },
-    {
-        name: 'Approved'
-    }
-]
+  {
+    name: "Created",
+  },
+  {
+    name: "Approved",
+  },
+];

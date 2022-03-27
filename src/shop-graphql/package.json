@@ -4,6 +4,7 @@
   "description": "GraphQL project for diploma thesis",
   "main": "index.js",
   "scripts": {
+    "format": "npx prettier --write .",
     "lint": "eslint --fix . --ext .ts",
     "start:dev": "nodemon -L src/index.ts",
     "start:debug": "nodemon --exec 'node --inspect=0.0.0.0:9229 --require ts-node/register src/index.ts'",

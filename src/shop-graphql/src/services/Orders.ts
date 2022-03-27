@@ -1,143 +1,134 @@
-import { PrismaClient } from '@prisma/client'
-import { AuthenticationError, UserInputError } from 'apollo-server-core'
-import { Order } from '../types/Orders'
+import { PrismaClient } from "@prisma/client";
+import { AuthenticationError, UserInputError } from "apollo-server-core";
+import { Order } from "../types/Orders";
 
-const prisma = new PrismaClient()
-
+const prisma = new PrismaClient();
 
 export const orderDetail = {
-    orderItems: {
-        include: {
-            product: true
-        }
+  orderItems: {
+    include: {
+      product: true,
     },
-    status: true
-}
+  },
+  status: true,
+};
 
-const transformOrder = (order: any) => {
-    order.items = order.orderItems.map((item: any) => {
-        return {
-            id: item.id,
-            productId: item.product.id,
-            name: item.product.name,
-            description: item.product.description,
-            price: item.price,
-            quantity: item.quantity
-        }
-    })
+export const transformOrder = (order: any) => {
+  order.items = order.orderItems.map((item: any) => {
+    return {
+      id: item.id,
+      productId: item.product.id,
+      name: item.product.name,
+      description: item.product.description,
+      price: item.price,
+      quantity: item.quantity,
+    };
+  });
 
-    return order as Order
-}
+  return order as Order;
+};
 
 export const findAll = async (userId: number) => {
-    const orders = await prisma.order.findMany({
-        where: {
-            userId: userId
-        },
-        include: orderDetail
-    })
-    return orders.map((order) => {
-        return transformOrder(order)
-    })
-}
+  const orders = await prisma.order.findMany({
+    where: {
+      userId: userId,
+    },
+    include: orderDetail,
+  });
+  return orders.map((order) => {
+    return transformOrder(order);
+  });
+};
 
 export const find = async (id: number, userId: number) => {
-    const order = await prisma.order.findUnique({
-        where: {
-            id: id
-        },
-        include: orderDetail
-    })
-    if (!order) {
-        throw new UserInputError(`Order with id: ${id} not found`)
-    } else if (order.userId != userId) {
-        throw new AuthenticationError(`Unauthorized to view order with id: ${id}`)
-    }
-    return transformOrder(order)
-}
-
-// todo refactor data
-export const createOrder = async (data: any) => {
-    const newOrder = await prisma.order.create({
-        data: data,
-        include: orderDetail
-    })
-    return transformOrder(newOrder)
-}
+  const order = await prisma.order.findUnique({
+    where: {
+      id: id,
+    },
+    include: orderDetail,
+  });
+  if (!order) {
+    throw new UserInputError(`Order with id: ${id} not found`);
+  } else if (order.userId != userId) {
+    throw new AuthenticationError(`Unauthorized to view order with id: ${id}`);
+  }
+  return transformOrder(order);
+};
 
 export const updateStatus = async (id: number, status: number, userId: number) => {
-    const order = await prisma.order.findUnique({
-        where: {
-            id: id
-        }
-    })
+  const order = await prisma.order.findUnique({
+    where: {
+      id: id,
+    },
+  });
 
-    if (!order) {
-        throw new UserInputError(`Order with id: ${id} not found`)
-    } else if(order.userId !== userId) {
-        throw new AuthenticationError(`Unauthorized to view order with id: ${id}`)
-    }
-    const updatedOrder = await prisma.order.update({
-        where: {
-            id: id
-        },
-        data: {
-            orderStatusId: status
-        },
-        include: orderDetail
-    })
-    return transformOrder(updatedOrder)
-}
-
+  if (!order) {
+    throw new UserInputError(`Order with id: ${id} not found`);
+  } else if (order.userId !== userId) {
+    throw new AuthenticationError(`Unauthorized to view order with id: ${id}`);
+  }
+  const updatedOrder = await prisma.order.update({
+    where: {
+      id: id,
+    },
+    data: {
+      orderStatusId: status,
+    },
+    include: orderDetail,
+  });
+  return transformOrder(updatedOrder);
+};
 
 export const cancelOrder = async (id: number, userId: number) => {
-    const order = await prisma.order.findUnique({
-        where: {
-            id: id
-        },
-        include: orderDetail
-    })
+  const order = await prisma.order.findUnique({
+    where: {
+      id: id,
+    },
+    include: orderDetail,
+  });
 
-    if (!order) {
-        throw new UserInputError(`Order with id: ${id} not found`)
-    } else if (order.userId !== userId) {
-        throw new AuthenticationError(`Unauthorized to edit order with id: ${id}`)
-    }
-    else if (order.status.id == 5) {
-        throw new UserInputError(`Order with id: ${id} is already cancelled`)
-    }
+  if (!order) {
+    throw new UserInputError(`Order with id: ${id} not found`);
+  } else if (order.userId !== userId) {
+    throw new AuthenticationError(`Unauthorized to edit order with id: ${id}`);
+  } else if (order.status.id == 5) {
+    throw new UserInputError(`Order with id: ${id} is already cancelled`);
+  }
 
-    await prisma.$transaction(async (prisma) => {
-        const orderItems = order.orderItems.map((item) => {
-            return {
-                productId: item.productId,
-                quantity: item.quantity
-            }
-        })
+  await prisma
+    .$transaction(async (prisma) => {
+      const orderItems = order.orderItems.map((item) => {
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+        };
+      });
 
-        await Promise.all(orderItems.map(async (item) => {
-            await prisma.product.update({
-                where: {
-                    id: item.productId
-                },
-                data: {
-                    quantity: {
-                        increment: item.quantity
-                    }
-                }
-            })
-        }))
-        await prisma.order.update({
+      await Promise.all(
+        orderItems.map(async (item) => {
+          await prisma.product.update({
             where: {
-                id: id
+              id: item.productId,
             },
             data: {
-                orderStatusId: 5
-            }
+              quantity: {
+                increment: item.quantity,
+              },
+            },
+          });
         })
-    }).catch((e) => {
-        throw e
-    }).finally(() =>
-        prisma.$disconnect()
-    )
-}
+      );
+      await prisma.order.update({
+        where: {
+          id: id,
+        },
+        data: {
+          orderStatusId: 5,
+        },
+      });
+    })
+    .catch((e) => {
+      throw e;
+    })
+    .finally(() => prisma.$disconnect());
+};
