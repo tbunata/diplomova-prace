@@ -8,7 +8,7 @@ import { app } from "../app";
 
 const prisma = new PrismaClient();
 const ADDRESS = "0.0.0.0:3334";
-let client = createClient(
+const client = createClient(
   {
     product: ProductRegisterClient,
     user: UserRegisterClient,

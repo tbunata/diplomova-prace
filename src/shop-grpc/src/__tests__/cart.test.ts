@@ -8,7 +8,7 @@ import { Cart as CartResponse } from "../../dist/api/cart/cart_pb";
 
 const prisma = new PrismaClient();
 const ADDRESS = "0.0.0.0:3335";
-let client = createClient(
+const client = createClient(
   {
     cart: CartRegisterClient,
     user: UserRegisterClient,
@@ -123,7 +123,7 @@ describe("cart walkthrough - clear at end", () => {
   });
   it("should clear a cart", async () => {
     const token = await login("lord.vetinari@discworld.am", "vetinariho");
-    const { response } = await client.cart.clearCart((req, metadata) => {
+    await client.cart.clearCart((req, metadata) => {
       metadata.set("authorization", token);
     });
     const cartDetail = await prisma.cart.findUnique({

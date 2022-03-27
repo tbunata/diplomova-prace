@@ -9,39 +9,9 @@ import { USER_STATUS_APPROVED, USER_STATUS_CREATED } from "../helper/constants";
 const prisma = new PrismaClient();
 const ADDRESS = "0.0.0.0:3333";
 export let token = "";
-let client = createClient(UserRegisterClient, ADDRESS, ChannelCredentials.createInsecure(), {
+const client = createClient(UserRegisterClient, ADDRESS, ChannelCredentials.createInsecure(), {
   interceptors: [metadataInterceptor((m) => m.set("authorization", token))],
 });
-
-const user1 = {
-  id: 1,
-  firstName: "Havelock",
-  lastName: "Vetinari",
-  email: "lord.vetinari@discworld.am",
-  phone: "777 666 555",
-  address: "Patrician's Palace",
-  city: "Ankh-Morpork",
-  zipCode: "100 00",
-  status: {
-    id: USER_STATUS_CREATED,
-    name: "Created",
-  },
-};
-
-const user2 = {
-  id: 2,
-  firstName: "Samuel",
-  lastName: "Vimes",
-  email: "samuel.vimes@discworld.am",
-  phone: "111 666 222",
-  address: "Ramkin residence",
-  city: "Ankh-Morpork",
-  zipCode: "100 01",
-  status: {
-    id: USER_STATUS_APPROVED,
-    name: "Approved",
-  },
-};
 
 const createUserFromResponse = (userResponse: UserResponse) => {
   return {
@@ -74,7 +44,7 @@ afterAll(() => app.stop());
 
 describe("LoginUser", () => {
   it("should log a user in", async () => {
-    const { status, metadata, response } = await client.loginUser((req, metadata) => {
+    const { response } = await client.loginUser((req, metadata) => {
       req.setEmail("lord.vetinari@discworld.am");
       req.setPassword("vetinariho");
     });
@@ -86,7 +56,7 @@ describe("LoginUser", () => {
 
 describe("listUsers", () => {
   it("should get a list of users", async () => {
-    const { response } = await client.listUsers((req, metadata) => {});
+    const { response } = await client.listUsers();
 
     expect(response.getUserList().length).toBe(2);
 
@@ -153,7 +123,7 @@ describe("getUser", () => {
       })
       .then()
       .catch((e: Error) => {
-        expect(e.message).toBe(`5 NOT_FOUND: User with id: 404 not found`);
+        expect(e.message).toBe("5 NOT_FOUND: User with id: 404 not found");
       });
   });
 });
