@@ -3,7 +3,7 @@ syntax = "proto3";
 package carts.v1;
 
 import "google/protobuf/empty.proto";
-import "order/order.proto";
+import "order.proto";
 
 service CartRegister {
     rpc GetCart (GetCartRequest) returns (GetCartResponse) {};

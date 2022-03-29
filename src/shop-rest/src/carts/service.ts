@@ -189,7 +189,7 @@ export const checkoutCart = async (userId: number) => {
     include: {
       items: {
         include: {
-          product: {},
+          product: true,
         },
       },
     },
@@ -242,7 +242,12 @@ export const checkoutCart = async (userId: number) => {
           });
         })
       );
-      await clearCart(userId);
+      
+      await prisma.cart.delete({
+        where: {
+          userId: userId
+        }
+      })
       productEmmiter.emit("update");
       return transformOrder(newOrder);
     })

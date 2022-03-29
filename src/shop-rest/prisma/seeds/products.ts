@@ -5,7 +5,7 @@ export const products = [
     statusId: 1,
     price: 2415,
     brandId: 1,
-    quantity: 12,
+    quantity: 10000,
   },
   {
     name: "Striped Cotton-Blend Socks",
@@ -13,7 +13,7 @@ export const products = [
     statusId: 1,
     price: 25,
     brandId: 1,
-    quantity: 37,
+    quantity: 10000,
   },
   {
     name: "Destroyer 3000 XL",
@@ -21,6 +21,6 @@ export const products = [
     statusId: 1,
     price: 22000,
     brandId: 2,
-    quantity: 3,
+    quantity: 10000,
   },
 ];

@@ -244,7 +244,11 @@ export const checkoutCart = async (userId: number) => {
         })
       );
 
-      await clearCart(userId);
+      await prisma.cart.delete({
+        where: {
+          userId: userId
+        }
+      })
       return transformOrder(newOrder);
     })
     .catch((e) => {
