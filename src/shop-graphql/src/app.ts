@@ -10,11 +10,14 @@ import { buildSchema } from "type-graphql";
 import { verifyToken } from "./auth/auth-middleware";
 import { authChecker } from "./auth/auth-checker";
 
+import { PrismaClient } from "@prisma/client";
 import { CartResolver } from "./resolvers/Carts";
 import { CategoryResolver } from "./resolvers/Categories";
 import { OrderResolver } from "./resolvers/Orders";
 import { ProductResolver } from "./resolvers/Products";
 import { UserResolver } from "./resolvers/Users";
+
+export const prisma = new PrismaClient();
 
 export const createApp = async () => {
   const app = Express();

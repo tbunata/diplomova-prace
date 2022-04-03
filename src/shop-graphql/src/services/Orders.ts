@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { AuthenticationError, UserInputError } from "apollo-server-core";
 import { Order } from "../types/Orders";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 export const orderDetail = {
   orderItems: {

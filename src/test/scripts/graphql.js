@@ -7,8 +7,8 @@ import {
 } from "https://jslib.k6.io/k6-utils/1.1.0/index.js";
 
 export const options = {
-  vus: 2,
-  duration: "10s",
+  vus: 10,
+  duration: "30s",
 };
 
 const url = "http://localhost:3333/graphql";
@@ -68,6 +68,7 @@ const login_user = (credentials) => {
     },
   };
   const response = http.post(url, JSON.stringify(loginData), params);
+  console.log(response.body)
   const body = JSON.parse(response.body);
   sleep(1);
   return body.data.loginUser.token;
@@ -91,6 +92,7 @@ const list_products = (token) => {
           }`,
   };
   const response = http.post(url, JSON.stringify(queryData), params);
+  console.log(response.body)
   const body = JSON.parse(response.body);
   sleep(1);
   return body.data.allProducts;
@@ -121,6 +123,7 @@ const add_to_cart = (token, products) => {
           }`,
   };
   const response = http.post(url, JSON.stringify(queryData), params);
+  console.log(response.body)
   const body = JSON.parse(response.body);
   sleep(1);
   return body.data.addItemToCart;
@@ -146,6 +149,7 @@ const checkout_cart = (token) => {
   };
   const response = http.post(url, JSON.stringify(queryData), params);
   const body = JSON.parse(response.body);
+  console.log(response.body)
   sleep(1);
   return body.data.checkoutCart;
 };
@@ -175,6 +179,7 @@ const list_orders = (token) => {
           }`,
   };
   const response = http.post(url, JSON.stringify(queryData), params);
+  console.log(response.body)
   const body = JSON.parse(response.body);
   sleep(1);
   return body.data.allOrders;

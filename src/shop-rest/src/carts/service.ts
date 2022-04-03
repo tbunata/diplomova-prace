@@ -4,7 +4,7 @@ import { UnprocessableEntityError, NotFoundError } from "../helper/errors";
 import { transformOrder } from "../orders/service";
 import { productEmmiter } from "../products/router";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 const cartItemDetail = {
   items: {
@@ -182,6 +182,7 @@ export const clearCart = async (userId: number) => {
 };
 
 export const checkoutCart = async (userId: number) => {
+  const prisma_transaction = new PrismaClient();
   const cart = await prisma.cart.findUnique({
     where: {
       userId: userId,
@@ -199,7 +200,7 @@ export const checkoutCart = async (userId: number) => {
   } else if (cart.items.length === 0) {
     throw new UnprocessableEntityError(`Cart: ${cart.id} is empty`);
   }
-  const order = await prisma
+  const order = await prisma_transaction
     .$transaction(async (prisma) => {
       let totalPrice = 0;
       const orderItems = cart.items.map((item) => {
@@ -211,7 +212,7 @@ export const checkoutCart = async (userId: number) => {
         };
       });
 
-      const newOrder = await prisma.order.create({
+      const newOrder = prisma.order.create({
         data: {
           price: totalPrice,
           orderStatusId: 1,
@@ -230,7 +231,7 @@ export const checkoutCart = async (userId: number) => {
           if (item.quantity > item.product.quantity) {
             throw new UnprocessableEntityError(`Item: ${item.id} named ${item.product.name} sold out`);
           }
-          await prisma.product.update({
+          prisma.product.update({
             where: {
               id: item.productId,
             },
@@ -242,18 +243,17 @@ export const checkoutCart = async (userId: number) => {
           });
         })
       );
-      
-      await prisma.cart.delete({
+
+      prisma.cart.delete({
         where: {
-          userId: userId
-        }
-      })
+          userId: userId,
+        },
+      });
       productEmmiter.emit("update");
-      return transformOrder(newOrder);
+      return newOrder;
     })
     .catch((e) => {
       throw e;
-    })
-    .finally(() => prisma.$disconnect());
-  return order;
+    });
+  return transformOrder(order);
 };

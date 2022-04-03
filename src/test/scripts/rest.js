@@ -7,8 +7,8 @@ import {
 } from "https://jslib.k6.io/k6-utils/1.1.0/index.js";
 
 export const options = {
-  vus: 3,
-  duration: "15s",
+  vus: 10,
+  duration: "30s",
 };
 
 const create_user = () => {
@@ -99,6 +99,7 @@ const checkout_cart = (token) => {
     },
   };
   const response = http.post(url, JSON.stringify({}), params);
+  console.log(JSON.stringify(response.body))
   const data = JSON.parse(response.body);
   sleep(1);
   return data;

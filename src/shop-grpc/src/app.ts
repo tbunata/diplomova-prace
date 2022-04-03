@@ -1,4 +1,5 @@
 import { ProtoCat } from "protocat";
+import { PrismaClient } from "@prisma/client";
 import { authMdw } from "./auth/auth";
 import {
   BadRequestError,
@@ -14,6 +15,8 @@ import { addProductServiceRegister } from "./registers/ProductRegister";
 import { addUserServiceRegister } from "./registers/UserRegister";
 import { ServerContext } from "./types/server-context";
 import { status } from "@grpc/grpc-js";
+
+export const prisma = new PrismaClient();
 
 export const app = new ProtoCat<ServerContext>();
 

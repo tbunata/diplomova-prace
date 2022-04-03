@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { NewCategoryInput, UpdateCategoryInput } from "../types/Categories";
 import { NotFoundError } from "../helper/errors";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 export const findAll = async () => {
   const categories = await prisma.category.findMany();

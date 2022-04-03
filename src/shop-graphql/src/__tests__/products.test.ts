@@ -16,7 +16,7 @@ const productToFetch = {
   id: 1,
   name: "Burnished-Leather Jacket",
   description: "Orlando Oxfords' leather jacket",
-  quantity: 12,
+  quantity: 1000,
   categories: [
     {
       id: 1,
@@ -147,7 +147,7 @@ describe("QUERY allProducts", () => {
         expect(payload.length).toBe(1);
         expect(payload[0].name).toBe("Striped Cotton-Blend Socks");
         expect(payload[0].price).toBe(25);
-        expect(payload[0].quantity).toBe(37);
+        expect(payload[0].quantity).toBe(1000);
       });
   });
 });

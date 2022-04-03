@@ -1,11 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
 import { uid } from "rand-token";
 import { NewUserInput, UpdateUserInput } from "../types/Users";
 import { AuthenticationError, UserInputError } from "apollo-server-errors";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 export const findAll = async () => {
   const users = await prisma.user.findMany({

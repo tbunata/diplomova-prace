@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import { UserInputError } from "apollo-server-errors";
 import { NewProductInput, UpdateProductInput, Product, ProductCategory, ProductFilterInput } from "../types/Products";
 import { PRODUCT_DELETED_STATUS } from "../constants";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 const includeRelatedTables = {
   category: {

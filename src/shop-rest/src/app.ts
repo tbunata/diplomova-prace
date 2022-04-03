@@ -1,6 +1,9 @@
+import { PrismaClient } from "@prisma/client";
 import express from "express";
 import expressWs from "express-ws";
 import morgan from "morgan";
+
+export const prisma = new PrismaClient();
 
 export const app = expressWs(express()).app;
 

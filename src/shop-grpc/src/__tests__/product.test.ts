@@ -61,7 +61,6 @@ const productToFetch = {
   id: 1,
   name: "Burnished-Leather Jacket",
   description: "Orlando Oxfords' leather jacket",
-  quantity: 12,
   categories: [
     {
       id: 1,
@@ -119,7 +118,7 @@ describe("listProducts", () => {
 
     expect(response.getProductsList().length).toBe(3);
     const firstProduct = createProductFromResponse(response.getProductsList()[0]);
-    expect(firstProduct).toEqual(productToFetch);
+    expect(firstProduct).toMatchObject(productToFetch);
   });
   it("should get a filtered list of products", async () => {
     const { response } = await client.product.listProducts((req, metadata) => {
@@ -130,7 +129,7 @@ describe("listProducts", () => {
     const filteredProduct = createProductFromResponse(response.getProductsList()[0]);
     expect(filteredProduct.name).toBe("Striped Cotton-Blend Socks");
     expect(filteredProduct.price).toBe(25);
-    expect(filteredProduct.quantity).toBe(37);
+    expect(filteredProduct.quantity).toBe(1000);
   });
 });
 
@@ -140,7 +139,7 @@ describe("getProduct", () => {
       req.setId(1);
     });
     const fetchedProduct = createProductFromResponse(response.getProduct()!);
-    expect(fetchedProduct).toEqual(productToFetch);
+    expect(fetchedProduct).toMatchObject(productToFetch);
   });
   it("should return error for not finding product", async () => {
     await client.product

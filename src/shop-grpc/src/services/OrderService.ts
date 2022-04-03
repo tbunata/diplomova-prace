@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import { ORDER_STATUS_CANCELLED } from "../helper/constants";
 import { NotFoundError, UnauthorizedError, UnprocessableEntityError } from "../helper/errors";
 import { Order, UpdateOrderStatusInput } from "../types/Orders";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 export const orderDetail = {
   orderItems: {

@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import { NewProductInput, Product, ProductCategory, ProductFilterInput, UpdateProductInput } from "../types/Products";
 
 import { NotFoundError } from "../helper/errors";
 import { PRODUCT_STATUS_DELETED } from "../helper/constants";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 const includeRelatedTables = {
   category: {

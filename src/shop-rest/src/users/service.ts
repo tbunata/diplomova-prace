@@ -1,11 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
 import { NewUserInput, UpdateUserInput } from "./interface";
 import { uid } from "rand-token";
 import { NotFoundError, UnauthorizedError } from "../helper/errors";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 export const findAll = async () => {
   const users = await prisma.user.findMany();

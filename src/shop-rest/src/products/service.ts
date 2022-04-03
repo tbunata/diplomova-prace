@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { NotFoundError } from "../helper/errors";
 import { NewProductInput, Product, ProductCategory, UpdateProductInput } from "./interface";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 const includeRelatedTables = {
   category: {

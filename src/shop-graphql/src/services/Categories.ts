@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { UserInputError } from "apollo-server-errors";
 import { NewCategoryInput, UpdateCategoryInput } from "../types/Categories";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 export const findAll = async () => {
   const categories = await prisma.category.findMany();

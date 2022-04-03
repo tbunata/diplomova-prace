@@ -4,7 +4,7 @@ import { PRODUCT_DELETED_STATUS } from "../constants";
 import { Cart, NewCartItemInput, UpdateCartItemInput } from "../types/Carts";
 import { transformOrder } from "./Orders";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 const cartItemDetail = {
   items: {
@@ -200,7 +200,8 @@ export const checkoutCart = async (userId: number) => {
   } else if (cart.items.length === 0) {
     throw new UserInputError(`Cart: ${cart.id} is empty`);
   }
-  const order = await prisma
+  const prisma_transaction = new PrismaClient();
+  const order = await prisma_transaction
     .$transaction(async (prisma) => {
       let totalPrice = 0;
       const orderItems = cart.items.map((item) => {
@@ -212,7 +213,7 @@ export const checkoutCart = async (userId: number) => {
         };
       });
 
-      const newOrder = await prisma.order.create({
+      const newOrder = prisma.order.create({
         data: {
           price: totalPrice,
           orderStatusId: 1,
@@ -231,7 +232,7 @@ export const checkoutCart = async (userId: number) => {
           if (item.quantity > item.product.quantity) {
             throw new UserInputError(`Item: ${item.id} named ${item.product.name} sold out`);
           }
-          await prisma.product.update({
+          prisma.product.update({
             where: {
               id: item.productId,
             },
@@ -244,16 +245,15 @@ export const checkoutCart = async (userId: number) => {
         })
       );
 
-      await prisma.cart.delete({
+      prisma.cart.delete({
         where: {
-          userId: userId
-        }
-      })
-      return transformOrder(newOrder);
+          userId: userId,
+        },
+      });
+      return newOrder;
     })
     .catch((e) => {
       throw e;
-    })
-    .finally(() => prisma.$disconnect());
-  return order;
+    });
+  return transformOrder(order);
 };

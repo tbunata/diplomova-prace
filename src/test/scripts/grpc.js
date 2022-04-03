@@ -7,8 +7,8 @@ import {
 } from "https://jslib.k6.io/k6-utils/1.1.0/index.js";
 
 export const options = {
-  vus: 3,
-  duration: "5s",
+  vus: 10,
+  duration: "30s",
 };
 
 const client = new grpc.Client();

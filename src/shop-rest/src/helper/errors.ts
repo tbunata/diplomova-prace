@@ -19,6 +19,7 @@ export const handleError = (e: unknown, res: Response) => {
     logger.error(e.stack);
     message = e.message;
   }
+  console.error({ e });
   return res.status(500).send(message);
 };
 

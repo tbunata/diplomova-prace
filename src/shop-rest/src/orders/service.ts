@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { NotFoundError, UnauthorizedError, UnprocessableEntityError } from "../helper/errors";
 import { Order } from "./interface";
 
-const prisma = new PrismaClient();
+import { prisma } from "../app";
 
 export const orderDetail = {
   orderItems: {
