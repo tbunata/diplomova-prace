@@ -189,20 +189,22 @@ export const clearCart = async (userId: number) => {
 };
 
 export const checkoutCart = async (userId: number) => {
-  const cart = await prisma.cart.findUnique({
-    where: {
-      userId: userId,
-    },
-    include: cartItemDetail,
-  });
-  if (!cart) {
-    throw new UserInputError(`Cart for user: ${userId} not found`);
-  } else if (cart.items.length === 0) {
-    throw new UserInputError(`Cart: ${cart.id} is empty`);
-  }
   const prisma_transaction = new PrismaClient();
   const order = await prisma_transaction
     .$transaction(async (prisma) => {
+      await prisma.$executeRaw`LOCK "Product";`;
+      const cart = await prisma.cart.findUnique({
+        where: {
+          userId: userId,
+        },
+        include: cartItemDetail,
+      });
+      if (!cart) {
+        throw new UserInputError(`Cart for user: ${userId} not found`);
+      } else if (cart.items.length === 0) {
+        throw new UserInputError(`Cart: ${cart.id} is empty`);
+      }
+
       let totalPrice = 0;
       const orderItems = cart.items.map((item) => {
         totalPrice += item.product.price * item.quantity;
@@ -213,7 +215,7 @@ export const checkoutCart = async (userId: number) => {
         };
       });
 
-      const newOrder = prisma.order.create({
+      const newOrder = await prisma.order.create({
         data: {
           price: totalPrice,
           orderStatusId: 1,
@@ -232,7 +234,7 @@ export const checkoutCart = async (userId: number) => {
           if (item.quantity > item.product.quantity) {
             throw new UserInputError(`Item: ${item.id} named ${item.product.name} sold out`);
           }
-          prisma.product.update({
+          await prisma.product.update({
             where: {
               id: item.productId,
             },
@@ -253,6 +255,7 @@ export const checkoutCart = async (userId: number) => {
       return newOrder;
     })
     .catch((e) => {
+      console.error({ e });
       throw e;
     });
   return transformOrder(order);
