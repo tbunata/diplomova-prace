@@ -11,11 +11,15 @@
 % hidelinks remove colour boxes around hyperlinks
 
 \documentclass[thesis=M,czech]{FITthesis}[2019/12/23]
+\makeatletter\AtBeginDocument{\let\@elt\relax}\makeatother
 
 \usepackage[utf8]{inputenc} % LaTeX source encoded as UTF-8
 
 \usepackage{amsmath} %advanced maths
 \usepackage{amssymb} %additional math symbols
+
+\usepackage{graphicx}
+\graphicspath{ {./img/} }
 
 \usepackage{dirtree} %directory tree visualisation
 \RequirePackage{pdfpages}
@@ -94,7 +98,13 @@ Partnerská APi jsou sdílená s business partnery a slouží hlavně k integrac
 Otevřená API jsou volně dostupná všem vývojářům a je možné je využívat bez explicitního souhlasu poskytovatele těchto rozhraní nebo bez licenčních poplatků. Poplatky mohou být účtované za informace dostupné za rozhraním, ale dokumentace  a testovací data musí být veřejně dostupná.
 
 Aplikační programovací rozhraní jdou také dělit podle způsobu použití. Může se jednat třeba o databázové API, které umožnuje komunikaci mezi aplikací a databázovým systémem, nebo API operačního systému, které definuje jak programy mohou využívat zdroje a služby operačního systému.\\
-Nejběžnější, a z pohledu této práce také nejzajímavější, jsou však webová aplikační rozhraní, která poskytují data a funkcionality mezi webovými systémy reprezentující architekturu klient-server. Tato API typicky doručují požadavky z webových aplikací a odpovědi ze serverů prostřednictvím protokolu HTTP. Mezi jeden z nejpopulárnějších typů webových aplikační rozhraní patří REST, ikdyž v poslední době jeho popularita začíná pomalu klesat \cite{google-trends}.
+Nejběžnější, a z pohledu této práce také nejzajímavější, jsou však webová aplikační rozhraní, která poskytují data a funkcionality mezi webovými systémy reprezentující architekturu klient-server. Tato API typicky doručují požadavky z webových aplikací a odpovědi ze serverů prostřednictvím protokolu HTTP. Mezi jeden z nejpopulárnějších typů webových aplikační rozhraní patří REST, ikdyž v poslední době jeho popularita začíná pomalu klesat, viz obrázek \ref{google_trends_img} \cite{google-trends}.
+
+\begin{figure}[h]
+    \includegraphics[width=\linewidth]{img/interest_trend.png}
+    \caption{Google Trends: REST (modrá), GraphQL (žlutá) a gRPC (červená)}
+	\label{google_trends_img}
+\end{figure}
 
 \section{REST}
 REST je velmi oblíbený architektonický styl pro tvorbu API, který vyniká svou jednoduchostí a čitelností. Na rozdíl např. od gRPC není orientován procedurálně, ale datově.\\
@@ -141,17 +151,37 @@ HTTP definuje množinu metod, které slouží k indikaci jakou akci chceme se zd
     \item \textbf{PATCH} - slouží k částečné změně cílového zdroje
 \end{itemize}
 
-<<<<<<< HEAD
-\section{GraphQL}
-=======
-%https://engineering.fb.com/2015/09/14/core-data/graphql-a-data-query-language/%
-\section{GraphQL}
-GraphQL bylo vytvořeno společností Facebook v roce 2012. Hlavním důvodem jeho vzniku byla narůstající potřeba API pro získávání dat, které bude dostatečně silné a zároveň bude jednoduché na používání. V roce 2015 pak bylo GraphQL zpřístupněno jako opensource. Od této doby vznikla spousta implementací v různých jazycích jako je Javascript, Java, Python a mnoha dalších.
 
-\subsection*{Graphql dotaz}
+\section{GraphQL}
+GraphQL bylo vytvořeno společností Facebook v roce 2012. Hlavním důvodem jeho vzniku byla narůstající potřeba API pro získávání dat, které bude dostatečně silné a zároveň bude jednoduché na používání. V roce 2015 pak bylo GraphQL zpřístupněno jako opensource \cite{graphql_fb}. Od této doby vznikla spousta implementací v různých jazycích jako je Javascript, Java, Python a mnoha dalších.
+
+\subsection{Základní vlastnosti}
+\subsubsection*{Definuje strukturu dat}
+První věcí, kterou si na GraphQL můžeme všimout je to, že struktura dat posílaných na server se velmi podobá struktuře dat vrácených v odpovědi, viz obrázek \ref{graphql-query}. To přispívá ke zjednošení psaní dotazů - pokud víme jaká data server potřebuje - a také víme jaký formát dat očekávat. To je jedna z velkých výhod GraphQL, klient si určuje formát dat posílaných ze serveru a má tak přizpůsobená data pro své požadavky.
+
+\begin{figure}[h]
+    \includegraphics[width=\linewidth]{img/graphql-query.png}
+    \caption{Příklad GraphQL dotazu a odpovědi \cite{graphql_query_img}}
+	\label{graphql-query}
+\end{figure}
+
+\subsubsection*{Hierarchický}
+Dalším důležitým apektem GraphQL je jeho hierarchičnost. Přirozeně totiž sleduje vztahy mezi objekty a oproti RESTu tak dovoluje vyhnout se několikanásobnému volání API pro získání dat souvisejících objektů.
+
+\subsubsection*{Silně typový}
+Každý GraphQL server definuje typový systém, který je specifický pro aplikaci.
+Každá úroveň GraphQL dotazu odpovídá určitému typu a každý typ má definovanou množinu atributů, které obsahuje. Toto umožňuje validaci dotazů ještě před odesláním na server a zobrazování relevantních chybových hlášek.
+
+\subsection*{Protokol, ne úložiště}
+Každému atributu v GraphQL na serveru odpovídá nějaká funkce. Pokud už máme existující logiku aplikace společně s úložištěm, můžeme toto všechno na GraphQL napojit.
+
+\subsection*{Introspekce}
+Díky typovému systému máme možnost prozkoumávat schéma a zjistit dostupné \textit{queries}, \textit{mutace} nebo \textit{subscriptions}. Schéma také slouží jako smlouva mezi frontendem a backendem definující jak spolu budou komunikovat.
+Introspekce také vytváří platformu pro různé nástroje - od generování kódu po tvorbu dokumentace.
+
+\subsection*{GraphQl dotaz}
 %img: https://www.apollographql.com/blog/static/5d820420290da80546e26d7c966b1d74/Untitled-1.png%
-GraphQL dotaz je řetězec, který je poslán na server, vyhodnocen a jeho výsledek je zaslán ve formátu JSON zpátky klientovi. Dle obrázku %todo %
-si můžeme všimnout, že struktura dotazu je velmi podobná struktuře odpovědi vrácené serverem.Existují dva druhý dotazů - query a mutace.
+GraphQL dotaz je řetězec, který je poslán na server, vyhodnocen a jeho výsledek je zaslán ve formátu JSON zpátky klientovi.
 
 \subsubsection*{GraphQL query}
 
