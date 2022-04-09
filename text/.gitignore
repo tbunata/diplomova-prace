@@ -4,6 +4,8 @@
 *.log
 *.out
 *.toc
+*.bbl
+*.blg
 
 # PDF output
 DP_Bunata_Tomas_2022.pdf
