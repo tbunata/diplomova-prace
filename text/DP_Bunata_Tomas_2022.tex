@@ -11,11 +11,15 @@
 % hidelinks remove colour boxes around hyperlinks
 
 \documentclass[thesis=M,czech]{FITthesis}[2019/12/23]
+\makeatletter\AtBeginDocument{\let\@elt\relax}\makeatother
 
 \usepackage[utf8]{inputenc} % LaTeX source encoded as UTF-8
 
 \usepackage{amsmath} %advanced maths
 \usepackage{amssymb} %additional math symbols
+
+\usepackage{graphicx}
+\graphicspath{ {./img/} }
 
 \usepackage{dirtree} %directory tree visualisation
 \RequirePackage{pdfpages}
@@ -94,7 +98,13 @@ Partnerská APi jsou sdílená s business partnery a slouží hlavně k integrac
 Otevřená API jsou volně dostupná všem vývojářům a je možné je využívat bez explicitního souhlasu poskytovatele těchto rozhraní nebo bez licenčních poplatků. Poplatky mohou být účtované za informace dostupné za rozhraním, ale dokumentace  a testovací data musí být veřejně dostupná.
 
 Aplikační programovací rozhraní jdou také dělit podle způsobu použití. Může se jednat třeba o databázové API, které umožnuje komunikaci mezi aplikací a databázovým systémem, nebo API operačního systému, které definuje jak programy mohou využívat zdroje a služby operačního systému.\\
-Nejběžnější, a z pohledu této práce také nejzajímavější, jsou však webová aplikační rozhraní, která poskytují data a funkcionality mezi webovými systémy reprezentující architekturu klient-server. Tato API typicky doručují požadavky z webových aplikací a odpovědi ze serverů prostřednictvím protokolu HTTP. Mezi jeden z nejpopulárnějších typů webových aplikační rozhraní patří REST, ikdyž v poslední době jeho popularita začíná pomalu klesat \cite{google-trends}.
+Nejběžnější, a z pohledu této práce také nejzajímavější, jsou však webová aplikační rozhraní, která poskytují data a funkcionality mezi webovými systémy reprezentující architekturu klient-server. Tato API typicky doručují požadavky z webových aplikací a odpovědi ze serverů prostřednictvím protokolu HTTP. Mezi jeden z nejpopulárnějších typů webových aplikační rozhraní patří REST, ikdyž v poslední době jeho popularita začíná pomalu klesat, viz obrázek \ref{google_trends_img} \cite{google-trends}.
+
+\begin{figure}[h]
+    \includegraphics[width=\linewidth]{img/interest_trend.png}
+    \caption{Google Trends: REST (modrá), GraphQL (žlutá) a gRPC (červená)}
+	\label{google_trends_img}
+\end{figure}
 
 \section{REST}
 REST je velmi oblíbený architektonický styl pro tvorbu API, který vyniká svou jednoduchostí a čitelností. Na rozdíl např. od gRPC není orientován procedurálně, ale datově.\\
@@ -141,7 +151,59 @@ HTTP definuje množinu metod, které slouží k indikaci jakou akci chceme se zd
     \item \textbf{PATCH} - slouží k částečné změně cílového zdroje
 \end{itemize}
 
+Metody, které nemění stav serveru označujeme jako bezpečné. Jedná se hlavně o GET a HEAD. V praxi ale bežně není možné tyto metody na straně serveru implementovat tak, aby neměnily vůbec žádný stav - může například dojít k zalogování metody nebo obnovení cache.
+
+Další kategorie jsou idempotetní metody. Idempotence znamená, že pokud klient provede několik shodných požadavků, všechny budou mít stejný výsledek. Jedná se hlavne o GET, HEAD, PUT a DELETE. To ale neznamená, že server musí na každý požadavek odpovědět stejně.
+
+
+\subsubsection*{Stavové kódy}
+HTTP taktéž definuje stavové kódy odpovědí. Tyto kódy se v REST api využívají k informování klienta o výsledku prováděné operace. Tyto kódy se dělí do pěti kategorií, které se od sebe liší prvním číslem. Kódy s začínající číslem 100 jsou informační - komunikují informace na úrovni transportního protokolu \cite{http_codes}. Kódy začínající číslem 200 informují o úspěšném zpracování požadavku. Kódy s číslem 300 značí, že je potřeba dodatečná akce od klienta. Číslo 400 označuje chybový stav na straně klienta. Poslední jsou pak kódy s číslem 500, které označují chybu na straně serveru. Nejčastěji se setkáme s následujícími kódy:
+\begin{itemize}
+    \item 200 OK - Požadavek proběhl v pořádku. Na rozdíl od kódu 204 by odpověď měla obsahovat i data, a je závislá na použité metodě. Například pro GET by se mělo jednat o reprezentaci zdroje, zatímco pro POST se může jednat o výsledek operace. %todo%
+    \item 201 Created - Požadavek proběhl v pořádku a jeho výsledkem je vytvoření zdroje. Typicky se jedná o vytvoření zdroje uvnitř kolekce pomocí POST metody.
+    \item 204 No Content - Server naplnil požadavek, ale není potřeba vrátit žádnou hodnotu. Například při operaci DELETE, kdy mažeme zdroj z kolekce. Tělo odpovědi nesmí obsahovat žádná data.
+    \item 400 Bad Request - Požadavek je pro server nečitelný. Jedná se o obecný chybový kód, který se použije pokud žádný jiný není vhodný. Může se například jednat o špatný formát požadavku. Klient by stejný požadavek neměl opakovat beze změny.
+    \item 401 Unauthorized - Klient není ověřen. Požadavek může být opakován s doplněnými informacemi o oveření.
+    \item 403 Forbidden - Klient nemá dostatečná práva. Narozdíl od 401, identita klienta je známa.
+    \item 404 Not Found - Server nenašel požadovaný zdroj.
+    \item 405 Method Not Allowed - Klient použil metodu, kterou daný zdroj nepodporuje. Odpověď musí obsahovat hlavičku s výčtem podporovaných metod.
+    \item 500 Internal Server Error - Server narazil na neočekávanou chybu při zpracování požadavku. Jedná se o obecný chybový kód. Nikdy se nejedná o chybu klienta a dává smysl stejný požadavek opakovat s očekáváním jiné odpovědi.
+    \item 503 Service Unavailable - Server není připravený zpracovat požadavek.
+\end{itemize}
+
 \section{GraphQL}
+GraphQL bylo vytvořeno společností Facebook v roce 2012. Hlavním důvodem jeho vzniku byla narůstající potřeba API pro získávání dat, které bude dostatečně silné a zároveň bude jednoduché na používání. V roce 2015 pak bylo GraphQL zpřístupněno jako opensource \cite{graphql_fb}. Od této doby vznikla spousta implementací v různých jazycích jako je Javascript, Java, Python a mnoha dalších.
+
+\subsection{Základní vlastnosti}
+\subsubsection*{Definuje strukturu dat}
+První věcí, kterou si na GraphQL můžeme všimout je to, že struktura dat posílaných na server se velmi podobá struktuře dat vrácených v odpovědi, viz obrázek \ref{graphql-query}. To přispívá ke zjednošení psaní dotazů - pokud víme jaká data server potřebuje - a také víme jaký formát dat očekávat. To je jedna z velkých výhod GraphQL, klient si určuje formát dat posílaných ze serveru a má tak přizpůsobená data pro své požadavky.
+
+\begin{figure}[h]
+    \includegraphics[width=\linewidth]{img/graphql-query.png}
+    \caption{Příklad GraphQL dotazu a odpovědi \cite{graphql_query_img}}
+	\label{graphql-query}
+\end{figure}
+
+\subsubsection*{Hierarchický}
+Dalším důležitým apektem GraphQL je jeho hierarchičnost. Přirozeně totiž sleduje vztahy mezi objekty a oproti RESTu tak dovoluje vyhnout se několikanásobnému volání API pro získání dat souvisejících objektů.
+
+\subsubsection*{Silně typový}
+Každý GraphQL server definuje typový systém, který je specifický pro aplikaci.
+Každá úroveň GraphQL dotazu odpovídá určitému typu a každý typ má definovanou množinu atributů, které obsahuje. Toto umožňuje validaci dotazů ještě před odesláním na server a zobrazování relevantních chybových hlášek.
+
+\subsection*{Protokol, ne úložiště}
+Každému atributu v GraphQL na serveru odpovídá nějaká funkce. Pokud už máme existující logiku aplikace společně s úložištěm, můžeme toto všechno na GraphQL napojit.
+
+\subsection*{Introspekce}
+Díky typovému systému máme možnost prozkoumávat schéma a zjistit dostupné \textit{queries}, \textit{mutace} nebo \textit{subscriptions}. Schéma také slouží jako smlouva mezi frontendem a backendem definující jak spolu budou komunikovat.
+Introspekce také vytváří platformu pro různé nástroje - od generování kódu po tvorbu dokumentace.
+
+\subsection*{GraphQl dotaz}
+%img: https://www.apollographql.com/blog/static/5d820420290da80546e26d7c966b1d74/Untitled-1.png%
+GraphQL dotaz je řetězec, který je poslán na server, vyhodnocen a jeho výsledek je zaslán ve formátu JSON zpátky klientovi.
+
+\subsubsection*{GraphQL query}
+
 
 \section{gRPC}
 
