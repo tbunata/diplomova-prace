@@ -151,6 +151,25 @@ HTTP definuje množinu metod, které slouží k indikaci jakou akci chceme se zd
     \item \textbf{PATCH} - slouží k částečné změně cílového zdroje
 \end{itemize}
 
+Metody, které nemění stav serveru označujeme jako bezpečné. Jedná se hlavně o GET a HEAD. V praxi ale bežně není možné tyto metody na straně serveru implementovat tak, aby neměnily vůbec žádný stav - může například dojít k zalogování metody nebo obnovení cache.
+
+Další kategorie jsou idempotetní metody. Idempotence znamená, že pokud klient provede několik shodných požadavků, všechny budou mít stejný výsledek. Jedná se hlavne o GET, HEAD, PUT a DELETE. To ale neznamená, že server musí na každý požadavek odpovědět stejně.
+
+
+\subsubsection*{Stavové kódy}
+HTTP taktéž definuje stavové kódy odpovědí. Tyto kódy se v REST api využívají k informování klienta o výsledku prováděné operace. Tyto kódy se dělí do pěti kategorií, které se od sebe liší prvním číslem. Kódy s začínající číslem 100 jsou informační - komunikují informace na úrovni transportního protokolu \cite{http_codes}. Kódy začínající číslem 200 informují o úspěšném zpracování požadavku. Kódy s číslem 300 značí, že je potřeba dodatečná akce od klienta. Číslo 400 označuje chybový stav na straně klienta. Poslední jsou pak kódy s číslem 500, které označují chybu na straně serveru. Nejčastěji se setkáme s následujícími kódy:
+\begin{itemize}
+    \item 200 OK - Požadavek proběhl v pořádku. Na rozdíl od kódu 204 by odpověď měla obsahovat i data, a je závislá na použité metodě. Například pro GET by se mělo jednat o reprezentaci zdroje, zatímco pro POST se může jednat o výsledek operace. %todo%
+    \item 201 Created - Požadavek proběhl v pořádku a jeho výsledkem je vytvoření zdroje. Typicky se jedná o vytvoření zdroje uvnitř kolekce pomocí POST metody.
+    \item 204 No Content - Server naplnil požadavek, ale není potřeba vrátit žádnou hodnotu. Například při operaci DELETE, kdy mažeme zdroj z kolekce. Tělo odpovědi nesmí obsahovat žádná data.
+    \item 400 Bad Request - Požadavek je pro server nečitelný. Jedná se o obecný chybový kód, který se použije pokud žádný jiný není vhodný. Může se například jednat o špatný formát požadavku. Klient by stejný požadavek neměl opakovat beze změny.
+    \item 401 Unauthorized - Klient není ověřen. Požadavek může být opakován s doplněnými informacemi o oveření.
+    \item 403 Forbidden - Klient nemá dostatečná práva. Narozdíl od 401, identita klienta je známa.
+    \item 404 Not Found - Server nenašel požadovaný zdroj.
+    \item 405 Method Not Allowed - Klient použil metodu, kterou daný zdroj nepodporuje. Odpověď musí obsahovat hlavičku s výčtem podporovaných metod.
+    \item 500 Internal Server Error - Server narazil na neočekávanou chybu při zpracování požadavku. Jedná se o obecný chybový kód. Nikdy se nejedná o chybu klienta a dává smysl stejný požadavek opakovat s očekáváním jiné odpovědi.
+    \item 503 Service Unavailable - Server není připravený zpracovat požadavek.
+\end{itemize}
 
 \section{GraphQL}
 GraphQL bylo vytvořeno společností Facebook v roce 2012. Hlavním důvodem jeho vzniku byla narůstající potřeba API pro získávání dat, které bude dostatečně silné a zároveň bude jednoduché na používání. V roce 2015 pak bylo GraphQL zpřístupněno jako opensource \cite{graphql_fb}. Od této doby vznikla spousta implementací v různých jazycích jako je Javascript, Java, Python a mnoha dalších.
