@@ -318,14 +318,80 @@ Introspekci mohou využívat i různé nástroje - například díky ní můžem
   __schema {
     types {
       name
-      description
+      description 
     }
   }
 }
 \end{minted}
 
 \section{gRPC}
-Intro to gRPC
+gRPC, plným názvem Google remote procedure call, je open sourcový RPC systém původně vyvinutý společnostní Google v roce 2015. RPC v překladu znamená volání vzdálené procedury. Klientská aplikace tedy může volat nějakou proceduru na serveru tak, jako kdyby to byl lokální objekt.
+
+gRPC je následník RPC systému Stubby, který Google používal pro propojení velkého množství mikroslužeb napříč svými datacentry po více než desetiletí \cite{grpc}. Stubby ale nebyl nijak standardizován a byl až příliš úzce závislý na interní infrastruktuře na to, aby ho Google mohl zpřístupnit veřejnosti. S rozvojem technologií jako je \mintinline{text}{HTTP/2} a dalších, bylo rozhodnuto, že je čas Stubby přepracovat.
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{img/grpc-overview.png}
+    \caption{Příklad komunikace serveru a různých klientů}
+	\label{grpc-overview}
+\end{figure}
+
+\subsection{Principy a požadavky}
+Níže jsem vybral několik hlavních principů a požadavků, na jejichž základě gRPC vzniklo. Všechny jsou pak dostupné na \cite{grpc_requirements}.
+\begin{itemize}
+    \item Služby a zprávy - Podpora filozofie mikroslužeb a snaha od oproštění se od problémů s distribuovanými objekty.
+    \item Pokrytí a jednoduchost - gRPC by mělo být dostupné na všech populárních vývojových platformách a zároveň dostatečně jednoduché pro sestavení na vlastní platformě.
+    \item Zdarma a otevřené - všechny základní funkcionality by měly být dostupné zdarma
+    \item Interoperabilita a dosah - protokol musí být schopný přežít cestu internetem
+    \item Obecné a výkonné - gRPC musí být vhodné pro velkou škálu způsobů užití a zároveň musí zůstat výkonné
+    \item Vrstvené - klíčové vrstvy protokolu se musejí vyvíjet nezávisle na sobě. Nesmí se stát, že úprava na síťové vrstvě způsobí přeřuší chod na vrstvě aplikační.
+    \item Blokujících a neblokujících operace - podpora synchronní a asynchronní komunikace mezi klientem a serverem je klíčová pro některé platformy.
+    \item Standardizované stavové kódy - omezení množiny stavových kódů si klade za cíl jasnější očetřování chyb.
+\end{itemize}
+
+\subsection{Protocol buffer}
+Můžeme mít například server implementovaný v Javě a pak několik klientských aplikací napsaných v různých jazycích, např. Javascriptu nebo Ruby, viz obrázek \ref{grpc-overview}. Aby mohla klientská aplikace volat vzdálené metody na serveru jako lokální, je potřeba zavést v jaké formátu si budou server a klient vyměňovat zprávy. K tomu se využívají \textit{Protocol buffers}, ikdyž je možné využívat i jiné formáty pokud je to potřeba. Je to opensourcový mechanizmus od Googlu jak serializovat strukturovaná data.
+
+Prvním krokem který musíme udělat je definovat si strukturu zpráv v \textit{proto} souboru - jedná se o obyčejný textový soubor s  koncovkou proto. Základním stavebním prvkem jsou zprávy.To je nejmenší logický celek obsahující dvojice jméno a hodnota nazývané pole. Každá definice pole obsahuje typ, jméno a číslo, které určuje jeho pořadí při serializaci.
+
+\begin{minted}{protobuf}
+message Product {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+    int64 price = 4;
+    int64 quantity = 5;
+    repeated ProductCategory categories = 6;
+    ProductBrand brand = 7;
+    ProductStatus status = 8;
+}
+\end{minted}
+
+Jakmile máme definované zprávy, je potřeba použít kompilátor protocol buffer \mintinline{text}{protoc}, který pak vygeneruje přístupové třídy v našem zvoleném jazyce. Tyto třídy pak obsahují metody na získávání a nastavování dat do zpráv a také metody na serializaci a deserializaci.
+
+Uvažujme zprávu \mintinline{protobuf}{Product} definovanou výše s polem  \mintinline{protobuf}{name} a cílový jazyk Javascript. Kompilátor pak vygeneruje třídu \mintinline{js}{Product} s metodou \mintinline{js}{setName(value)} a dalšími potřebnými metodami.
+
+Následně můžeme v proto souboru nadefinovat služby a metody, které budou dostupné klientům.
+
+\subsubsection*{Definice služeb}
+gRPc je stejně jako většina RPC systémů založena na myšlence definování služeb, které pak definují své metody a jejich parametry. Je možné definovat čtyři typy služeb.
+
+\begin{itemize}
+    \item Unary - Klient pošle jeden požadavek na server a server mu pošle jednu odpověď zpět.
+    \item Server streaming - Klient pošle jeden požadavek na server a odpovědí získá stream, ve kterém mu server zašle sekvenci zpráv. Klient čte data tak dlouho dokud mu chodí zprávy.
+    \item Client streaming - Klient zasílá sekvenci zpráv na server. Jakmile klient dokončí posílání zpráv, počká až je server přečtě a vrátí mu odpověď.
+    \item Bidirectional streaming - Klient a server posílají sekvenci zpráv pomocí read-write streamu. Tyto dva streamy operují nezávisle na sobě, takže klient a server mohou číst a posílat zprávy v jakémkoli pořadí.
+\end{itemize}
+
+\begin{minted}{protobuf}
+service ProductRegister {
+    rpc GetProduct (GetProductRequest) returns (GetProductResponse) {};
+}
+\end{minted}
+
+Protoc kompilátor poté ke kódu protocol buffer zpráv také vygeneruje gRPC klientský a serverový kód.
+
+\subsubsection*{Verzování}
+
 
 \section{Node.js }
 \section{Návrh}
