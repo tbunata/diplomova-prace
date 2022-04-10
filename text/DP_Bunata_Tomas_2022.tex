@@ -11,6 +11,7 @@
 % hidelinks remove colour boxes around hyperlinks
 
 \documentclass[thesis=M,czech]{FITthesis}[2019/12/23]
+\usepackage{minted}
 \makeatletter\AtBeginDocument{\let\@elt\relax}\makeatother
 
 \usepackage[utf8]{inputenc} % LaTeX source encoded as UTF-8
@@ -172,7 +173,7 @@ HTTP taktéž definuje stavové kódy odpovědí. Tyto kódy se v REST api využ
 \end{itemize}
 
 \section{GraphQL}
-GraphQL bylo vytvořeno společností Facebook v roce 2012. Hlavním důvodem jeho vzniku byla narůstající potřeba API pro získávání dat, které bude dostatečně silné a zároveň bude jednoduché na používání. V roce 2015 pak bylo GraphQL zpřístupněno jako opensource \cite{graphql_fb}. Od této doby vznikla spousta implementací v různých jazycích jako je Javascript, Java, Python a mnoha dalších.
+GraphQL bylo vytvořeno společností Facebook v roce 2012. Hlavním důvodem jeho vzniku byla narůstající potřeba API pro získávání dat, které bude dostatečně silné a zároveň bude jednoduché na používání. V roce 2015 pak bylo GraphQL zpřístupněno jako opensource \cite{graphql_fb}. Od této doby vznikla spousta implementací v různých jazycích jako je Javascript, Java, Python a mnoha dalších. GraphQL sestává z typového systému, dotazovacího jazyka, statické validace a typové introspekce.
 
 \subsection{Základní vlastnosti}
 \subsubsection*{Definuje strukturu dat}
@@ -198,14 +199,133 @@ Každému atributu v GraphQL na serveru odpovídá nějaká funkce. Pokud už m�
 Díky typovému systému máme možnost prozkoumávat schéma a zjistit dostupné \textit{queries}, \textit{mutace} nebo \textit{subscriptions}. Schéma také slouží jako smlouva mezi frontendem a backendem definující jak spolu budou komunikovat.
 Introspekce také vytváří platformu pro různé nástroje - od generování kódu po tvorbu dokumentace.
 
-\subsection*{GraphQl dotaz}
-%img: https://www.apollographql.com/blog/static/5d820420290da80546e26d7c966b1d74/Untitled-1.png%
-GraphQL dotaz je řetězec, který je poslán na server, vyhodnocen a jeho výsledek je zaslán ve formátu JSON zpátky klientovi.
+\subsubsection*{Bez verzí}
+Pokud v REST API chceeme zachovat stávající funkčnost klientů při přidávání nových funkcionalit, je potřeba zavést verzování API. V praxi je to často řešeno prefixem s číslem verze v URI zdroje, např. \mintinline{text}{http:localhost/v1/products}. S přibývajícím počtem verzí pak roste náročnost úprav API - pokud budeme například opravovat chybu v aplikaci, je potřeba zajistit, že chyba bude opravena ve všech verzích API, což je velmi časově náročné.
 
-\subsubsection*{GraphQL query}
+Pokud v GraphQL navrhneme API chytře, tomuto problému se vyhneme. Protože klient si určuje podobu dat sám, server může být jednodušší a obecnější. Místo upravování stávajících funkcionalit, které by poškodily stávající kompatibilitu, budeme přidávat nové. Tento přístup funguje hlavně proto, že podobu vrácených dat si určuje klient, což zabrání případnému nabobtnávání. Atributy, které dále už nebudou podporovány mohou být označeny dekorátorem \mintinline{text}{@deprecated} jako zastaralé a dále budou fungovat aby nebyla porušena zpětná kompatibilita. Díky těmto postupným změnám máme možnost vyhnout se verzování API.
 
+\subsection{Typový systém}
+Protože GraphQL není závislé na konkrétním programovacím jazyku, definuje svoje vlastní typové schéma - typicky v souboru \mintinline{text}{schema.gql}
+Hlavním stavebním prvek schémat je \textit{Object type}. To je obecný typ, který obsahuje několik dalších atributů. Jeho definice může vypadat následovně. 
+\begin{figure}[h]
+\begin{minted}{gql.py:GraphqlLexer -x}
+    type Cart {
+        id: Float!
+        items: [CartItem!]!
+        totalPrice: Float!
+        userId: Float!
+    }
+\end{minted}
+\end{figure}
+\begin{itemize}
+    \item \textbf{Cart} definuje \textit{Object type}
+    \item \textbf{id} je typu Float. Vykřičník znamená, že tento artibut je \textit{non-nullable}, což slibuje, že hodnota vždy bude odpovídat danému typu, v tomto případě \textit{Float}
+    \item \textbf{items} reprezentuje pole typu \textit{CartItem}. CartItem je další uživatelem definovaný \textit{Object type}
+    \item \textbf{totalPrice} a \textbf{userId} jsou opět typu \textit{Float}
+\end{itemize}
+
+Každý atribut typu \textit{Object type} může mít libovolný počet argumentů. Každý z těchto argumentů má své jméno. Narozdíl třeba od Javascriptu, kde funkce přebírají seznam seřazených argumentů, v GraphQL jsou předávány jménem.
+
+Ikdyž ve schématu bude nejvíce zastoupen \textit{Object type}, existují ještě tři velmi důležité typy - \textit{Query}, \textit{Mutation} a \textit{Subscription}. Jedná se o jediné typy operací, které v GraphQL můžeme provádět.
+
+Query se používá pouze pro čtení dat ze serveru, nesmí měnit stav serveru. Mutation se naopak používá právě když je potřeba stav serveru modifikovat. Přirovnáme-li to k RESTu, query jsou obdobou k metodě \mintinline{text}{GET} a mutation k \mintinline{text}{POST}, \mintinline{text}{PUT} nebo \mintinline{text}{DELETE}. Mutation také může vracet data, ale ta by měla být relevantní k provádené operaci.
+Posledním typem je Subscription. Stějně jako dotazy, subscription slouží k získávání dat, ale rozdíl je v tom, že se jedná o dlouho trvající operace. Udržují aktivní spojení se serverem a umožňují tak serveru notifikovat klienta o změnách objektů, ke kterým se přihlásil. Subscription jsou vhodné hlavně pro real-time data - například sledování ceny akcií.
+
+\begin{minted}{gql.py:GraphqlLexer -x}
+type Query {    
+    getProduct(id: Float!): Product!
+}
+
+type Mutation {
+    addProduct(newProductData: NewProductInput!): Product!
+}
+\end{minted}
+
+Na příkladě výše máme definováno jedno query \mintinline{text}{getProduct}, které slouží k získání detailu produktu podle jeho identifikátoru. Níže je pak definována mutation \mintinline{text}{addProduct}, která slouží k vytvoření nového produktu na základě uživatelského vstupu. Můžeme si všimnout, že tyto typy si jsou velmi podobné - největší rozdíl je v názvu operace.
+
+Stavebním prvek typového systému je typ \textit{Scalar}, reprezentující listy listy dotazů. Mezi skalární typy v GraphQL patří:
+\begin{itemize}
+    \item Int: celé číslo
+    \item Float: desetinné číslo se znaménkem
+    \item String: UTF-8 zakódovaný řetězec
+    \item Boolean: hodnota true nebo false
+\end{itemize}
+V mnoha implementacích GraphQL existuje možnost pro definici vlastních skalárních typů. Často je potřeba definovat si typ pro reprezentaci data a času. Je pak naší zodpovědností zajistit serializaci, deserializaci a validaci tohoto typu. Výčtový typ \textit{Enum} je speciálním skalárním typem a slouží reprezentaci dat, která mohou nabývat pouze několika předem daných hodnot. 
+
+Typ \textit{Input} pak ještě slouží slouží k definování dat, která poskytuje uživatel v dotazu a má podobné vlastnosti jako \textit{Object type}
+\begin{minted}{gql.py:GraphqlLexer -x}
+    type Query {    
+        getProduct(id: Float!): Product!
+    }
+    
+    type Mutation {
+        addProduct(newProductData: NewProductInput!): Product!
+    }
+\end{minted}
+
+\subsection{Dotazovací jazyk}
+GraphQL je deklarativní jazyk. To znamená, že specifikujeme jak výsledek má vypadat, místo postupu jak by měl být nalezen. Nejlépe si to ukážeme na příkladu. Uvažujme následující dotaz:
+
+\begin{figure}[h]
+\begin{minted}{gql.py:GraphqlLexer -x}
+query {
+    allProducts(productFilterData: { minPrice: 20, maxPrice: 100 }) {
+        id
+        name
+        price
+        status {
+            id
+            name
+        }
+    }
+}
+\end{minted}
+\end{figure}
+
+Na první řádce specifikujeme, že se jedná o dotaz. Dále je pak potřeba specifikovat jméno dotazu \mintinline{text}{allProducts}, za kterým následuje objekt se vstupními daty pro filtrování produktů - v tomto případě se jedná o minimální a maximální cenu produktu - \mintinline{text}{minPrice} a \mintinline{text}{maxPrice}. Poté už jen následuje objekt se samotným výčtem atributů, jejichž hodnoty chceme získat.
+
+Můžeme si všimnout, že atribut \mintinline{text}{status} je typu objekt. Protože všechny typy listů dotazu musí být skalární objekty, je zde potřeba určit nějakou podmnožinu atributů, které skalární budou, jinak by dotaz skončil chybou. Aby se dotaz mohl vyhodnotit, je vždy potřeba specifikovat alespoň jeden atribut.
+
+Na příkladu níže můžeme vidět výsledek tohoto dotazu. Pokud se podařilo dotaz v pořádku provést, najdeme odpověd vždy v objektu \mintinline{text}{data}. Snadno nahlédneme, že odpověď serveru je skutečně velmi podobná struktuře původního dotazu. Hlavními rozdíly jsou absence vstupních dat a to, že produkt je obalený v hranatých závorkách - to proto, že tento dotaz vrací pole objektů.
+
+\begin{minted}{js}
+{
+  "data": {
+    "allProducts": [
+      {
+        "id": 2,
+        "name": "Striped Cotton-Blend Socks",
+        "price": 25,
+        "status": {
+          "id": 1,
+          "name": "New"
+        }
+      }
+    ]
+  }
+}  
+\end{minted}
+
+\subsection{Statická validace}
+Díky definovanému schématu je jednoduché validovat dotazy - klient snadno rozpozná zda nějaký dotaz je validní, a to právě ještě před odesláním na server. Typickými chybami mohou být chybějící vstupní data, přistupování k atributům nějakého skalárního atributu nebo naopak nepřistupování k žádnému atributu neskalárního objektu.
+
+\subsection{Introspekce}
+Introspekce nám dovoluje dotazovat API pro informace a schématu bez toho abychom museli číst dokumentaci. Můžeme si tak zobrazit dotazy, typy atributy nebo direktivy, které server podporuje. Velmi to usnadní práci vývojářům, ale pokud se k našemu API dostane nějaký útočník, dostává zdarma dokumentaci jak server využít. Je tedy vhodné introspekci zakázat v produkčním prostředí.
+Introspekci mohou využívat i různé nástroje - například díky ní můžeme mít interaktivního klienta pro testování našeho API, který nám bude doporučovat jaké dotazy jsou dostupné  nebo jaké atributy se vyskytují na dané úrovni v dotazu.
+
+\begin{minted}{gql.py:GraphqlLexer -x}
+{
+  __schema {
+    types {
+      name
+      description
+    }
+  }
+}
+\end{minted}
 
 \section{gRPC}
+Intro to gRPC
 
 \section{Node.js }
 \section{Návrh}
