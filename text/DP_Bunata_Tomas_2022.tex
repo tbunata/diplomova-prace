@@ -351,47 +351,71 @@ Níže jsem vybral několik hlavních principů a požadavků, na jejichž zákl
 \subsection{Protocol buffer}
 Můžeme mít například server implementovaný v Javě a pak několik klientských aplikací napsaných v různých jazycích, např. Javascriptu nebo Ruby, viz obrázek \ref{grpc-overview}. Aby mohla klientská aplikace volat vzdálené metody na serveru jako lokální, je potřeba zavést v jaké formátu si budou server a klient vyměňovat zprávy. K tomu se využívají \textit{Protocol buffers}, ikdyž je možné využívat i jiné formáty pokud je to potřeba. Je to opensourcový mechanizmus od Googlu jak serializovat strukturovaná data.
 
-Prvním krokem který musíme udělat je definovat si strukturu zpráv v \textit{proto} souboru - jedná se o obyčejný textový soubor s  koncovkou proto. Základním stavebním prvkem jsou zprávy.To je nejmenší logický celek obsahující dvojice jméno a hodnota nazývané pole. Každá definice pole obsahuje typ, jméno a číslo, které určuje jeho pořadí při serializaci.
+Prvním krokem který musíme udělat je definovat si strukturu zpráv v \textit{proto} souboru - jedná se o obyčejný textový soubor s  koncovkou proto. Základním stavebním prvkem jsou zprávy.To je nejmenší logický celek obsahující dvojice jméno a hodnota nazývané pole. Každá definice pole obsahuje typ, jméno a číslo pole. Soupis všech dostupných skalárních typů je k dispozici zde \cite{proto_scalars}
 
+\begin{figure}[H]
 \begin{minted}{protobuf}
-message Product {
-    int64 id = 1;
-    string name = 2;
-    string description = 3;
-    int64 price = 4;
-    int64 quantity = 5;
-    repeated ProductCategory categories = 6;
-    ProductBrand brand = 7;
-    ProductStatus status = 8;
-}
+    message Product {
+        int64 id = 1;
+        string name = 2;
+        string description = 3;
+        int64 price = 4;
+        int64 quantity = 5;
+        repeated ProductCategory categories = 6;
+        ProductBrand brand = 7;
+        ProductStatus status = 8;
+    }
 \end{minted}
+\caption{Příklad protobuf zprávy}
+\label{proto-message}   
+\end{figure}
+
+Každé pole má svoje unikátní číslo. Toto číslo identifikuje pole serializované v binárním formátu a nemělo by se měnit. Protože k zakódování čísel od 1 do 15 nám stačí jediný bajt, je vhodné tato čísla použít pro pole, která se ve zprávách budou vyskytovat velmi často. Může být dobrý nápad si některá čísla nechat volná pro budoucí potřebu.
+
+Jedna věc, na kterou je potřeba si dát pozor při navrhování zpráv, je že pokud při parsování zprávy nějaký element chybí, jeho odpovídající pole bude naplněno výchozí hodnotou. Pro skalární pole po parsování nemůžeme určit zda se tato výchozí hodnota ve zprávě skutečně vyskytovala nebo nebyla vůbec nastavena. 
 
 Jakmile máme definované zprávy, je potřeba použít kompilátor protocol buffer \mintinline{text}{protoc}, který pak vygeneruje přístupové třídy v našem zvoleném jazyce. Tyto třídy pak obsahují metody na získávání a nastavování dat do zpráv a také metody na serializaci a deserializaci.
-
-Uvažujme zprávu \mintinline{protobuf}{Product} definovanou výše s polem  \mintinline{protobuf}{name} a cílový jazyk Javascript. Kompilátor pak vygeneruje třídu \mintinline{js}{Product} s metodou \mintinline{js}{setName(value)} a dalšími potřebnými metodami.
-
-Následně můžeme v proto souboru nadefinovat služby a metody, které budou dostupné klientům.
 
 \subsubsection*{Definice služeb}
 gRPc je stejně jako většina RPC systémů založena na myšlence definování služeb, které pak definují své metody a jejich parametry. Je možné definovat čtyři typy služeb.
 
 \begin{itemize}
-    \item Unary - Klient pošle jeden požadavek na server a server mu pošle jednu odpověď zpět.
-    \item Server streaming - Klient pošle jeden požadavek na server a odpovědí získá stream, ve kterém mu server zašle sekvenci zpráv. Klient čte data tak dlouho dokud mu chodí zprávy.
-    \item Client streaming - Klient zasílá sekvenci zpráv na server. Jakmile klient dokončí posílání zpráv, počká až je server přečtě a vrátí mu odpověď.
-    \item Bidirectional streaming - Klient a server posílají sekvenci zpráv pomocí read-write streamu. Tyto dva streamy operují nezávisle na sobě, takže klient a server mohou číst a posílat zprávy v jakémkoli pořadí.
+    \item \textbf{Unary} - Klient pošle jeden požadavek na server a server mu pošle jednu odpověď zpět.
+    \item \textbf{Server streaming} - Klient pošle jeden požadavek na server a odpovědí získá stream, ve kterém mu server zašle sekvenci zpráv. Klient čte data tak dlouho dokud mu chodí zprávy.
+    \item \textbf{Client streaming} - Klient zasílá sekvenci zpráv na server. Jakmile klient dokončí posílání zpráv, počká až je server přečtě a vrátí mu odpověď.
+    \item \textbf{Bidirectional streaming} - Klient a server posílají sekvenci zpráv pomocí read-write streamu. Tyto dva streamy operují nezávisle na sobě, takže klient a server mohou číst a posílat zprávy v jakémkoli pořadí.
 \end{itemize}
 
+Jako první věc, kterou musíme udělat, je specifikovat verzi protocol bufferu. Následně můžeme v proto souboru nadefinovat služby a metody, které budou dostupné klientům.
+
 \begin{minted}{protobuf}
+syntax = "proto3";
+
 service ProductRegister {
-    rpc GetProduct (GetProductRequest) returns (GetProductResponse) {};
+    rpc GetProduct (GetProductRequest)
+        returns (GetProductResponse) {};
 }
 \end{minted}
+Metoda musí být vždy definována uvnitř nějaké služby - na příkladě  výše se jedná o službu \mintinline{text}{ProductRegister}. Poté už můžeme definovat samotnou metodu - první je klíčové slovo \mintinline{text}{rpc}, za kterým následuje jméno metody. A poté nadefinujeme vstupní a výstupní parametry této metody, které musí být typu zpráva.
 
-Protoc kompilátor poté ke kódu protocol buffer zpráv také vygeneruje gRPC klientský a serverový kód.
+\subsubsection*{Kompilace protocol bufferu}
+Uvažujme zprávu \mintinline{protobuf}{Product} z příkladu \ref{proto-message} s polem  \mintinline{protobuf}{name} a cílový jazyk Javascript. Kompilátor pak vygeneruje třídu \mintinline{js}{Product} s metodou \mintinline{js}{setName(value)} a dalšími potřebnými metodami.
+
+Protoc kompilátor poté ke kódu protocol buffer zpráv také vygeneruje gRPC klientský a serverový kód. Výstup kompilátoru pak záleží na naší zvolené platformě. Pro jazyk C++ vygeneruje odpovídající .h a .cc soubory s třídou pro každou zprávu definovanou v proto souboru. Pro Javu dojde k vygenerování odpovídajících .java tříd společně se speciální Builder třídou sloužící k výrobě instancí tříd jednotlivých zpráv.
+
+Pokud však chceme používat gRPC s jazykem Javascript, máme na výběr dva způsoby. Prvním je načítat dynamicky deskriptory služeb a klientských stubů přímo ze samotných proto souborů pomocí knihovny \mintinline{text}{@grpc/proto-loader}.
+Druhý způsob je použití kompilátoru. Dříve zmínený kompilátor protoc bohužel nepodporuje Javascript a je potřeba použít kompilátor \mintinline{text}{grpc_tools_node_protoc}, který je dostupný ve správci balíčků npm. Ten pak vygeneruje třídy zpráv a metody na jejich manipulaci.
 
 \subsubsection*{Verzování}
+Filozofie gRPC je taková, že služby by se měly snažit být co nejvíce zpětně kompatibilní. To má několik výhod - existující klienti budou nadále fungovat, stačí udržovat pouze jednu verzi služby a další. V gRPC jsou změny kategorizovány do tří kategorií.
 
+\begin{itemize}
+    \item \textbf{Non-breaking changes} - Patří sem například přidání nové služby, metody nebo pole do zprávy.
+    \item \textbf{Binary breaking changes} - Tyto změny jsou non-breaking na úrovni protokolu gRPC, ale je potřeba aktualizovat klienty. Jedná se např. o odstranění pole nebo přejmenování zprávy.
+    \item \textbf{Protocol breaking changes} - Patří sem například přejmenování pole, změna čísla pole nebo odstranění služby.
+\end{itemize}
+
+Protobuf podporuje verzování API specifikací verze do volitelného označení balíčku, např. \mintinline{protobuf}{package products.v1;}. 
 
 \section{Node.js }
 \section{Návrh}
@@ -423,114 +447,7 @@ OpenAPI
 	\item[REST] Representational state transfer
 	\item[RPC] Remote procedure call
 	\item[XML] Extensible markup language
-\end{description}
-
-
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% % Tuto kapitolu z výsledné práce ODSTRAŇTE.
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% 
-% \chapter{Návod k~použití této šablony}
-% 
-% Tento dokument slouží jako základ pro napsání závěrečné práce na Fakultě informačních technologií ČVUT v~Praze.
-% 
-% \section{Výběr základu}
-% 
-% Vyberte si šablonu podle druhu práce (bakalářská, diplomová), jazyka (čeština, angličtina) a kódování (ASCII, \mbox{UTF-8}, \mbox{ISO-8859-2} neboli latin2 a nebo \mbox{Windows-1250}). 
-% 
-% V~české variantě naleznete šablony v~souborech pojmenovaných ve formátu práce\_kódování.tex. Typ může být:
-% \begin{description}
-% 	\item[BP] bakalářská práce,
-% 	\item[DP] diplomová (magisterská) práce.
-% \end{description}
-% Kódování, ve kterém chcete psát, může být:
-% \begin{description}
-% 	\item[UTF-8] kódování Unicode,
-% 	\item[ISO-8859-2] latin2,
-% 	\item[Windows-1250] znaková sada 1250 Windows.
-% \end{description}
-% V~případě nejistoty ohledně kódování doporučujeme následující postup:
-% \begin{enumerate}
-% 	\item Otevřete šablony pro kódování UTF-8 v~editoru prostého textu, který chcete pro psaní práce použít -- pokud můžete texty s~diakritikou normálně přečíst, použijte tuto šablonu.
-% 	\item V~opačném případě postupujte dále podle toho, jaký operační systém používáte:
-% 	\begin{itemize}
-% 		\item v~případě Windows použijte šablonu pro kódování \mbox{Windows-1250},
-% 		\item jinak zkuste použít šablonu pro kódování \mbox{ISO-8859-2}.
-% 	\end{itemize}
-% \end{enumerate}
-% 
-% 
-% V~anglické variantě jsou šablony pojmenované podle typu práce, možnosti jsou:
-% \begin{description}
-% 	\item[bachelors] bakalářská práce,
-% 	\item[masters] diplomová (magisterská) práce.
-% \end{description}
-% 
-% \section{Použití šablony}
-% 
-% Šablona je určena pro zpracování systémem \LaTeXe{}. Text je možné psát v~textovém editoru jako prostý text, lze však také využít specializovaný editor pro \LaTeX{}, např. Kile.
-% 
-% Pro získání tisknutelného výstupu z~takto vytvořeného souboru použijte příkaz \verb|pdflatex|, kterému předáte cestu k~souboru jako parametr. Vhodný editor pro \LaTeX{} toto udělá za Vás. \verb|pdfcslatex| ani \verb|cslatex| \emph{nebudou} s~těmito šablonami fungovat.
-% 
-% Více informací o~použití systému \LaTeX{} najdete např. v~\cite{wikilatex}.
-% 
-% \subsection{Typografie}
-% 
-% Při psaní dodržujte typografické konvence zvoleného jazyka. České \uv{uvozovky} zapisujte použitím příkazu \verb|\uv|, kterému v~parametru předáte text, jenž má být v~uvozovkách. Anglické otevírací uvozovky se v~\LaTeX{}u zadávají jako dva zpětné apostrofy, uzavírací uvozovky jako dva apostrofy. Často chybně uváděný symbol "{} (palce) nemá s~uvozovkami nic společného.
-% 
-% Dále je třeba zabránit zalomení řádky mezi některými slovy, v~češtině např. za jednopísmennými předložkami a spojkami (vyjma \uv{a}). To docílíte vložením pružné nezalomitelné mezery -- znakem \texttt{\textasciitilde}. V~tomto případě to není třeba dělat ručně, lze použít program \verb|vlna|.
-% 
-% Více o~typografii viz \cite{kobltypo}.
-% 
-% \subsection{Obrázky}
-% 
-% Pro umožnění vkládání obrázků je vhodné použít balíček \verb|graphicx|, samotné vložení se provede příkazem \verb|\includegraphics|. Takto je možné vkládat obrázky ve formátu PDF, PNG a JPEG jestliže používáte pdf\LaTeX{} nebo ve formátu EPS jestliže používáte \LaTeX{}. Doporučujeme preferovat vektorové obrázky před rastrovými (vyjma fotografií).
-% 
-% \subsubsection{Získání vhodného formátu}
-% 
-% Pro získání vektorových formátů PDF nebo EPS z~jiných lze použít některý z~vektorových grafických editorů. Pro převod rastrového obrázku na vektorový lze použít rasterizaci, kterou mnohé editory zvládají (např. Inkscape). Pro konverze lze použít též nástroje pro dávkové zpracování běžně dodávané s~\LaTeX{}em, např. \verb|epstopdf|.
-% 
-% \subsubsection{Plovoucí prostředí}
-% 
-% Příkazem \verb|\includegraphics| lze obrázky vkládat přímo, doporučujeme však použít plovoucí prostředí, konkrétně \verb|figure|. Například obrázek \ref{fig:float} byl vložen tímto způsobem. Vůbec přitom nevadí, když je obrázek umístěn jinde, než bylo původně zamýšleno -- je tomu tak hlavně kvůli dodržení typografických konvencí. Namísto vynucování konkrétní pozice obrázku doporučujeme používat odkazování z~textu (dvojice příkazů \verb|\label| a \verb|\ref|).
-% 
-% \begin{figure}\centering
-% 	\includegraphics[width=0.5\textwidth, angle=30]{cvut-logo-bw}
-% 	\caption[Příklad obrázku]{Ukázkový obrázek v~plovoucím prostředí}\label{fig:float}
-% \end{figure}
-% 
-% \subsubsection{Verze obrázků}
-% 
-% % Gnuplot BW i barevně
-% Může se hodit mít více verzí stejného obrázku, např. pro barevný či černobílý tisk a nebo pro prezentaci. S~pomocí některých nástrojů na generování grafiky je to snadné.
-% 
-% Máte-li například graf vytvořený v programu Gnuplot, můžete jeho černobílou variantu (viz obr. \ref{fig:gnuplot-bw}) vytvořit parametrem \verb|monochrome dashed| příkazu \verb|set term|. Barevnou variantu (viz obr. \ref{fig:gnuplot-col}) vhodnou na prezentace lze vytvořit parametrem \verb|colour solid|.
-% 
-% \begin{figure}\centering
-% 	\includegraphics{gnuplot-bw}
-% 	\caption{Černobílá varianta obrázku generovaného programem Gnuplot}\label{fig:gnuplot-bw}
-% \end{figure}
-% 
-% \begin{figure}\centering
-% 	\includegraphics{gnuplot-col}
-% 	\caption{Barevná varianta obrázku generovaného programem Gnuplot}\label{fig:gnuplot-col}
-% \end{figure}
-% 
-% 
-% \subsection{Tabulky}
-% 
-% Tabulky lze zadávat různě, např. v~prostředí \verb|tabular|, avšak pro jejich vkládání platí to samé, co pro obrázky -- použijte plovoucí prostředí, v~tomto případě \verb|table|. Například tabulka \ref{tab:matematika} byla vložena tímto způsobem.
-% 
-% \begin{table}\centering
-% 	\caption[Příklad tabulky]{Zadávání matematiky}\label{tab:matematika}
-% 	\begin{tabular}{|l|l|c|c|}\hline
-% 		Typ		& Prostředí		& \LaTeX{}ovská zkratka	& \TeX{}ovská zkratka	\tabularnewline \hline \hline
-% 		Text		& \verb|math|		& \verb|\(...\)|	& \verb|$...$|		\tabularnewline \hline
-% 		Displayed	& \verb|displaymath|	& \verb|\[...\]|	& \verb|$$...$$|	\tabularnewline \hline
-% 	\end{tabular}
-% \end{table}
-% 
-% % % % % % % % % % % % % % % % % % % % % % % % % % 
+\end{description} 
 
 \chapter{Obsah přiloženého CD}
 
