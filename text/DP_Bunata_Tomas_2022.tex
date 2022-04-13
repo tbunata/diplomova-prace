@@ -83,7 +83,7 @@ Dále zde bude popsána metodologie porovnání (dokumentace, rychlost vývoje, 
 
 
 
-\chapter{Analýza a návrh}
+\chapter{Analýza}
 Před tím, než se začneme věnovat návrhu a implementaci API, je v hodné si nejdříve vysvětlit co znamená pojem API a následně představím co to je REST, GraphQL a gRPC. Současně také popíšu jaké knihovny jsem si vybral pro jejich implementaci. A poté představím samotný návrh API, které bude implementováno v praktické části.
 
 \section{API}
@@ -418,15 +418,30 @@ Filozofie gRPC je taková, že služby by se měly snažit být co nejvíce zpě
 Protobuf podporuje verzování API specifikací verze do volitelného označení balíčku, např. \mintinline{protobuf}{package products.v1;}. 
 
 \section{Node.js }
-\section{Návrh}
+JavaScript byl vytvořen společností Netscape jako skriptovací nástroj pro manipulaci s webovými stránkami uvnitř prohlížeče. Tato společnost se také neúspšně snažila zavést prostředí \textit{Netscape LiveWire} pro běh JavaScriptu na serveru. Server-side JavaScript se tak stal populární až v roce 2009 s uvedením Node.js.
+
+Node.js \cite{node} je open-sourcové a meziplatformní prostředí pro běh JavaScriptu. Je postavené na Google V8 JavaScript engine \cite{v8}, který je také jádrem prohlížeče Google Chrome.
+
+Node.js aplikace běží v jediném procesu a pro příchozí požadavky nevytváří nová vlákna. Když node.js provádí I/O operaci, například. čtení ze sítě nebo databáze, místo blokování vlákna, Node.js bude pokračovat až po vrácení výsledku této operace. Toto umožňuje obsluhovat vysoký počet příchozích spojení bez potřeby správy vláken.
+
+Jedna z největších výhod Node.js je, že umožňuje frontendovým vývojářům, kteří píšou klientský kód v JavaScriptu, psát serverový kód bez nuntnosti učit se další jazyk. 
+Při psaní JavaScriptu pro Node.js nemáme dostupné žádné objekty jako document nebo window, které nam poskytuje prohlížeč. Máme ale kontrolu nad prostředím, můžeme si vybrat jakou verzi Node.js budeme používat a není potřeba řešit podporu pro všechny různé verze prohlížeče.
+
+\subsection{npm}
+npm \cite{npm}, plným jménem node package manager, je výchozí správce balíčků pro Node.js (alternativou je např. yarn\cite{yarn}). Sestává z klienta pro příkazovou řádku a online databáze balíčků, která se označuje jako npm registry.
+
+\chapter{Návrh}
 Aby srovnání co nejvíce odpovídalo realitě, vybral jsem si jako vzor pro API, které budu implementovat, eshop. Je to typický příklad, se kterým se vývojář může setkat při své práci a zároveň je tento vzor dost obecný na to, aby si čtenář mohl jednoduše převést na jiný. Pro popis api jsem zvolil specifikaci OpenAPI.
 
 \subsection{OpenAPI}
 OpenAPI 
 
-\chapter{}
+\chapter{Použité technologie}
 
 \chapter{Realizace}
+\section{REST API}
+\section{GraphQL API}
+\section{gRPC API}
 
 \chapter{Testování}
 
