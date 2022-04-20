@@ -1,15 +1,3 @@
-% arara: pdflatex
-% arara: pdflatex
-% arara: pdflatex
-
-% options:
-% thesis=B bachelor's thesis
-% thesis=M master's thesis
-% czech thesis in Czech language
-% slovak thesis in Slovak language
-% english thesis in English language
-% hidelinks remove colour boxes around hyperlinks
-
 \documentclass[thesis=M,czech]{FITthesis}[2019/12/23]
 \usepackage{minted}
 \makeatletter\AtBeginDocument{\let\@elt\relax}\makeatother
@@ -310,7 +298,9 @@ Na příkladu níže můžeme vidět výsledek tohoto dotazu. Pokud se podařilo
 Díky definovanému schématu je jednoduché validovat dotazy - klient snadno rozpozná zda nějaký dotaz je validní, a to právě ještě před odesláním na server. Typickými chybami mohou být chybějící vstupní data, přistupování k atributům nějakého skalárního atributu nebo naopak nepřistupování k žádnému atributu neskalárního objektu.
 
 \subsection{Introspekce}
+\begin{sloppypar}
 Introspekce nám dovoluje dotazovat API pro informace a schématu bez toho abychom museli číst dokumentaci. Můžeme si tak zobrazit dotazy, typy atributy nebo direktivy, které server podporuje. Velmi to usnadní práci vývojářům, ale pokud se k našemu API dostane nějaký útočník, dostává zdarma dokumentaci jak server využít. Je tedy vhodné introspekci zakázat v produkčním prostředí.
+\end{sloppypar}
 Introspekci mohou využívat i různé nástroje - například díky ní můžeme mít interaktivního klienta pro testování našeho API, který nám bude doporučovat jaké dotazy jsou dostupné  nebo jaké atributy se vyskytují na dané úrovni v dotazu.
 
 \begin{minted}{gql.py:GraphqlLexer -x}
@@ -434,7 +424,18 @@ npm \cite{npm}, plným jménem node package manager, je výchozí správce balí
 Aby srovnání co nejvíce odpovídalo realitě, vybral jsem si jako vzor pro API, které budu implementovat, eshop. Je to typický příklad, se kterým se vývojář může setkat při své práci a zároveň je tento vzor dost obecný na to, aby si čtenář mohl jednoduše převést na jiný. Pro popis api jsem zvolil specifikaci OpenAPI.
 
 \subsection{OpenAPI}
-OpenAPI 
+OpenAPI
+
+\subsection*{Databázové schéma}
+Podle hotového návrhu API jsem pokračoval návrhem databázového modelu. Model databáze jsem navrhoval v ORM nástroji Prisma, který používá speciální jazyk k definování modelu do souboru \mintinline{text}{schema.prisma}.
+
+Na obrázku \ref{schema-dbdiagram} si můžete prohlédnout vizualizaci databázového schématu pomocí nástroje \mintinline{text}{dbdiagram.io}.
+
+\begin{figure}[h]
+    \includegraphics[width=\linewidth]{img/schema-dbdiagram.png}
+    \caption{Vizualizace DB schématu pomocí nástroje dbdiagram.io}
+	\label{schema-dbdiagram}
+\end{figure}
 
 \chapter{Použité technologie}
 
@@ -443,9 +444,101 @@ OpenAPI
 \section{GraphQL API}
 \section{gRPC API}
 
-\chapter{Testování}
+\chapter{Výkonnostní testování}
+\label{load_test}
 
 \chapter{Závěrečné srovnání}
+V této kapitole provedu srovnání technologií REST, GraphQL a gRPC a jejich implementací v jazyce JavaScript. Je potřeba zdůraznit, že některá kritéria jako např. developer experience jsou silně závislá na knihovnách, které jsem pro implementaci API v této práci zvolil.
+
+
+\section{Srovnávací kritéria}
+Abychom mohli tyto technologie mezi sebou porovnat, je nejdříve potřeba stanovit kritéria, podle kterých tyto technologie budeme hodnotit.Popisované technologie porovnám podle následujících kritérií.
+
+\subsection{Velikost kódu a závislostí}
+Přestože v dnešní době již není diskový prostor tak drahý jako v minulosti, může být velikost kódu dané implementace přispět k rozhodnutí kterou technologii použijeme. Čím méně závislostí tento kód obsahuje, je větší šance že dojde k nějaké komplikaci. Sice to nemusí být tak dramatické jako incident z roku 2016, kdy stažení knihovny \mintinline{text}{left-pad} z npm došlo ke znemožnění instalace velkého možství projektů \cite{left_pad},  ale může dojít ke vzniku chyb s aktualizací verze knihovny.
+
+Velikost knihoven zjistím následovně - v novém docker kontejneru si nainstaluji pomocí npm samotnou knihovnu a spočítám počet a velikost závislostí nainstalovaných ve složce \mintinline{text}{node_modules}
+
+
+\subsection{Oblíbenost}
+Oblíbenost dané technologie je velmi důležitým kritériem. Souvisí s ní dostupnost a kvalita dokumentace, rychlost opravy chyb a vývoj nových funkcionalit. Čím více je daná technologie populární mezi vývojáři, je také pravděpodobnější, že v případě nějakého problému s implementací najdeme pomoc právě v nějaké komunitě jako je např. Stack Overlow%todo ref%.
+
+Oblíbenost dané technologie se dá kvantifikovat několika způsoby. Poměrně dobrým indikátorem popularity může být například počet hvězd v GitHub repozitáři dané knihovny nebo počet stažení v balíčkovacím systému npm. Další metrikou k porovnání popularity je počet otevřených otázek na Stack Overflow
+
+Vzhledem k tomu, že tyto technologie nejsou závislé na platformě a v rámci jednotlivých programovacích jazyků existuje mnoho jejich implementací pomocí různých knihoven, je velmi náročné shromáždit data o jejich používání. Rozhodl jsem se proto, že shromáždím nejvíce používané knihovny implementující danou technologii a srovnání provedu nad nimi.
+
+\subsubsection*{GitHub stars}
+
+\subsubsection*{npm stažení}
+
+\subsubsection*{Stack Overflow otázky}
+%https://insights.stackoverflow.com/trends?tags=grpc%2Crest%2Cgraphql%
+
+\subsection{Developer experience}
+V této části popíšu svoje zkušenosti které jsem získal při vývoji API pomocí těchto technologií. Přestože se jedná o víceméně subjektivní, věřím že bude přínosem pro každého, kdo přemýšlí o využítí některé z těchto technologií.
+
+Práce s dokumentací je nedílnou součástí vývoje a její čitelnost přímo ovliňuje rychlost s jakou jsme schopni danou knihovnu začít používat nebo jak efektivně vyřešíme problém, na který při vývoji narazíme. Protože tato část je také velmi subjektivní, ke svojí zkušenosti také poskytnu ukázky dokumentaci aby si čtenář mohl udělat svůj názor. 
+
+\subsection{Dokumentace API}
+Kvalitní dokumentace API pomáhá ostatní vývojářům pochopit jakými způsoby lze API používat
+
+\subsection{Výkon}
+Potřebujeme-li vybudovat API, které by dokázalo odbavovat velké množství požadavků najednou a co nejrychleji, je výkon nejspíše jedno z hlavních kritérií, které zvažujeme při výběru technologie pro tvorbu API.
+
+V této části porovnám výkon implementovaných API na datech posbíraných během výkonnostního testování v kapitole \ref{load_test} z několika pohledů:
+
+\begin{itemize}
+    \item Průměrná doba obsloužení požadavku při vysokém zatížení
+    \item Velikost odesílaných dat v odpovědi
+    \item Průchodnost WebSocket, GraphQL subscription a gRPC streaming
+    \item Počet otevřených spojení HTTP WebSocket, GraphQL subscription a gRPC streaming
+\end{itemize}
+
+\section{Samotné srovnání}
+\subsection*{Dokumentace API}
+\subsubsection*{REST}
+Pro dokumentaci REST API existují dva způsoby jak přistupovat ke tvorbě API jeho dokumentace: design first a program first.%todo% 
+V prvním případě nejdříve navrhujeme samotné API např. ve specifikaci OpenAPI a poté využijeme nějaký program třetí strany k vygenerování kostry API nebo typů pro TypeScript.
+
+Ve druhém případě API nejdříve naprogramujeme a poté pomocí knihovny vygenerujeme samotnou dokumentaci, také např. ve formátu OpenAPI. Tento přístup má hlavní výhodu v tom, že dokumentaci nemusíme věnovat takovou práci údržbě dokumentace. Na druhou stranu může být práce programátora snažší pokud už má návrh připravený a programuje podle něj.
+
+\subsubsection*{GraphQL}
+GraphQL je na tom o něco lépe co se týče dokumentace. Pro prozkoumání možnéstí API si můžeme buď zobrazit GraphQL schéma, kde je celá struktura API definována, nebo můžeme využít vlastnosti introspekce a aplikační rozhraní si pomocí GraphQL dotazů vyzkoušet.
+
+Samozřejmě je možné využít nějaký nástroj k zobrazení a práci s API. Při programování GraphQL API se mi osvědčil nástroj GraphQL Playground. %https://www.apollographql.com/docs/apollo-server/v2/testing/graphql-playground/%
+Jedná se o nástroj vyvinutý Prismou a založený na GraphiQL, který umožňuje v prohlížeči interaktivně provolávat GraphQL API. Mezi jeho hlavní funkcionality patří automatické doplňování textu a zvýrazňování chyb nebo testování GraphQL subscriptions. Zároveň je velmi jednoduché tento nástroj začít používat, stačí importovat třídu \mintinline{text}{ApolloServerPluginLandingPageGraphQLPlayground} a při inicializaci našeho serveru přidat tuto třídu do serveru jako plugin, viz ukázka kódu níže.
+
+\begin{figure}[H]
+\begin{minted}{typescript}
+import { ApolloServerPluginLandingPageGraphQLPlayground }
+  from "apollo-server-core";
+const server = new ApolloServer({
+  schema,
+  plugins: [ApolloServerPluginLandingPageGraphQLPlayground],
+  context: ({ req }) => {
+    const context = {
+      req,
+      user: req.user,
+    };
+    return context;
+  },
+});
+
+\end{minted}
+\caption{Inicializace GraphQL Playground}
+\end{figure}
+
+\subsubsection*{gRPC}
+Stejně jako GraphQL, tak i gRPC nutí vývojáře udržovat kontrakt 
+Protože při tvorbě gRPC API je potřeba vytvořit definici služeb a metod pomocí \mintinline{text}{.proto} souborů, máme tak určitou formu dokumentace API přímo dostupnou.
+
+Kromě samotného čtení můžeme využít nástrojů třetích stran, které je možné použít jak k prozkoumávání možností API tak zároveň k jeho testování. Mohu například zmínít nástroj BloomRPC, %https://github.com/bloomrpc/bloomrpc
+který jsem používal k testování API při implementaci. Tento nástroj podporuje všechny typy gRPC metod od \mintinline{text}{unary call} po \mintinline{text}{bidirectional streaming}. Na rozdíl od GraphQL Playground, tato aplikace není dostupná jako plugin serveru, ale je potřeba si ji doinstalovat. Poté stačí importovat si příslušné \mintinline{text}{.proto} soubory, nakonfigurovat k jakému serveru se chceme připojit a začít testovat API.
+
+\subsubsection*{Zhodnocení}
+Z hlediska dokumentace API mi jako nejlepší vycházejí GraphQL a gRPC. Obě technologie z principu nutí udržovat vývojáře nějaký způsob dokumentace API, s tím že GraphQL je na tom ještě o něco lépe díky introspekci.
+
+REST z tohoto úhlu pohledu vychází na poslední místě, ale to neznamená, že by na tom byl špatně. Je jen nutno počítat s tím, že je potřeba věnovat čas a rozmyslet si jak budeme dokumentaci API tvořit a udržovat. 
 
 \begin{conclusion}
 	%sem napište závěr Vaší práce
