@@ -1,5 +1,6 @@
 \documentclass[thesis=M,czech]{FITthesis}[2019/12/23]
 
+\usepackage{xevlna}
 \usepackage{minted}
 \usemintedstyle{manni}
 \makeatletter\AtBeginDocument{\let\@elt\relax}\makeatother
@@ -55,70 +56,70 @@ Architektura webových aplikací se dá rozdělit na dvě hlavní části: front
 Vzhledem k tomu, že webové technologie se velmi rychle vyvíjejí a posouvají vpřed, vývojáři velmi často narážejí na otázku výběru správné technologie pro svůj projekt. V této práci se pokusím na tuto otázku odpovědět. Porovnám mezi sebou následující: REST, GraphQL a gRPC.
 
 V roce 2000 byl vynalezen REST, který je z těchto technologií nejstarší a v současnosti také nejpopulárnější. Princip RESTu je takový, že každá entita je identifikována unikátním URI a pomocí HTTP metod je s těmito entitami manipulováno.
-GraphQL vzniklo přibližně o deset let později a funguje zcela na odlišném principu -- vystavuje jediný endpoint, na který se poté dotazujeme speciálním jazykem, který strukturou velmi přípomína JSON.
+GraphQL vzniklo přibližně o deset let později a funguje zcela na odlišném principu -- vystavuje jediný endpoint, na který se poté dotazujeme speciálním jazykem, který strukturou velmi připomíná JSON.
 gRPC je z těchto technologií nejmladší a jedná se o open source implementaci RPC (volání vzdálené procedury) od společnosti Google.
 
-S každou z těchto technologií implementuji aplikační rozhraní pro eshop a následně je porovnám ze stránek výkonu, zkušenosti s vývojem nebo dokumentace API.
+S každou z těchto technologií implementuji aplikační rozhraní pro e-shop a následně je porovnám ze stránek výkonu, zkušenosti s vývojem nebo dokumentace API.
 V teoretické části práce nejdříve tyto technologie představím. Poté se budu věnovat požadavkům na návrh backendu aplikace, na kterém tyto technologie budou demonstrovány. Další část se bude věnovat představení a výběru dostupných technologií pro tvorbu tohoto API.
-V praktické části se budu nejdříve věnovat implementaci jednotlivých backendů, včetně otestování jejich správné funkčnosti, a poté otestuji jejich výkon zátěžovými testy. Poslední část se bude věnovat věnovat samotnému srovnání těchto technologií.
+V praktické části se budu nejdříve věnovat implementaci jednotlivých backendů, včetně otestování jejich správné funkčnosti, a poté otestuji jejich výkon zátěžovými testy. Poslední část se bude věnovat samotnému srovnání těchto technologií.
 
 \end{introduction}
 
 \chapter{Analýza}
 Před tím, než se začnu věnovat návrhu a implementaci API, je důležité nejdříve vysvětlit co znamená pojem API a následně představím samotné technologie REST, GraphQL a gRPC.
 
-\section{API}
-Zkratka API označuje rozhraní pro programování aplikací. Jedná se o velmi důležitou součást vývoje, protože definuje způsob jak mezi sebou budou jednotlivé aplikace (nebo komponenty v rámci jedné aplikace) komunikovat. Dalo by se říci, že představuje smlouvu, kterou obě strany musí dodržet aby spolu mohly komunikovat
+\section{Aplication programming interface}
+Zkratka API označuje rozhraní pro programování aplikací. Jedná se o velmi důležitou součást vývoje, protože definuje způsob, jak mezi sebou budou jednotlivé aplikace (nebo komponenty v rámci jedné aplikace) komunikovat. Dalo by se říci, že představuje smlouvu, kterou obě strany musí dodržet, aby spolu mohly komunikovat.
 
 API se skládá ze dvou částí: 
 \begin{itemize}
-    \item Technické specifikace, která popisuje možnosti komunikace -- metody, které API vystavuje, vstupní data...
+    \item Technické specifikace, která popisuje možnosti komunikace -- metody, které API vystavuje, vstupní data atd.
     \item Softwarového rozhraní, které tuto specifikaci implementuje
 \end{itemize}
 
-API se dále mohou dělit podle dostupnosti na soukromá, partnerská nebo otevřená. Soukromá API se používají výhradně v rámci jedné organizace. Ikdyž aplikace, které tato API využívají mohou být veřejně dostupné, samotné rozhraní není.\\
+API se dále mohou dělit podle dostupnosti na soukromá, partnerská nebo otevřená. Soukromá API se používají výhradně v rámci jedné organizace. I když aplikace, které tato API využívají mohou být veřejně dostupné, samotné rozhraní není.
 
 Partnerská API jsou sdílená s business partnery a slouží hlavně k integraci systémů mezi partnery a společností, která poskytuje přístup k API.
 
 Otevřená API jsou volně dostupná všem vývojářům a je možné je využívat bez explicitního souhlasu poskytovatele těchto rozhraní nebo bez licenčních poplatků. Poplatky mohou být účtované za informace dostupné za rozhraním, ale dokumentace a testovací data musí být veřejně dostupná.
 
-Aplikační programovací rozhraní jdou také dělit podle způsobu použití. Může se jednat třeba o databázové API, které umožnuje komunikaci mezi aplikací a databázovým systémem, nebo API operačního systému, které definuje jak programy mohou využívat zdroje a služby operačního systému.
+Aplikační programovací rozhraní jdou také dělit podle způsobu použití. Může se jednat třeba o databázové API, které umožnuje komunikaci mezi aplikací a databázovým systémem, nebo API operačního systému, které definuje, jak programy mohou využívat zdroje a služby operačního systému.
 
-Nejběžnější, a z pohledu této práce také nejzajímavější, jsou však webová aplikační rozhraní, která poskytují data a funkcionality mezi webovými systémy reprezentující architekturu klient-server. Tato API typicky doručují požadavky z webových aplikací a odpovědi ze serverů prostřednictvím protokolu HTTP. Mezi jeden z nejpopulárnějších typů webových aplikační rozhraní patří REST, ikdyž v poslední době jeho popularita začíná pomalu klesat, viz obrázek \ref{google_trends_img} \cite{google-trends}.
+Nejběžnější, a z pohledu této práce také nejzajímavější, jsou však webová aplikační rozhraní, která poskytují data a funkcionality mezi webovými systémy reprezentující architekturu klient-server. Tato API typicky doručují požadavky z webových aplikací a odpovědi ze serverů prostřednictvím protokolu HTTP. Mezi jeden z nejpopulárnějších typů webových aplikační rozhraní patří REST, i když v poslední době jeho popularita začíná pomalu klesat, viz obrázek \ref{google_trends_img}.
 
 \begin{figure}[h]
     \includegraphics[width=\linewidth]{img/interest_trend.png}
-    \caption{Google Trends: REST (modrá), GraphQL (žlutá) a gRPC (červená)}
+    \caption{Google Trends: REST (modrá), GraphQL (žlutá) a gRPC (červená) \cite{google-trends}}
 	\label{google_trends_img}
 \end{figure}
 
 \section{REST}
 REST je velmi oblíbený architektonický styl pro tvorbu API, který vyniká svou jednoduchostí a čitelností. Na rozdíl např. od gRPC není orientován procedurálně, ale datově.
 
-Zkratka REST vyjadřuje pojem \textit{representational state transfer} a v roce 2000 ji zavedl Roy Fielding ve své dizertační práci \cite{fielding00}. Než vysvětlím, jaké požadavky musí REST API splňovat, je potřeba vysvětlit co to je zdroj (resource).
+Zkratka REST vyjadřuje pojem \textit{representational state transfer} a v roce 2000 ji zavedl Roy Fielding ve své dizertační práci \cite{fielding00}. Než vysvětlím, jaké požadavky musí REST API splňovat, je potřeba vysvětlit co to je \textit{zdroj (resource)}.
 
 Jakákoli informace, kterou lze pojmenovat, může být zdrojem. Může to být například obrázek, dočasná služba nebo kolekce jiných zdrojů. Stav zdroje v čase nazýváme reprezentace zdroje. Skládá se ze tří částí -- dat, metadat popisující tato data a hypermedia odkazů, která pomáhají klientům s přechodem do dalšího požadovaného stavu.
 
-Aby aplikační rozhraní mohlo být nazýváno RESTful, je potřeba aby splňovalo šest architektonických omezení \cite{restful_api}:
+Aby aplikační rozhraní mohlo být nazýváno RESTful, je potřeba aby splňovalo sedm architektonických omezení \cite{restful_api}:
 
 \subsection{Uniform Interface}
 Aplikováním principu generality na rozhraní komponenty můžeme zjednodušit architekturu celého systému. Tomu pomáhá několik omezení.
 \begin{itemize}
-    \item \textbf{Identifikace zdrojů} -- Rozhraní musí jednoznačně identifikovat každý zdroj, který je použit v interakci mezi klientem a serverem
+    \item \textbf{Identifikace zdrojů} -- Rozhraní musí jednoznačně identifikovat každý zdroj, který je použit v interakci mezi klientem a serverem.
     \item \textbf{Manipulace se zdroji skrz jejich reprezentaci} -- Zdroje v odpovědi serveru by měly mít jednotnou reprezentaci. Konzumenti API by pak měli použít tyto reprezentace k modifikování stavu zdrojů.
-    \item \textbf{Samopopisující se zprávy} -- Každá reprezentace zdroje by měla obsahovat dostatek informací aby bylo jasné jak ji zpracovat. Měla by také obsahovat jaké další možné operace může klient se zdrojem provádět.
+    \item \textbf{Samopopisující se zprávy} -- Každá reprezentace zdroje by měla obsahovat dostatek informací, aby bylo jasné, jak ji zpracovat. Měla by také obsahovat jaké další možné operace může klient se zdrojem provádět.
     \item \textbf{Hypermedia jako aplikační stav} -- Klient by měl mít pouze počáteční URI aplikace. Klientská aplikace by poté měla řídit veškeré interakce pomocí hyperlinků -- serverová odpověď obsahuje seznam dostupných operací.
 \end{itemize}
 
 \subsection{Client-server}
-Návrhový vzor klient-server vynucuje oddělení zodpovědností, což pomáhá tomu aby se klientské a serverové komponenty mohly vyvíjet nezávisle na sobě. Zatímco se server a klient vyvíjí, je potřeba dávat pozor, aby rozhraní mezi nimi nebylo porušeno.
+Návrhový vzor klient-server vynucuje oddělení zodpovědností, což pomáhá tomu, aby se klientské a serverové komponenty mohly vyvíjet nezávisle na sobě. Zatímco se server a klient vyvíjí, je potřeba dávat pozor, aby rozhraní mezi nimi nebylo porušeno.
 Oddělením uživatelského rozhraní (klienta) a manipulaci s daty (serveru) umožníme nezávislost uživatelského rozhraní na konkrétní platformě a zároveň zlepšíme škálovatelnost serveru zjednodušením jeho komponent. Servery nebo klienti mohou být také nahrazeny, pokud nedojde ke změně rozhraní
 
 \subsection{Stateless}
-Bezestavovost požaduje, že každý požadavek z klienta na server musí obsahovat všechny dostupné informace potřebné k jeho zpracování. Server nemůže využívat žádných uložených informací z předchozích interakcí -- chová se jako kdyby každý požadavek byl úplně nový. Z toho vyplývá, že klient je zodpovědný za udržování aplikačního stavu, pokud to je potřeba.
+Bezestavovost požaduje, aby každý požadavek z klienta na server obsahoval všechny dostupné informace potřebné k jeho zpracování. Server nemůže využívat žádných uložených informací z předchozích interakcí -- chová se jako kdyby každý požadavek byl úplně nový. Z toho vyplývá, že klient je zodpovědný za udržování aplikačního stavu, pokud to je potřeba.
 
 \subsection{Cacheable}
-Toto omezení požaduje, že každá odpověď serveru by se měla označit jako cachovatelná nebo necachovatelná. Pokud je cachovatelná, klient má po omezenou dobu právo tyto informace přepoužít v dalších požadavcích
+Toto omezení požaduje, aby každá odpověď serveru byla označená jako cachovatelná nebo necachovatelná. Pokud je cachovatelná, klient má po omezenou dobu právo tyto informace přepoužít v dalších požadavcích.
 
 \subsection{Layered system}
 REST umožnuje využití vrstvené architektury, kde například server A obsahuje API, na serveru B se ukládají data a na serveru C se autentizují požadavky. Klient nemůže zjistit, jestli je ke konkrétnímu serveru připojen přímo nebo přes prostředníka.
@@ -127,8 +128,8 @@ REST umožnuje využití vrstvené architektury, kde například server A obsahu
 Umožnění rozšíření funkcionality klienta stažením a spuštěním kódu ve formě appletů nebo skriptů ze serveru. Výsledkem je zjednodušení klienta, který nemusí obsahovat tolik předinstalovaných funkcí.
 
 \subsection{HTTP}
-Pro přenos dat mezi klientem a servrem se nejčastěji používá protokol HTTP, ikdyž REST není vázaný na tento protokol. Protože se ale tato práce zabývá pouze webovými API, budu se v této práci věnovat pouze přenosu pomocí HTTP.
-HTTP definuje množinu metod, které slouží k indikaci jakou akci chceme se zdrojem provést. Tyto metody se také označují jako \textit{HTTP verbs} \cite{http_metods}
+Pro přenos dat mezi klientem a serverem se nejčastěji používá protokol HTTP, i když REST není vázaný na tento protokol. Protože se ale tato práce zabývá pouze webovými API, budu se v této práci věnovat pouze přenosu pomocí HTTP.
+HTTP definuje množinu metod, které slouží k indikaci, jakou akci chceme se zdrojem provést. Tyto metody se také označují jako \textit{HTTP verbs} \cite{http_metods}
 
 \begin{itemize}
     \item \textbf{GET} -- slouží k získání reprezentace daného zdroje. Měla by být použita pouze k získávání informací.
@@ -139,19 +140,19 @@ HTTP definuje množinu metod, které slouží k indikaci jakou akci chceme se zd
     \item \textbf{PATCH} -- slouží k částečné změně cílového zdroje.
 \end{itemize}
 
-Metody, které nemění stav serveru označujeme jako bezpečné. Jedná se hlavně o GET a HEAD. V praxi ale bežně není možné tyto metody na straně serveru implementovat tak, aby neměnily vůbec žádný stav -- může například dojít k zalogování metody nebo obnovení cache.
+Metody, které nemění stav serveru označujeme jako bezpečné. Jedná se hlavně o GET a HEAD. V praxi ale běžně není možné tyto metody na straně serveru implementovat tak, aby neměnily vůbec žádný stav -- může například dojít k zalogování metody nebo obnovení cache.
 
 Další kategorie jsou idempotentní metody. Idempotence znamená, že pokud klient provede několik shodných požadavků, všechny budou mít stejný výsledek. Jedná se hlavně o GET, HEAD, PUT a DELETE. To ale neznamená, že server musí na každý požadavek odpovědět stejně.
 
 
 \subsubsection*{Stavové kódy}
-HTTP taktéž definuje stavové kódy odpovědí. Tyto kódy se v REST api využívají k informování klienta o výsledku prováděné operace. Tyto kódy se dělí do pěti kategorií, které se od sebe liší prvním číslem. Kódy začínající číslem 100 jsou informační -- komunikují informace na úrovni transportního protokolu \cite{http_codes}. Kódy začínající číslem 200 informují o úspěšném zpracování požadavku. Kódy s číslem 300 značí, že je potřeba dodatečná akce od klienta. Číslo 400 označuje chybový stav na straně klienta. Poslední jsou pak kódy s číslem 500, které označují chybu na straně serveru. Nejčastěji se setkáme s následujícími kódy:
+HTTP taktéž definuje stavové kódy odpovědí. Tyto kódy se v REST API využívají k informování klienta o výsledku prováděné operace. Tyto kódy se dělí do pěti kategorií, které se od sebe liší prvním číslem. Kódy začínající číslem 100 jsou informační -- komunikují informace na úrovni transportního protokolu \cite{http_codes}. Kódy začínající číslem 200 informují o úspěšném zpracování požadavku. Kódy s číslem 300 značí, že je potřeba dodatečná akce od klienta. Číslo 400 označuje chybový stav na straně klienta. Poslední jsou pak kódy s číslem 500, které označují chybu na straně serveru. Nejčastěji se setkáme s následujícími kódy:
 \begin{itemize}
     \item \textbf{200 OK} -- Požadavek proběhl v pořádku. Na rozdíl od kódu 204 by odpověď měla obsahovat i data, a je závislá na použité metodě. Například pro GET by se mělo jednat o reprezentaci zdroje, zatímco pro POST se může jednat o výsledek operace.
     \item \textbf{201 Created} -- Požadavek proběhl v pořádku a jeho výsledkem je vytvoření zdroje. Typicky se jedná o vytvoření zdroje uvnitř kolekce pomocí POST metody.
     \item \textbf{204 No Content} -- Server naplnil požadavek, ale není potřeba vrátit žádnou hodnotu. Například při operaci DELETE, kdy mažeme zdroj z kolekce. Tělo odpovědi nesmí obsahovat žádná data.
-    \item \textbf{400 Bad Request} -- Požadavek je pro server nečitelný. Jedná se o obecný chybový kód, který se použije pokud žádný jiný není vhodný. Může se například jednat o špatný formát požadavku. Klient by stejný požadavek neměl opakovat beze změny.
-    \item \textbf{401 Unauthorized} -- Klient není ověřen. Požadavek může být opakován s doplněnými informacemi o oveření.
+    \item \textbf{400 Bad Request} -- Požadavek je pro server nečitelný. Jedná se o obecný chybový kód, který se použije, pokud žádný jiný není vhodný. Může se například jednat o špatný formát požadavku. Klient by stejný požadavek neměl opakovat beze změny.
+    \item \textbf{401 Unauthorized} -- Klient není ověřen. Požadavek může být opakován s doplněnými informacemi o ověření.
     \item \textbf{403 Forbidden} -- Klient nemá dostatečná práva. Narozdíl od 401, identita klienta je známa.
     \item \textbf{404 Not Found} -- Server nenašel požadovaný zdroj.
     \item \textbf{405 Method Not Allowed} -- Klient použil metodu, kterou daný zdroj nepodporuje. Odpověď musí obsahovat hlavičku s výčtem podporovaných metod.
@@ -160,11 +161,11 @@ HTTP taktéž definuje stavové kódy odpovědí. Tyto kódy se v REST api využ
 \end{itemize}
 
 \section{GraphQL}
-GraphQL bylo vytvořeno společností Facebook v roce 2012. Hlavním důvodem jeho vzniku byla narůstající potřeba API pro získávání dat, které bude dostatečně silné a zároveň bude jednoduché na používání. V roce 2015 pak bylo GraphQL zpřístupněno jako opensource \cite{graphql_fb}. Od této doby vznikla spousta implementací v různých jazycích jako je JavaScript, Java, Python a mnoha dalších. GraphQL sestává z typového systému, dotazovacího jazyka, statické validace a typové introspekce.
+GraphQL bylo vytvořeno společností Facebook v roce 2012. Hlavním důvodem jeho vzniku byla narůstající potřeba API pro získávání dat, které bude dostatečně silné a zároveň bude jednoduché na používání. V roce 2015 pak bylo GraphQL zpřístupněno jako open-source \cite{graphql_fb}. Od této doby vznikla spousta implementací v různých jazycích jako je JavaScript, Java, Python a mnoha dalších. GraphQL sestává z typového systému, dotazovacího jazyka, statické validace a typové introspekce.
 
 \subsection{Základní vlastnosti}
 \subsubsection*{Definuje strukturu dat}
-První věcí, kterou si na GraphQL můžeme všimout je to, že struktura dat posílaných na server se velmi podobá struktuře dat vrácených v odpovědi, viz obrázek \ref{graphql-query}. To přispívá ke zjednošení psaní dotazů -- pokud víme jaká data server potřebuje -- a také víme jaký formát dat očekávat. To je jedna z velkých výhod GraphQL, klient si určuje formát dat posílaných ze serveru a má tak přizpůsobená data pro své požadavky.
+První věcí, kterou si na GraphQL můžeme všimnout je to, že struktura dat posílaných na server se velmi podobá struktuře dat vrácených v odpovědi, viz obrázek \ref{graphql-query}. To přispívá ke zjednodušení psaní dotazů -- pokud víme jaká data server potřebuje -- a také víme jaký formát dat očekávat. To je jedna z velkých výhod GraphQL, klient si určuje formát dat posílaných ze serveru a má tak přizpůsobená data pro své požadavky.
 
 \begin{figure}[h]
     \includegraphics[width=\linewidth]{img/graphql-query.png}
@@ -187,13 +188,13 @@ Díky typovému systému máme možnost prozkoumávat schéma a zjistit dostupn�
 Introspekce také vytváří platformu pro různé nástroje -- od generování kódu po tvorbu dokumentace.
 
 \subsubsection*{Bez verzí}
-Pokud v REST API chceme zachovat stávající funkčnost klientů při přidávání nových funkcionalit, je potřeba zavést verzování API. V praxi je to často řešeno prefixem s číslem verze v URI zdroje, např. \mintinline{text}{http:localhost/v1/products}. S přibývajícím počtem verzí pak roste náročnost úprav API -- pokud budeme například opravovat chybu v aplikaci, je potřeba zajistit, že chyba bude opravena ve všech verzích API, což je velmi časově náročné.
+Pokud v REST API chceme zachovat stávající funkčnost klientů při přidávání nových funkcionalit, je potřeba zavést verzování API. V praxi je to často řešeno prefixem s číslem verze v URI zdroje,\\*např. \mintinline{text}{http:localhost/v1/products}. S přibývajícím počtem verzí pak roste náročnost úprav API -- pokud budeme například opravovat chybu v aplikaci, je potřeba zajistit, že chyba bude opravena ve všech verzích API, což je velmi časově náročné.
 
-Pokud v GraphQL navrhneme API chytře, tomuto problému se vyhneme. Protože klient si určuje podobu dat sám, server může být jednodušší a obecnější. Místo upravování stávajících funkcionalit, které by poškodily stávající kompatibilitu, budeme přidávat nové. Tento přístup funguje hlavně proto, že podobu vrácených dat si určuje klient, což zabrání případnému nabobtnávání. Atributy, které dále už nebudou podporovány mohou být označeny dekorátorem \mintinline{text}{@deprecated} jako zastaralé a dále budou fungovat aby nebyla porušena zpětná kompatibilita. Díky těmto postupným změnám máme možnost vyhnout se verzování API.
+Pokud v GraphQL navrhneme API chytře, tomuto problému se vyhneme. Protože klient si určuje podobu dat sám, server může být jednodušší a obecnější. Místo upravování stávajících funkcionalit, které by poškodily stávající kompatibilitu, budeme přidávat nové. Tento přístup funguje hlavně proto, že podobu vrácených dat si určuje klient, což zabrání případnému nabobtnávání. Atributy, které dále už nebudou podporovány mohou být označeny dekorátorem \mintinline{text}{@deprecated} jako zastaralé a dále budou fungovat, aby nebyla porušena zpětná kompatibilita. Díky těmto postupným změnám máme možnost vyhnout se verzování API.
 
 \subsection{Typový systém}
 Protože GraphQL není závislé na konkrétním programovacím jazyku, definuje svoje vlastní typové schéma -- typicky v souboru \mintinline{text}{schema.gql}
-Hlavním stavebním prvek schémat je \textit{Object type}. To je obecný typ, který obsahuje několik dalších atributů. Jeho definice může vypadat následovně. 
+Hlavním stavebním prvkem schémat je \textit{Object type}. To je obecný typ, který obsahuje několik dalších atributů. Jeho definice může vypadat následovně. 
 
 \begin{listing}[H]
 \begin{minted}{gql.py:GraphqlLexer -x}
@@ -210,16 +211,16 @@ type Cart {
 
 \begin{itemize}
     \item \textbf{Cart} definuje \textit{Object type}
-    \item \textbf{id} je typu Float. Vykřičník znamená, že tento artibut je \textit{non-nullable}, což slibuje, že hodnota vždy bude odpovídat danému typu, v tomto případě \textit{Float}
+    \item \textbf{id} je typu Float. Vykřičník znamená, že tento atribut je \textit{non-nullable}, což slibuje, že hodnota vždy bude odpovídat danému typu, v tomto případě \textit{Float}
     \item \textbf{items} reprezentuje pole typu \textit{CartItem}. CartItem je další uživatelem definovaný \textit{Object type}
     \item \textbf{totalPrice} a \textbf{userId} jsou opět typu \textit{Float}
 \end{itemize}
 
 Každý atribut typu \textit{Object type} může mít libovolný počet argumentů. Každý z těchto argumentů má své jméno. Narozdíl třeba od JavaScriptu, kde funkce přebírají seznam seřazených argumentů, v GraphQL jsou předávány jménem.
 
-Ikdyž ve schématu bude nejvíce zastoupen \textit{Object type}, existují ještě tři velmi důležité typy -- \textit{Query}, \textit{Mutation} a \textit{Subscription}. Jedná se o jediné typy operací, které v GraphQL můžeme provádět.
+I když ve schématu bude nejvíce zastoupen \textit{Object type}, existují ještě tři velmi důležité typy -- \textit{Query}, \textit{Mutation} a \textit{Subscription}. Jedná se o jediné typy operací, které v GraphQL můžeme provádět.
 
-Query se používá pouze pro čtení dat ze serveru, nesmí měnit stav serveru. Mutation se naopak používá právě když je potřeba stav serveru modifikovat. Přirovnáme-li to k RESTu, query jsou obdobou k metodě \mintinline{text}{GET} a mutation k \mintinline{text}{POST}, \mintinline{text}{PUT} nebo \mintinline{text}{DELETE}. Mutation také může vracet data, ale ta by měla být relevantní k provádené operaci.
+Query se používá pouze pro čtení dat ze serveru, nesmí měnit stav serveru. Mutation se naopak používá právě když je potřeba stav serveru modifikovat. Přirovnáme-li to k RESTu, query jsou obdobou k metodě \mintinline{text}{GET} a mutation k \mintinline{text}{POST}, \mintinline{text}{PUT} nebo \mintinline{text}{DELETE}. Mutation také může vracet data, ale ta by měla být relevantní k prováděné operaci.
 Posledním typem je Subscription. Stejně jako dotazy, subscription slouží k získávání dat, ale rozdíl je v tom, že se jedná o dlouho trvající operace. Udržují aktivní spojení se serverem a umožňují tak serveru notifikovat klienta o změnách objektů, ke kterým se přihlásil. Subscription jsou vhodné hlavně pro real-time data -- například sledování ceny akcií.
 
 \begin{listing}[H]
@@ -247,10 +248,10 @@ Stavebním prvek typového systému je typ \textit{Scalar}, reprezentující lis
 \end{itemize}
 V mnoha implementacích GraphQL existuje možnost pro definici vlastních skalárních typů. Často je potřeba definovat si typ pro reprezentaci data a času. Je pak naší zodpovědností zajistit serializaci, deserializaci a validaci tohoto typu. Výčtový typ \textit{Enum} je speciálním skalárním typem a slouží reprezentaci dat, která mohou nabývat pouze několika předem daných hodnot. 
 
-Typ \textit{Input} pak ještě slouží slouží k definování dat, která poskytuje uživatel v dotazu a má podobné vlastnosti jako \textit{Object type}
+Typ \textit{Input} pak ještě slouží k definování dat, která poskytuje uživatel v dotazu a má podobné vlastnosti jako \textit{Object type}
 
 \subsection{Dotazovací jazyk}
-GraphQL je deklarativní jazyk. To znamená, že specifikujeme jak výsledek má vypadat, místo postupu jak by měl být nalezen. Nejlépe je to vidět na příkladu. Uvažujme následující dotaz:
+GraphQL je deklarativní jazyk. To znamená, že specifikujeme jak výsledek má vypadat, místo postupu, jak by měl být nalezen. Nejlépe je to vidět na příkladu. Uvažujme následující dotaz:
 
 \begin{listing}[H]
 \begin{minted}{gql.py:GraphqlLexer -x}
@@ -272,9 +273,9 @@ query {
 
 Na první řádce specifikujeme, že se jedná o dotaz. Dále je pak potřeba specifikovat jméno dotazu \mintinline{text}{allProducts}, za kterým následuje objekt se vstupními daty pro filtrování produktů -- v tomto případě se jedná o minimální a maximální cenu produktu -- \mintinline{text}{minPrice} a \mintinline{text}{maxPrice}. Poté už jen následuje objekt se samotným výčtem atributů, jejichž hodnoty chceme získat.
 
-Můžeme si všimnout, že atribut \mintinline{text}{status} je typu objekt. Protože všechny typy listů dotazu musí být skalární objekty, je zde potřeba určit nějakou podmnožinu atributů, které skalární budou, jinak by dotaz skončil chybou. Aby se dotaz mohl vyhodnotit, je vždy potřeba specifikovat alespoň jeden atribut.
+Můžeme si všimnout, že atribut \mintinline{text}{status} je typu \mintinline{text}{Object}. Protože všechny typy listů dotazu musí být skalární objekty, je zde potřeba určit nějakou podmnožinu atributů, které skalární budou, jinak by dotaz skončil chybou. Aby se dotaz mohl vyhodnotit, je vždy potřeba specifikovat alespoň jeden atribut.
 
-Na příkladu níže můžeme vidět výsledek tohoto dotazu. Pokud se podařilo dotaz v pořádku provést, najdeme odpověd vždy v objektu \mintinline{text}{data}. Snadno nahlédneme, že odpověď serveru je skutečně velmi podobná struktuře původního dotazu. Hlavními rozdíly jsou absence vstupních dat a to, že produkt je obalený v hranatých závorkách -- to proto, že tento dotaz vrací pole objektů.
+Na příkladu níže můžeme vidět výsledek tohoto dotazu. Pokud se podařilo dotaz v pořádku provést, najdeme odpověď vždy v objektu \mintinline{text}{data}. Snadno nahlédneme, že odpověď serveru je skutečně velmi podobná struktuře původního dotazu. Hlavními rozdíly jsou absence vstupních dat a to, že produkt je obalený v hranatých závorkách -- to proto, že tento dotaz vrací pole objektů.
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -295,7 +296,7 @@ Na příkladu níže můžeme vidět výsledek tohoto dotazu. Pokud se podařilo
 \end{listing}
 
 \subsection{Statická validace}
-Díky definovanému schématu je jednoduché validovat dotazy -- klient snadno rozpozná zda nějaký dotaz je validní, a to právě ještě před odesláním na server. Typickými chybami mohou být chybějící vstupní data, přistupování k atributům nějakého skalárního atributu nebo naopak nepřistupování k žádnému atributu neskalárního objektu.
+Díky definovanému schématu je jednoduché validovat dotazy -- klient snadno rozpozná, zda nějaký dotaz je validní, a to právě ještě před odesláním na server. Typickými chybami mohou být chybějící vstupní data, přistupování k atributům nějakého skalárního atributu nebo naopak nepřistupování k žádnému atributu neskalárního objektu.
 
 \subsection{Introspekce}
 \begin{sloppypar}
@@ -319,7 +320,7 @@ Introspekci mohou využívat i různé nástroje -- například díky ní může
 \end{listing}
 
 \section{gRPC}
-gRPC, plným názvem Google remote procedure call, je open sourcový RPC systém původně vyvinutý společnostní Google v roce 2015. RPC v překladu znamená volání vzdálené procedury. Klientská aplikace tedy může volat nějakou proceduru na serveru tak, jako kdyby to byl lokální objekt.
+gRPC, plným názvem Google remote procedure call, je open-source RPC systém původně vyvinutý společnostní Google v roce 2015. RPC v překladu znamená volání vzdálené procedury. Klientská aplikace tedy může volat nějakou proceduru na serveru tak, jako kdyby to byl lokální objekt.
 
 gRPC je následník RPC systému Stubby, který Google používal pro propojení velkého množství mikroslužeb napříč svými datacentry po více než desetiletí \cite{grpc}. Stubby ale nebyl nijak standardizován a byl až příliš úzce závislý na interní infrastruktuře na to, aby ho Google mohl zpřístupnit veřejnosti. S rozvojem technologií jako je \mintinline{text}{HTTP/2} a dalších, bylo rozhodnuto, že je čas Stubby přepracovat.
 
@@ -337,13 +338,13 @@ Níže jsem vybral několik hlavních principů a požadavků, na jejichž zákl
     \item \textbf{Zdarma a otevřené} -- všechny základní funkcionality by měly být dostupné zdarma.
     \item \textbf{Interoperabilita a dosah} -- protokol musí být schopný přežít cestu internetem.
     \item \textbf{Obecné a výkonné} -- gRPC musí být vhodné pro velkou škálu způsobů užití a zároveň musí zůstat výkonné.
-    \item \textbf{Vrstvené} -- klíčové vrstvy protokolu se musejí vyvíjet nezávisle na sobě. Nesmí se stát, že úprava na síťové vrstvě způsobí přeřušení chodu na vrstvě aplikační.
+    \item \textbf{Vrstvené} -- klíčové vrstvy protokolu se musejí vyvíjet nezávisle na sobě. Nesmí se stát, že úprava na síťové vrstvě způsobí přerušení chodu na vrstvě aplikační.
     \item \textbf{Blokující a neblokující operace} -- podpora synchronní a asynchronní komunikace mezi klientem a serverem je klíčová.
     \item \textbf{Standardizované stavové kódy} -- omezení množiny stavových kódů si klade za cíl jasnější ošetřování chyb.
 \end{itemize}
 
 \subsection{Protocol buffer}
-Protože gRPC je multiplatformní, můžeme mít například server implementovaný v Javě a pak několik klientských aplikací napsaných v různých jazycích, např. JavaScriptu nebo Ruby, viz obrázek \ref{grpc-overview}. Aby mohla klientská aplikace volat vzdálené metody na serveru jako lokální, je potřeba zavést v jakém formátu si budou server a klient vyměňovat zprávy. K tomu se využívají \textit{Protocol buffers}, ikdyž je možné využívat i jiné formáty pokud je to potřeba. Je to open-source mechanizmus od Googlu říkající jak serializovat strukturovaná data.
+Protože gRPC je multiplatformní, můžeme mít například server implementovaný v Javě a pak několik klientských aplikací napsaných v různých jazycích, např. JavaScriptu nebo Ruby, viz obrázek \ref{grpc-overview}. Aby mohla klientská aplikace volat vzdálené metody na serveru jako lokální, je potřeba zavést v jakém formátu si budou server a klient vyměňovat zprávy. K tomu se využívají \textit{Protocol buffers}, i když je možné využívat i jiné formáty, pokud je to potřeba. Jedná se o open-source mechanizmus od Googlu říkající jak serializovat strukturovaná data.
 
 Prvním krokem je definice struktury zpráv v \textit{.proto} souboru -- jedná se o obyčejný textový soubor s koncovkou \mintinline{text}{.proto}. Základním stavebním prvkem jsou zprávy. To je nejmenší logický celek obsahující dvojice jméno a hodnota nazývané pole. Každá definice pole obsahuje typ, jméno a číslo pole. Soupis všech dostupných skalárních typů je k dispozici zde \cite{proto_scalars}
 
@@ -364,11 +365,11 @@ message Product {
 \label{lst:protobuf_example}
 \end{listing}
 
-Každé pole má svoje unikátní číslo. Toto číslo identifikuje pole serializované v binárním formátu a nemělo by se měnit. Protože k zakódování čísel od 1 do 15 nám stačí jediný bajt, je vhodné tato čísla použít pro pole, která se ve zprávách budou vyskytovat velmi často. Může být dobrý nápad si některá čísla nechat volná pro budoucí potřebu.
+Každé pole má svoje unikátní číslo. Toto číslo identifikuje pole serializované v binárním formátu a nesmí se změnit, jinak by došlo k přerušení fungování existujících klientů. Protože k zakódování čísel od 1 do 15 nám stačí jediný bajt, je vhodné tato čísla použít pro pole, která se ve zprávách budou vyskytovat velmi často. Může být dobrý nápad si některá čísla nechat volná pro budoucí potřebu.
 
 Jedna věc, na kterou je potřeba si dát pozor při navrhování zpráv, je že pokud při parsování zprávy nějaký element chybí, jeho odpovídající pole bude naplněno výchozí hodnotou. Pro skalární pole po parsování nemůžeme určit zda se tato výchozí hodnota ve zprávě skutečně vyskytovala nebo nebyla vůbec nastavena. 
 
-Jakmile máme definované zprávy, je potřeba použít kompilátor protocol buffer \mintinline{text}{protoc}, který pak vygeneruje přístupové třídy v našem zvoleném jazyce. Tyto třídy pak obsahují metody na získávání a nastavování dat do zpráv a také metody na serializaci a deserializaci.
+Jakmile máme definované zprávy, je potřeba použít kompilátor pro protocol buffer \mintinline{text}{protoc}, který pak vygeneruje přístupové třídy v našem zvoleném jazyce. Tyto třídy pak obsahují metody na získávání a nastavování dat do zpráv a také metody na serializaci a deserializaci.
 
 \subsubsection*{Definice služeb}
 gRPC je stejně jako většina RPC systémů založena na myšlence definování služeb, které pak definují své metody a jejich parametry. Je možné definovat čtyři typy metod.
@@ -376,7 +377,7 @@ gRPC je stejně jako většina RPC systémů založena na myšlence definování
 \begin{itemize}
     \item \textbf{Unary} -- Klient pošle jeden požadavek na server a server mu pošle jednu odpověď zpět.
     \item \textbf{Server streaming} -- Klient pošle jeden požadavek na server a odpovědí získá stream, ve kterém mu server zašle sekvenci zpráv. Klient čte data tak dlouho dokud mu chodí zprávy.
-    \item \textbf{Client streaming} -- Klient zasílá sekvenci zpráv na server. Jakmile klient dokončí posílání zpráv, počká až je server přečtě a vrátí mu odpověď.
+    \item \textbf{Client streaming} -- Klient zasílá sekvenci zpráv na server. Jakmile klient dokončí posílání zpráv, počká až je server přečte a vrátí mu odpověď.
     \item \textbf{Bidirectional streaming} -- Klient a server posílají sekvenci zpráv pomocí read-write streamu. Tyto dva streamy operují nezávisle na sobě, takže klient a server mohou číst a posílat zprávy v jakémkoli pořadí.
 \end{itemize}
 
@@ -398,14 +399,27 @@ service ProductRegister {
 Metoda musí být vždy definována uvnitř nějaké služby -- na příkladě  výše se jedná o službu \mintinline{text}{ProductRegister}. Poté už můžeme definovat samotnou metodu -- první je klíčové slovo \mintinline{text}{rpc}, za kterým následuje jméno metody. A poté nadefinujeme vstupní a výstupní parametry této metody, které musí být typu zpráva.
 
 \subsubsection*{Kompilace protocol bufferu}
-Uvažujme zprávu \mintinline{text}{Product} z příkladu \ref{lst:protobuf_example} s polem  \mintinline{text}{name} a cílový jazyk JavaScript. Kompilátor pak vygeneruje třídu \mintinline{text}{Product} s metodou \mintinline{js}{setName(value)} a dalšími potřebnými metodami.
+Uvažujme zprávu \mintinline{text}{Product} z příkladu \ref{lst:protobuf_example} s polem  \mintinline{text}{name} a cílový jazyk JavaScript. Kompilátor pak vygeneruje třídu \mintinline{text}{Product} s metodou \\* \mintinline{js}{setName(value)} a dalšími potřebnými metodami.
 
 Protoc kompilátor poté ke kódu protocol buffer zpráv také vygeneruje gRPC klientský a serverový kód. Výstup kompilátoru pak záleží na naší zvolené platformě. Pro jazyk C++ vygeneruje odpovídající .h a .cc soubory s třídou pro každou zprávu definovanou v proto souboru. Pro Javu dojde k vygenerování odpovídajících .java tříd společně se speciální Builder třídou sloužící k výrobě instancí tříd jednotlivých zpráv.
 
-Pokud však chceme používat gRPC s jazykem JavaScript, máme na výběr dva způsoby. Prvním je načítat dynamicky deskriptory služeb a klientských stubů přímo ze samotných proto souborů pomocí knihovny \mintinline{text}{@grpc/proto-loader}.
-Druhý způsob je použití kompilátoru. Dříve zmínený kompilátor protoc bohužel nepodporuje JavaScript a je potřeba použít kompilátor \mintinline{text}{grpc_tools_node_protoc}, který je dostupný ve správci balíčků npm. Ten pak vygeneruje třídy zpráv a metody na jejich manipulaci.
+Pokud však chceme používat gRPC s jazykem JavaScript, máme na výběr dva způsoby. Prvním je načítat dynamicky deskriptory služeb a klientských stubů přímo ze samotných proto souborů pomocí knihovny \\* \mintinline{text}{@grpc/proto-loader}.
+Druhý způsob je použití kompilátoru. Dříve zmíněný kompilátor protoc bohužel nepodporuje JavaScript a je potřeba použít kompilátor \mintinline{text}{grpc_tools_node_protoc}, který je dostupný ve správci balíčků npm. Ten pak vygeneruje třídy zpráv a metody na jejich manipulaci.
 
-\subsubsection*{Verzování}
+\subsection{Chybové kódy}
+Obdobně jako HTTP, gRPC definuje množinu chybových kódů \cite{grpc_codes}. Následující kódy jsou vhodné pro ošetřování chyb při implementaci API, protože nikdy nejsou vygenerovány gRPC knihovnou.
+
+\begin{itemize}
+  \item \textbf{3 INVALID\_ARGUMENT} -- klient poskytl neplatný argument.
+  \item \textbf{5 NOT\_FOUND} -- požadovaná entita nebyla nalezena.
+  \item \textbf{6 ALREADY\_EXISTS} -- klient se pokusil o vytvoření existující entity.
+  \item \textbf{9 FAILED\_PRECONDITION} -- operace byla zamítnuta, protože server není v požadovaném stavu pro její vykonání. V případě API e-shopu se může jednat např. o zamítnutí vytvoření objednávky z prázdného košíku.
+  \item \textbf{10 ABORTED} -- operace byla zrušena, typicky kvůli problému souběžnosti -- např. zrušení databázové transakce.
+  \item \textbf{11 OUT\_OF\_RANGE} -- operace byla prováděna mimo platný rozsah -- např. čtení za koncem souboru.
+  \item \textbf{15 DATA\_LOSS} -- Neobnovitelná ztráta dat.
+\end{itemize}
+
+\subsection{Verzování}
 Filozofie gRPC je taková, že služby by se měly snažit být co nejvíce zpětně kompatibilní. To má několik výhod -- existující klienti budou nadále fungovat, stačí udržovat pouze jednu verzi služby a další. V gRPC jsou změny kategorizovány do tří kategorií.
 
 \begin{itemize}
@@ -414,56 +428,56 @@ Filozofie gRPC je taková, že služby by se měly snažit být co nejvíce zpě
     \item \textbf{Protocol breaking changes} -- Patří sem například přejmenování pole, změna čísla pole nebo odstranění služby.
 \end{itemize}
 
-Protobuf podporuje verzování API specifikací verze do volitelného označení balíčku, např. \mintinline{protobuf}{package products.v1;}. 
+Protocol buffer podporuje verzování API specifikací verze do volitelného označení balíčku, např. \mintinline{text}{package products.v1;}. 
 
 \section{Node.js}
-JavaScript byl vytvořen společností Netscape jako skriptovací nástroj pro manipulaci s webovými stránkami uvnitř prohlížeče. Tato společnost se také neúspšně snažila zavést prostředí \textit{Netscape LiveWire} pro běh JavaScriptu na serveru. Server-side JavaScript se tak stal populární až v roce 2009 s uvedením Node.js.
+JavaScript byl vytvořen společností Netscape jako skriptovací nástroj pro manipulaci s webovými stránkami uvnitř prohlížeče. Tato společnost se také neúspěšně snažila zavést prostředí \textit{Netscape LiveWire} pro běh JavaScriptu na serveru. Server-side JavaScript se tak stal populární až v roce 2009 s uvedením Node.js.
 
-Node.js \cite{node} je open-sourcové a meziplatformní prostředí pro běh JavaScriptu. Je postavené na Google V8 JavaScript engine \cite{v8}, který je také jádrem prohlížeče Google Chrome.
+Node.js \cite{node} je open-source a meziplatformní prostředí pro běh JavaScriptu. Je postavené na Google V8 JavaScript engine \cite{v8}, který je také jádrem prohlížeče Google Chrome.
 
 Node.js aplikace běží v jediném procesu a pro příchozí požadavky nevytváří nová vlákna. Když Node.js provádí I/O operaci, například čtení ze sítě nebo databáze, místo blokování vlákna bude Node.js pokračovat až po vrácení výsledku této operace. Toto umožňuje obsluhovat vysoký počet příchozích spojení bez potřeby správy vláken.
 
-Jedna z největších výhod Node.js je, že umožňuje frontendovým vývojářům, kteří píšou klientský kód v JavaScriptu, psát serverový kód bez nuntnosti učit se další jazyk. 
+Jedna z největších výhod Node.js je, že umožňuje frontendovým vývojářům, kteří píšou klientský kód v JavaScriptu, psát serverový kód bez nutnosti učit se další jazyk. 
 Při psaní JavaScriptu pro Node.js nemáme dostupné žádné objekty jako document nebo window, které nam poskytuje prohlížeč. Máme ale kontrolu nad prostředím, můžeme si vybrat jakou verzi Node.js budeme používat a není potřeba řešit podporu pro všechny různé verze prohlížeče.
 
 \subsection{npm}
 npm \cite{npm}, plným jménem node package manager, je výchozí správce balíčků pro Node.js (alternativou je např. yarn\cite{yarn}). Sestává z klienta pro příkazovou řádku a online databáze balíčků, která se označuje jako npm registry.
 
 \subsection{TypeScript}
-TypeScript je open-source programovací jazyk založený na JavaScriptu, který vyvinula a udržuje společnost Microsoft \cite{typescript}. V podstatě se jedná o nadmnožinu JavaScriptu, která je rozšířená o statické typování. Protože se jedná o nadmnožinu, validní JavaScriptové programy jsou také platnými TypeScriptovými programy. Před spuštěním je pak TypeScript transpilován do čistého JavaScriptu.
+TypeScript je open-source programovací jazyk založený na JavaScriptu, který vyvinula a udržuje společnost Microsoft \cite{typescript_2015}. V podstatě se jedná o nadmnožinu JavaScriptu, která je rozšířená o statické typování. Protože se jedná o nadmnožinu, validní JavaScriptové programy jsou také platnými TypeScriptovými programy. Před spuštěním je pak TypeScript transpilován do čistého JavaScriptu.
 
 Oproti čistému JavaScriptu přináší TypeScript několik výhod:
 
 \begin{itemize}
-  \item \textbf{Včasná detekce chyb} -- díky statickému typování je velké množství chyb detekováno již při transpilaci do JavaScriptu. Výzkum odhalil, že TypeScript odhalí 15\% běžných chyb při kompilaci \cite{typescript_bugs}.
+  \item \textbf{Včasná detekce chyb} -- díky statickému typování je velké množství chyb detekováno již při transpilaci do JavaScriptu. Výzkum odhalil, že TypeScript odhalí 15 \% běžných chyb při kompilaci \cite{typescript_bugs}.
   \item \textbf{Lepší čitelnost} -- Díky typům je možné psát kód, který bude více sebepopisující. Lepší čitelnost ocení hlavně vývojáři pracující v týmech.
   \item \textbf{Podpora IDE} -- Vývojová prostředí lépe našeptávají a umožňují lepší navigaci napříč kódem projektu. Poskytují vývojáři také zpětnou vazbu -- některé chyby lze odhalit ještě před kompilací. Protože TypeScript je vyvinutý společností Microsoft, je tento jazyk nejvíce podporován vývojovým prostředím Visual Studio Code, které je také vyvíjené Microsoftem. V současnosti je však TypeScript podporován i mnoha dalšími vývojovými prostředími -- např. WebStorm nebo Atom.
 \end{itemize}
 
-S těmito výhodami přichází i několik nevýhod. Na naučení se syntaxi TypeScriptu je nutné věnovat nějaký čas. Typové anotace a \textit{syntactic sugar} přinášejí potřebu napsat více kódu než by bylo v JavaScriptu nutné. Ikdyž proces transpilace je automatizovaný, je nutné před samotným vývojem tento proces nakonfigurovat -- toto může být malá výzva, obzvlášť pro vývojáře, který nemá s TypeScriptem žádné zkušenosti.
+S těmito výhodami přichází i několik nevýhod. Na naučení se syntaxi TypeScriptu je nutné věnovat nějaký čas. Typové anotace a \textit{syntactic sugar} přinášejí potřebu napsat více kódu, než by bylo v JavaScriptu nutné. I když proces transpilace je automatizovaný, je nutné před samotným vývojem tento proces nakonfigurovat -- toto může být malá výzva, obzvlášť pro vývojáře, který nemá s TypeScriptem žádné zkušenosti.
 
 Kód TypeScriptu je transpilován do JavaScriptu, takže je možné bez problémů vyvíjet klientské i serverové aplikace. Stačí si pouze správně zvolit cílovou verzi JavaScriptu, do které bude kód transpilován.
 
 \chapter{Návrh}
-Aby srovnání bylo co nejsnáze představitelné a zároveň reflektovalo běžný způsob užití, rozhodl jsem se pro implementaci API eshopu. Je to typický příklad, se kterým se vývojář může setkat při své práci a zároveň je tento příklad dost obecný na to, aby si ho čtenář mohl jednoduše převést na jiný. 
+Aby srovnání bylo co nejsnáze představitelné a zároveň reflektovalo běžný způsob užití, rozhodl jsem se pro implementaci API e-shopu. Je to typický příklad, se kterým se vývojář může setkat při své práci a zároveň je tento příklad dost obecný na to, aby si ho čtenář mohl jednoduše převést na jiný. 
 
 Začal jsem s návrhem REST API, pro jehož popis jsem zvolil specifikaci OpenAPI. GraphQL a gRPC API pak budou z tohoto návrhu vycházet -- REST zdrojům budou odpovídat GraphQL Resolvery a gRPC služby.
 
 \section{OpenAPI Specification}
 OpenAPI Specification definuje standard pro HTTP aplikační rozhraní, který je nezávislý na konkrétním programovacím jazyce a je čitelný jak pro počítač tak pro člověka.
 % vice o openapi, co to je
-Díky strojově čitelnému formátu existuje nespočetné množství nástrojů, které programátorům usnadňují práci s API. Tyto nástroje sahají od jednoduchých validátorů, přes mockování serverů, čehož často využívají frontend vývojáři, po generátory zdrojového kódu nebo dokumentace API. To nás přivádí k dvěma hlavním přístupům navrhování REST API -- \textit{Design First} nebo \textit{Code First} \cite{api_design_approach}.
+Díky strojově čitelnému formátu existuje nespočetné množství nástrojů, které programátorům usnadňují práci s API. Tyto nástroje sahají od jednoduchých validátorů, přes mockování serverů, čehož často využívají frontend vývojáři, po generátory zdrojového kódu nebo dokumentace API. To nás přivádí ke dvěma hlavním přístupům navrhování REST API -- \textit{Design First} nebo \textit{Code First} \cite{api_design_approach}.
 
 \begin{itemize}
-  \item \textbf{Design first přístup} -- je vhodný zejména kdy záleží na rozšiřitelnosti a znovupoužitelnosti výsledného API. Specifikace zde slouží jako smlouva jak se má výsledné API chovat. Tento přístup vyžaduje strávení více času nad tím jak tato smlouva má vypadat. Věnování více času plánování má pak za následek identifikaci klíčových funkcionalit a vyhnutí se nepotřebným funkcionalitám. Jakmile je specifikace připravena ve strojově čitelném formátu, je možné využít nástroje na generování kódu k vygenerování útržků kódů nebo typů, které se pak použijí při vývoji.
-  \item \textbf{Code first přístup} -- tento přístup je zejména vhodný když je kladen velký důraz na rychlost dodání produktu. Plánování specifikace je zde zredukováno na minimum a vývojáři mohou co nejdříve začít pracovat na tvorbě API. Specifikace API je pak generována nějakým nástrojem ze zdrojového kódu. Další výhodou tohoto přístupu je, že specifikace je vždy konzistentní s aktuální verzí API. Oproti design first přístupu ale vývojáři mohou pálit čas na nepotřebných funkcionalitách.
+  \item \textbf{Design first přístup} -- je vhodný zejména kdy záleží na rozšiřitelnosti a znovupoužitelnosti výsledného API. Specifikace zde slouží jako smlouva popisující chování výsledného API. Tento přístup vyžaduje strávení více času nad tím, jak tato smlouva má vypadat. Věnování více času plánování má pak za následek identifikaci klíčových funkcionalit a vyhnutí se nepotřebným funkcionalitám. Jakmile je specifikace připravena ve strojově čitelném formátu, je možné využít nástroje na generování kódu k vygenerování útržků kódů nebo typů, které se pak použijí při vývoji.
+  \item \textbf{Code first přístup} -- tento přístup je zejména vhodný, když je kladen velký důraz na rychlost dodání produktu. Plánování specifikace je zde zredukováno na minimum a vývojáři mohou co nejdříve začít pracovat na tvorbě API. Specifikace API je pak generována nějakým nástrojem ze zdrojového kódu. Další výhodou tohoto přístupu je, že specifikace je vždy konzistentní s aktuální verzí API. Oproti design first přístupu ale vývojáři mohou pálit čas na nepotřebných funkcionalitách.
 \end{itemize}
 
 V této práci jsem zvolil design first přístup, zejména z důvodu návrhu funkcionalit, na kterých půjdou ukázat rozdíly použitých technologií k tvorbě API.
 
-\section{Návrh API eshopu}
+\section{Návrh API e-shopu}
 
-Začal jsem definováním kroků typického průchodu eshopem, které je nutné podnikout k úspěšnému odeslání objednávky.
+Začal jsem definováním kroků typického průchodu e-shopem, které je nutné podniknout k úspěšnému odeslání objednávky.
 
 \begin{enumerate}
   \item Zobrazení a filtrování produktů
@@ -473,7 +487,7 @@ Začal jsem definováním kroků typického průchodu eshopem, které je nutné 
   \item Správa objednávek
 \end{enumerate}
 
-Následně jsem identifikoval klíčové zdroje a metody, které bude potřeba naprogramovat. Další část popisuje jaké operace podporuje navržené API. Přesná struktura vstupních parametrů a odpovědí je dostupná v příloze této práce nebo na \mintinline{text}{https://app.swaggerhub.com/apis/tbunata/shop/1.0.0#/}
+Následně jsem identifikoval klíčové zdroje a metody, které bude potřeba naprogramovat. Další část popisuje, jaké operace podporuje navržené API. Přesná struktura vstupních parametrů a odpovědí je dostupná v příloze této práce nebo na \mintinline{text}{https://app.swaggerhub.com/apis/tbunata/shop/1.0.0#/}
 
 \subsection{/users}
 Tento zdroj slouží k manipulaci s daty uživatelů nebo k registraci nových a přihlašování stávajících uživatelů. Obsahuje následující operace:
@@ -502,7 +516,7 @@ Tento zdroj slouží k listování a manipulaci s daty produktů. Také je možn
   \item \textbf{WebSocket /products/{id}/quantity} -- přihlášení se k real-time odběru informací o skladovém množství produktu
 \end{itemize}
 
-Pro zobrazování dat o produktech není vyžadováno přihlašování, pro metody které mění data už ano.
+Pro zobrazování dat o produktech není vyžadováno přihlašování, pro metody, které mění data, už ano.
 
 \subsection{/categories}
 Tento zdroj slouží k zobrazení, tvorbě a úpravě produktových kategorií.
@@ -528,7 +542,7 @@ Tento zdroj slouží ke správě košíku přihlášeného uživatele, podporuje
   \item \textbf{POST /carts/checkout} -- vytvoření nové objednávky
 \end{itemize}
 
-Všechny metody tohoto zdroje vyžadují aby byl uživatel ověřen a dovolují pouze upravování jeho vlastního košíku.
+Všechny metody tohoto zdroje vyžadují, aby byl uživatel ověřen a dovolují pouze upravování jeho vlastního košíku.
 
 \subsection{/orders}
 Tento zdroj slouží ke správě objednávek přihlášeného uživatele.
@@ -557,17 +571,18 @@ Na obrázku \ref{schema-dbdiagram} je znázorněna vizualizace databázového sc
 V této částí představím populární technologie, pomocí kterých je možné jednotlivá API implementovat a vyberu z nich ty, které k implementaci v této práci použiji. Nejdříve představím ORM a následně jednotlivé technologie určené pro tvorbu API.
 
 \section{Databáze}
-Pro usnadnění práce z databází jsem se rozhodl pro použítí ORM -- objektově relačního mapování. Pomocí ORM se můžeme vyhnout psaní dotazů do databáze v čistém SQL. ORM knihovny poskytují rozhraní pro manipulaci s databází pomocí tříd, které mapují atributy této třídy přímo do databáze. Místo psaní SQL příkazu pro uložení nového uživatele do databáze stačí pak například zavolat metodu \mintinline{ts}{.save()} na instanci třídy reprezentující tohoto uživatele a knihovna se o uložení postará sama.
+Pro usnadnění práce z databází jsem se rozhodl pro použití ORM -- objektově-relačního mapování. Pomocí ORM se můžeme vyhnout psaní dotazů do databáze v čistém SQL. ORM knihovny poskytují rozhraní pro manipulaci s databází pomocí tříd, které mapují atributy této třídy přímo do databáze. Místo psaní SQL příkazu pro uložení nového uživatele do databáze stačí pak například zavolat metodu \mintinline{ts}{.save()} na instanci třídy reprezentující tohoto uživatele a knihovna se o uložení postará sama.
 
 \subsubsection*{Prisma}
 Pro implementaci této práce jsem zvolil ORM knihovnu Prisma \cite{prisma}, která kromě samotného objektově relačního mapování poskytuje i nástroj pro spravování migrací nebo GUI nástroj pro správu a procházení databáze.
 
-\section{REST API}
-Přesto že je možné vytvořit v Node.js server bez použití frameworku, ve většině případů bude framework nejspíše správná volba. Můžeme tak využít připravených metod ke směrování, ověřování uživatele a dalších. Mezi případy kdy bychom framework používat nechtěli můžeme třeba zahrnout server se speficickými požadavky na výkon, kde chceme mít co největší část implementace pod kontrolou.
+\section{REST API} % pridat pocty hvezd, zduvodnit vyber
+Přesto že je možné vytvořit v Node.js server bez použití frameworku, ve většině případů bude framework nejspíše správná volba. %todo reword
+ Můžeme tak využít připravených metod ke směrování, ověřování uživatele a dalších. Mezi případy kdy bychom framework používat nechtěli můžeme třeba zahrnout server se specifickými požadavky na výkon, kde chceme mít co největší část implementace pod kontrolou.
 
-Mezi nejpoužívanější frameworky pro tvorbu REST API v Node.js patří Express.js, Koa.js nebo Nest.js, které si představíme. % citace nebo preformulovat
+Mezi nejpoužívanější frameworky pro tvorbu REST API v Node.js patří Express.js, Koa.js nebo Nest.js, které dále představím. % citace nebo preformulovat
 \subsection*{Express.js}
-Express.js je open-sourcový framework, vydaný pod MIT licencí, pro tvorbu backendu webových aplikací. Byl založen TJ Holowaychukem v roce 2010 a první verze byla vydána na GitHubu 22. května 2010. % vice popisu
+Express.js je open-source framework, vydaný pod MIT licencí, pro tvorbu backendu webových aplikací. Byl založen TJ Holowaychukem v roce 2010 a první verze byla vydána na GitHubu 22. května 2010. % vice popisu
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -589,12 +604,12 @@ app.listen(port, () => {
 
 Ukázka kódu \ref{lst:express_hello} ukazuje jednoduchý \textit{Hello world} server, který při zavolání HTTP metody GET vrátí zprávu \mintinline{text}{Hello World!}. 
 
-Nejdříve je nutné importovat a inicializovat samotný express a definovat port, na kterém bude server poslouchat. Poté definujeme jaké metody bude server obsluhovat -- pro přidání dalších metod bychom obdobně nastavili \mintinline{javascript}{app.post('/', ...) pro metodu POST a další HTTP metody}. Tyto metody příjímají jako první parametr cestu(route), na které endpoint bude dostupný, a jako druhý parametr objekty request a response, pomocí kterých lze např. číst vstupní data a nastavovat odpověď serveru. V případě že route je lomítko, endpoint je dostupný na kořenové URL.
+Nejdříve je nutné importovat a inicializovat samotný express a definovat port, na kterém bude server poslouchat. Poté definujeme, jaké metody bude server obsluhovat -- pro přidání dalších metod bychom obdobně nastavili \mintinline{javascript}{app.post('/', ...)} pro metodu POST a další HTTP metody. Tyto metody přijímají jako první parametr cestu(route), na které endpoint bude dostupný, a jako druhý parametr objekty request a response, pomocí kterých lze např. číst vstupní data a nastavovat odpověď serveru. V případě že route je lomítko, endpoint je dostupný na kořenové URL.
 
-Na závěr je ještě potřeba zavolat metodu \mintinline{javascript}{app.listen()}, která má jako parametry port, a callback funkci, která se zavolá jakmile je server připravený obsluhovat požadavky -- zde se jedná o výpis do konzole, že server poslouchá na zadaném portu.
+Na závěr je ještě potřeba zavolat metodu \mintinline{javascript}{app.listen()}, která má jako parametry port, a callback funkci, která se zavolá, jakmile je server připravený obsluhovat požadavky -- zde se jedná o výpis do konzole, že server poslouchá na zadaném portu.
 
 \subsection*{Koa.js}
-Koa.js je framework, který byl navržen teamem Expressu, snažící se vyřešit jeho nedostatky a cílí být co nejmenší, nejexpresivnější a robustní. Na rozdíl od Expressu, Koa v základu neobsahuje přibalený žádný middleware.
+Koa.js je framework, který byl navržen týmem Expressu, snažící se vyřešit jeho nedostatky a cílí být co nejmenší, nejexpresivnější a robustní. Na rozdíl od Expressu, Koa v základu neobsahuje přibalený žádný middleware.
 
 Koa aplikace slouží jako rozhraní pro Node.js http server a stará se registraci middlewaru, error handling a konfiguraci objektů pro request a response.
 Middleware jsou funkce, které spouštěny ve stylu zásobníku při zpracování requestu -- request zpracuje middleware, zavoláním funkce \mintinline{javascript}{next()} předá kontrolu dalšímu middlewaru a počká na jeho vykonání. Když už není žádný další middleware, pokračuje middleware v dokončení své funkce.
@@ -615,7 +630,7 @@ app.listen(port);
 \label{lst:koa_hello}
 \end{listing}
 
-Můžeme si všimnout, že Hello World aplikace pro Koa.js vypadá jinak než pro Express. V první fázi také importujeme framework a nainicializujeme aplikaci. Koa aplikace ale neobsahuje přímo metody na zpracování requestů, umožňuje pouze definovat middleware pomocí metody \mintinline{javascript}{app.use()}. Middleware v této ukázce kódu pak zpracovává všechny příchozí requesty a nastavuje tělo odpovědi na \mintinline{text}{Hello Wrold}. Objekty Request a Response jsou pak dostupné jako atributy objektu Context pod názvy \mintinline{javascript}{request} a \mintinline{javascript}{response}.
+Můžeme si všimnout, že Hello World aplikace pro Koa.js vypadá jinak než pro Express. V první fázi také importujeme framework a inicializujeme aplikaci. Koa aplikace ale neobsahuje přímo metody na zpracování requestů, umožňuje pouze definovat middleware pomocí metody \mintinline{javascript}{app.use()}. Middleware v této ukázce kódu pak zpracovává všechny příchozí requesty a nastavuje tělo odpovědi na \mintinline{text}{Hello World}. Objekty Request a Response jsou pak dostupné jako atributy objektu Context pod názvy \mintinline{javascript}{request} a \mintinline{javascript}{response}.
 
 Pokud bychom chtěli zpracovávat requesty přímo pro konkrétní URI a metodu, je potřeba importovat router middleware:
 
@@ -637,7 +652,7 @@ Stejně jako u Expressu pak specifikujeme HTTP metodu zavoláním obdobné metod
 \section{Nest.js}
 Nest.js je framework pro tvorbu výkonných, škálovatelných server-side aplikací. Plně podporuje TypeScript a kombinuje prvky objektově orientovaného programování společně s prvky funkcionálního a funkcionálně-reaktivního programování. V základu Nest.js na pozadí využívá Express, ale je možné nakonfigurovat i pro framework Fastify.
 
-Na rozdíl od  výše uvedených frameworků Express.js a Koa.js, které slouží čistě k tvorbě HTTP serverů, Nest.js poskytuje i out-of-the-box aplikační architekturu, která poskytuje velké množství výhod jako: škálovatelnost, snadná udržovatelnost nebo modulárnost. Přináší to ale i jisté nevýhody. V případě že tvoříme mikroslužby, architektura Nest.js může být příliš svazující. To doprovazí i strmější učící křivka jako psaní velkého množství boiler-plate kódu, což je možné vidět i na ukázkovém Hello World serveru níže. 
+Na rozdíl od  výše uvedených frameworků Express.js a Koa.js, které slouží čistě k tvorbě HTTP serverů, Nest.js poskytuje i out-of-the-box aplikační architekturu, která poskytuje velké množství výhod jako: škálovatelnost, snadná udržovatelnost nebo modulárnost. Přináší to ale i jisté nevýhody. V případě že tvoříme mikroslužby, architektura Nest.js může být příliš svazující. To doprovází i strmější učící křivka jako psaní velkého množství boiler-plate kódu, což je možné vidět i na ukázkovém Hello World serveru níže. 
 
 Inicializace Nest.js serveru může vypadat následovně a je na první pohled vidět, že se významně liší od předchozích frameworků.
 
@@ -652,13 +667,13 @@ async function bootstrap() {
 }
 bootstrap();
 \end{minted}
-\caption{Nest.js --Bootstrap}
+\caption{Nest.js -- Bootstrap}
 \label{lst:nest_bootstrap}
 \end{listing}
 
 Nejdříve je potřeba naimportovat továrnu NestFactory, pomocí které sestavíme naší aplikaci. Dále importujeme Appmodule, který obsahuje logiku aplikace. Nakonec definujeme funkci boostrap, pomocí které server spustíme.
 
-Samotný kód pro obloužení metody GET bychom pak definovali v controlleru AppController:
+Samotný kód pro obsloužení metody GET bychom pak definovali v controlleru AppController:
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -679,10 +694,10 @@ export class AppController {
 Z výše uvedených frameworků jsem se rozhodl pro implementaci REST API vybrat Express.js. Oproti Nest.js slouží k čistě ke tvorbě API a nenutí vývojáře  dodržovat doporučenou strukturu architektury, což umožní co nejpřímočařejší srovnání s implementacemi pro GraphQL a gRPC. Koa.js by pro tento úkol byl také vhodný, ale zatím hlavní výhoda Expressu je jeho popularita a podpora komunity vývojářů.
 
 \section{GraphQL API}
-Stejně jako pro REST, i pro GraphQL existuje množství frameworků pro tvorbu serverů, ikdyž ne tak velké. Mezi nejpoužívanější patří Apollo Server (12 tisíc hvězd), GraphQL Yoga (7 tisíc hvězd) nebo GraphQL Express (6 tisíc hvězd na GitHubu), který je referenční implementací GraphQL serveru \cite{graphql_libraries}.
+Stejně jako pro REST, i pro GraphQL existuje množství frameworků pro tvorbu serverů, i když ne tak velké. Mezi nejpoužívanější patří Apollo Server (12 tisíc hvězd), GraphQL Yoga (7 tisíc hvězd) nebo GraphQL Express (6 tisíc hvězd na GitHubu), který je referenční implementací GraphQL serveru \cite{graphql_libraries}.
 
 \subsection*{GraphQL Express}
-Přestože GraphQL Express je referenční implementací GraphQL serveru, je až na třetím místě z pohledu oblíbenosti. Oproti ostatním frameworkům na tvorbu GraphQL API neobsahuje tolik funkcionalit a možností nastavení, může být však dobrá volba pro pokud chceme doplnit REST API o GraphQL.
+Přestože GraphQL Express je referenční implementací GraphQL serveru, je až na třetím místě z pohledu oblíbenosti. Oproti ostatním frameworkům na tvorbu GraphQL API neobsahuje tolik funkcionalit a možností nastavení, může být však dobrá volba pro doplnění REST API o GraphQL.
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -772,14 +787,15 @@ server.start()
 \label{lst:yoga_hello}
 \end{listing}
 
-Definice GraphQL serveru pomocí frameworku GraphQL Yoga je velmi podobná té z Apollo serveru
+Definice GraphQL serveru pomocí frameworku GraphQL Yoga je velmi podobná té z Apollo serveru.
+\clearpage
 
 \section{gRPC API}
-gRPC je nejmladší z technologií pro tvorbu API probíraných v této práci a je to velmi znát v omezném výběru serverů dostupných pro jeho implementaci. Na výběr máme referenční implementací gRPC serveru, minimalistický server pro implementaci mikroslužeb Mali nebo server ProtoCat. Podíváme-li se na počet stažení přes NPM nebo počet hvězd na GitHubu, jejich počty jsou o řády nižší než např. u Expressu.
+gRPC je nejmladší z technologií pro tvorbu API probíraných v této práci a je to velmi znát v omezeném výběru serverů dostupných pro jeho implementaci. Na výběr máme referenční implementací gRPC serveru, minimalistický server pro implementaci mikroslužeb Mali nebo server ProtoCat. Podíváme-li se na počet stažení přes NPM nebo počet hvězd na GitHubu, jejich počty jsou řádově nižší než např. u Expressu.
 
-Pro všechny následující ukázkové implementace gRPC serveru použiji stejnou probuf definici služby. Jedná se o jednu metodu, která bude vracet odpověď s jedním atributem.
+Pro všechny následující ukázkové implementace gRPC serveru použiji stejnou protobuf definici služby. Jedná se o jednu metodu, která bude vracet odpověď s jedním atributem.
 
-\begin{listing}[H]
+\begin{listing}[h]
 \begin{minted}{protobuf}
 service Greeter {
   rpc SayHello (HelloRequest) returns (HelloResponse) {}
@@ -795,13 +811,13 @@ message HelloResponse {
 
 \subsection*{Referenční implementace gRPC-js}
 Referenční implementace gRPC má zatím největší výhodu v tom, že je nejpoužívanější a je k ní dostupné největší množství dokumentace.
-Na ukáce kódu lze \ref{lst:grpcjs_hello} je vidět implementace gRPC služby Greeter s metodou sayHello. Na první pohled je vidět, že oproti RESTu a GraphQL je potřeba napsat nejvíce kódu -- protobuf definici a inicializaci serveru.
+Na ukázce kódu lze \ref{lst:grpcjs_hello} je vidět implementace gRPC služby Greeter s metodou sayHello. Na první pohled je vidět, že oproti RESTu a GraphQL je potřeba napsat nejvíce kódu -- protobuf definici a inicializaci serveru.
 
-Na začátku je potřeba importovat všechny potřebné knihovny. Dalším nutným krokem je konfigurace a samotné načtení definice služeb z \mintinline{text}{.proto} souboru. Poté následuje implementace \mintinline{text}{hello}, která bude později namapována na na metodu \mintinline{text}{sayHello} ze služby \mintinline{text}{Greeter}. Zbýva už jen nakonfigurovat samotný server. Server přidáme službu Greeter s implementací její metody, nastavíme port na kterém bude server naslouchat a můžeme ho spustit.
+Na začátku je potřeba importovat všechny potřebné knihovny. Dalším nutným krokem je konfigurace a samotné načtení definice služeb z \mintinline{text}{.proto} souboru. Poté následuje implementace \mintinline{text}{hello}, která bude později namapována na na metodu \mintinline{text}{sayHello} ze služby \mintinline{text}{Greeter}. Zbývá už jen nakonfigurovat samotný server. Server přidáme službu Greeter s implementací její metody, nastavíme port na kterém bude server naslouchat a můžeme ho spustit.
 
 Samotné načítání \mintinline{text}{.proto} souborů a inicializace serveru pak můžeme zjednodušit použitím frameworků, můžeme však přijít o úroveň granularity konfigurace.
 
-\begin{listing}[H]
+\begin{listing}[h]
 \begin{minted}{ts}
 var PROTO_PATH = __dirname + '/helloworld.proto';
 
@@ -841,9 +857,9 @@ function main() {
 \end{listing}
 
 \subsection{Mali}
-Mali \cite{mali} je velmi minimalistický framework pro tvorbu gRPC mikroslužeb. Je inspirovaný již zmíněným frameworkem Koa s využítím gRPC konceptů. Jak uvidíme na ukázce kódu níže, Mali umožňuje vyhnutí se spoustě boilerplate kódu, který byl potřeba napsat při implementaci pouze s grpc-js.
+Mali \cite{mali} je velmi minimalistický framework pro tvorbu gRPC mikroslužeb. Je inspirovaný již zmíněným frameworkem Koa s využitím gRPC konceptů. Jak uvidíme na ukázce kódu níže, Mali umožňuje vyhnutí se spoustě boilerplate kódu, který byl potřeba napsat při implementaci pouze s grpc-js.
 
-\begin{listing}[H]
+\begin{listing}[h]
 \begin{minted}{ts}
 const Mali = require('mali')
 
@@ -863,14 +879,14 @@ function main () {
 
 Z ukázky kódu \ref{lst:mali_hello} je patrné, že implementace jednoduchého serveru je záležitost na pár řádek kódu. Načítání \mintinline{text}{.proto} souborů si framework řeší sám a stačí mu pouze přidat cestu k nim při inicializaci serveru.
 
-Po importování samotného frameworku implementujeme metodu \mintinline{text}{sayHello}, inicializujeme samotný server, předáme implementaci metody a server spustíme.
+Po importování samotného frameworku implementujeme metodu \\* \mintinline{text}{sayHello}, inicializujeme samotný server, předáme implementaci metody a server spustíme.
 
 \subsection{ProtoCat}
-ProtoCat \cite{protocat} je open-source minimalistickým frameworkem pro gRPC vyvýjený společností Ackee.
+ProtoCat \cite{protocat} je open-source minimalistickým frameworkem pro gRPC sponzorovaný společností Ackee. % zeptat se jestli to odstranit
 
 Oproti předchozím gRPC implementací nenačítá protobuf definice přímo ze souborů, ale je potřeba vygenerovat příslušné definice, typy pro TypeScript a metody pomocí \mintinline{text}{grpc_tools_node_protoc} kompilátoru.
 
-\begin{listing}[H]
+\begin{listing}[h]
 \begin{minted}{ts}
 import { ProtoCat } from 'protocat';
 import { GreeterService } from '../dist/greeter_grpc_pb';
@@ -890,12 +906,12 @@ app.start('0.0.0.0:3000')
 
 Jako první krok je potřeba importovat samotný framework ProtoCat a poté definici služby, která byla vygenerována protoc kompilátorem. Poté vytvoříme novou instanci serveru a zaregistrujeme novou službu. Můžeme si všimnout, že metoda \mintinline{text}{.setMessage()} byla vygenerována protoc kompilátorem. Pak už stačí pouze samotný server spustit.
 
-Z dostupných frameworků pro gRPC jsem se rozhodl použít ProtoCat, protože definování gRPC služeb mi přišla intuitivní velmi intuitivní a podporuje TypeScript.
+Z dostupných frameworků pro gRPC jsem se rozhodl použít ProtoCat, protože definování gRPC služeb mi přišla velmi intuitivní a podporuje TypeScript. %zduvodnit lepe
 
 
 
 \chapter{Implementace}
-Tato kapitola popisuje popis samotné implementace navrženého API v REST, GraphQL a gRPC.
+Tato kapitola popisuje aspekty samotné implementace navrženého API v REST, GraphQL a gRPC.
 
 \section{Datové úložiště}
 Pro vyhnutí se potřebě spravování vlastního databázového serveru jsem se rozhodl spouštět databázi, stejně jako jednotlivé implementace API, v Docker kontejneru. To umožňuje jednoduše vytvořit oddělené instance databáze pro jednotlivé implementace API. Další výhodou je jednoduchost instalace, kdy k rozběhnutí databáze na novém počítači stačí stáhnout daný Docker image a spustit ho. Jako databázový systém jsem zvolil PostgreSQL.
@@ -903,7 +919,7 @@ Pro vyhnutí se potřebě spravování vlastního databázového serveru jsem se
 \subsection{Prisma}
 Pro návrh databázového schématu jsem využil funkce zvolené ORM knihovny Prisma. Ta používá vlastní jazyk na popis modelu, ze kterého se poté vygeneruje SQL a naplní databáze. Prisma podle tohoto modelu vygeneruje odpovídající typy pro TypeScript.
 
-Prvním krokem je samotná inicializace Prismy v projektu. K tomu slouží příkaz \mintinline{text}{npx prisma init}, který udělá nasledující :
+Prvním krokem je samotná inicializace Prismy v projektu. K tomu slouží příkaz \mintinline{text}{npx prisma init}, který udělá následující:
 \begin{itemize}
   \item vytvoří složku \mintinline{text}{prisma} -- tato složka obsahuje soubor \mintinline{text}{schema.prisma}, ve kterém bude definováno databázové schéma
   \item vytvoří soubor \mintinline{text}{.env} -- v tomto souboru jsou definovány proměnné prostředí, například spojení do databáze
@@ -922,9 +938,9 @@ datasource db {
 \label{lst:prisma_datasource}
 \end{listing}
 
-Datový model může vzninkout dvěma způsoby -- pokud připojujeme Prismu k existující databázi, je možné vygenerovat model pomocí introspekce \cite{prisma_introspection}. Druhý způsob je navrhnout model ručně. V této práci se budu zabývat pouze ručním návrhem modelu.
+Datový model může vzniknout dvěma způsoby -- pokud připojujeme Prismu k existující databázi, je možné vygenerovat model pomocí introspekce \cite{prisma_introspection}. Druhý způsob je navrhnout model ručně. V této práci se budu zabývat pouze ručním návrhem modelu.
 
-Ukázka kódu \ref{lst:prisma_model} pak zobrazuje jak může definice schématu v Prismě vypadat. Z každého objektu, který je označen klíčovým slovem \mintinline{text}{model}, vznikne v databázi jedna tabulka. Uvnitř modelu jsou poté definované jednotlivé atributy -- ty odpovídají sloupcím v databází. Znak za názvem atributu značí, že se jedná o nepovinný atribut. Tyto atributy jsou pak doplněny o typy (skalární typy nebo reference na jiný Prisma model) a dekorátory. Dekorátory specifikují nějaké zvláštní chování -- např. že atribut je identifikátor a je automaticky incrementován -- \mintinline{text}{@id @default(autoincrement())}.
+Ukázka kódu \ref{lst:prisma_model} pak zobrazuje, jak může definice schématu v Prismě vypadat. Z každého objektu, který je označen klíčovým slovem \mintinline{text}{model}, vznikne v databázi jedna tabulka. Uvnitř modelu jsou poté definované jednotlivé atributy -- ty odpovídají sloupcům v databázi. Znak za názvem atributu značí, že se jedná o nepovinný atribut. Tyto atributy jsou pak doplněny o typy (skalární typy nebo reference na jiný Prisma model) a dekorátory. Dekorátory specifikují nějaké zvláštní chování -- např. že atribut je identifikátor a je automaticky inkrementován -- \mintinline{text}{@id @default(autoincrement())}.
 
 \begin{listing}[H]
 \begin{minted}{text}
@@ -952,9 +968,9 @@ model User {
 
 Jakmile je datový model navržen, můžeme příkazem \mintinline{text}{npx prisma migrate} vygenerovat SQL soubor s databázovou migrací, která bude následně aplikována do databáze.
 
-Pak už jen stačí do projektu nainstalovat klienta pro Prismu pomocí příkazu \mintinline{text}{npm install @prisma/client} a všechno je připraveno k dotazování databáze, viz ukázka kódu \ref{lst:prisma_example}. Dotazovat databází lze buď pomocí rozhraní Prisma klienta nebo čistým SQL pomocí metody \mintinline{text}{prisma.$executeRaw}. Spouštění SQL je velmi důležitá funkce a umožňuje řešení problémů, které v klientu zatím nejsou implementovány. Např. zamykání tabulek během transakcí klient neobsahuje a proto bylo nutná implementace pomocí SQL zámků.
+Pak už jen stačí do projektu nainstalovat klienta pro Prismu pomocí příkazu \mintinline{text}{npm install @prisma/client} a všechno je připraveno k dotazování databáze, viz ukázka kódu \ref{lst:prisma_example}. Dotazovat databází lze buď pomocí rozhraní Prisma klienta nebo čistým SQL pomocí metody \mintinline{text}{prisma.$executeRaw}. Spouštění SQL je velmi důležitá funkce a umožňuje řešení problémů, které v klientovi zatím nejsou implementovány. Např. zamykání tabulek během transakcí klient neobsahuje, a proto bylo nutná implementace pomocí SQL zámků.
 
-Prisma klient podporuje zpracování transakcí třema způsoby. Prvním způsobem je předání klientu pole volání, která budou následně zavolána v jedné transakci. Druhým způsobem jsou interaktivní transakce, kdy klientu předáme celou funkci, která proběhne v rámci jedné transakce. Třetím je pak ruční správa transakcí pomocí čistého SQL. Interaktivní transakce přišly vhod při implementaci vytvoření objednávky, kdy je potřeba během transakce kontrolovat počet položek skladem, aby nešla vytvořit objednávka s více položkami než je možné. Bohužel tato vlastnost je zatím ve fázi vývoje a při výkonnostním testu se mi podařilo objevit chybu, která způsobovala deadlock a timeout transakce. Tato chyba by však měla být v další verzi Prismy opravena.
+Prisma klient podporuje zpracování transakcí třemi způsoby. Prvním způsobem je předání klientu pole volání, která budou následně zavolána v jedné transakci. Druhým způsobem jsou interaktivní transakce, kdy klientu předáme celou funkci, která proběhne v rámci jedné transakce. Třetím je pak ruční správa transakcí pomocí čistého SQL. Interaktivní transakce přišly vhod při implementaci vytvoření objednávky, kdy je potřeba během transakce kontrolovat počet položek skladem, aby nešla vytvořit objednávka s více položkami než je možné. Bohužel tato vlastnost je zatím ve fázi vývoje a při výkonnostním testu se mi podařilo objevit chybu, která způsobovala deadlock a timeout transakce. Tato chyba by však měla být v další verzi Prismy opravena.
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -974,7 +990,7 @@ Při používání TypeScriptu společně s Expressem je ještě potřeba doinst
 
 Express umožňuje obsluhovat požadavky aplikace na úrovni celé aplikace ve formátu \mintinline{text}{app.get('/user'...)}, ale to se stává velmi nepřehledné s narůstající komplexitou aplikace. Proto jsem se rozhodl implementaci strukturovat na Express Routery, které obsluhují dané zdroje. Ke každému zdroji přísluší definice typů a služba, ve které je implementována samotná logika metod. Ke každému routeru pak přísluší sada testů kontrolující jeho implementaci.
 
-Ukázka kódu \ref{lst:express_init} ukazuje inicializaci express serveru, použití middlewaru \mintinline{text}{morgan} k logování příchozích požadavků, middlewaru \mintinline{text}{json} k parsování těl příchozích požadavků a nakonec přimountování všech routerů.
+Ukázka kódu \ref{lst:express_init} ukazuje inicializaci express serveru, použití middlewaru \mintinline{text}{morgan} k logování příchozích požadavků, middlewaru \mintinline{text}{json} k parsování těl příchozích požadavků, a nakonec přimountování všech routerů.
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -994,9 +1010,9 @@ app.use("/orders", ordersRouter);
 \label{lst:express_init}
 \end{listing}
 
-Každý Router pak může obshluhovat požadavky pouze na zadané cestě. Na ukázce kódu \ref{lst:express_router} je vidět definice a implementace routeru pro zdroj \mintinline{text}{/carts}, konkrétně metody POST pro přidávání položek do košíku.
+Každý Router pak může obsluhovat požadavky pouze na zadané cestě. Na ukázce kódu \ref{lst:express_router} je vidět definice a implementace routeru pro zdroj \mintinline{text}{/carts}, konkrétně metody POST pro přidávání položek do košíku.
 
-Middleware pro routery jde definovat buď na úrovni celého routeru, stejně jako to je na ukázce, nebo jdou jednotlivé middlewary předávat na úrovni metody a cesty, pokud je potřeba větší granularity.
+Middleware pro routery jde definovat buď na úrovni celého routeru, stejně jako to je na ukázce, nebo jdou jednotlivé middlewary předávat na úrovni metody a cesty, pokud je potřeba větší granularita.
 
 Příkazem \mintinline{text}{app.use("/carts", cartsRouter);}, kde \mintinline{text}{app} je instance Express serveru, je pak možné router přimountovat k serveru.
 
@@ -1006,7 +1022,8 @@ export const cartsRouter = express.Router();
 
 cartsRouter.use(verifyToken);
 
-cartsRouter.post("/addItem", async (req: Request, res: Response) => {
+cartsRouter.post("/addItem",
+    async (req: Request, res: Response) => {
   try {
     const cartItem = new NewCartItemInput(req.body);
     await validate(cartItem).then((errors) => {
@@ -1026,25 +1043,25 @@ cartsRouter.post("/addItem", async (req: Request, res: Response) => {
 \label{lst:express_router}
 \end{listing}
 
-Ke kontrole vstupních dat používám knihovnu \mintinline{text}{class-validator}, která umožňuje doplnit JavaScriptové třídy o dekorátory, které popisují jak by měl formát dat vypadat. Poté lze pak zavoláním metody \mintinline{js}{valdiate(input)} zkontrolovat, zda uživatelský vstup obsahuje všechna data. Umožňuje také kontrolu hodnota, například jestli atribut je email nebo splňuje minimální hodnotu.
+Ke kontrole vstupních dat používám knihovnu \mintinline{text}{class-validator}, která umožňuje doplnit JavaScriptové třídy o dekorátory, které popisují, jak by měl formát dat vypadat. Poté lze pak zavoláním metody \mintinline{js}{validate(input)} zkontrolovat, zda uživatelský vstup obsahuje všechna data. Umožňuje také kontrolu hodnota, například jestli atribut je email nebo splňuje minimální hodnotu.
 
-Poté co vstupní data projdou kontrolou, jsou předána do služby, v případě v ukázce se jedná o \mintinline{text}{CartService}, ve které je implementována logika. Tato služba pak vrátí výsledek, který Router posílá v odpovědi. Výhodou oddělení implementace logiky od samotného routeru je nezávislost na implementaci
+Poté co vstupní data projdou kontrolou, jsou předána do služby, v případě v ukázce se jedná o \mintinline{text}{CartService}, ve které je implementována logika práce s košíkem uživatele. Tato služba pak vrátí výsledek, který Router posílá v odpovědi. Výhodou oddělení implementace logiky od samotného routeru je nezávislost na implementaci
 
 \subsection{Error Handling}
 Na kód na úrovni jednotlivých metod v routerů jsem obalil do try catch bloku, ve kterém odchytávám všechny výjimky, které během volání mohou nastat. Odchycené výjimky jsou pak obslouženy v metodě \mintinline{text}{handleError}, která nastavuje odpovídající tělo odpovědi a mapuje tyto výjimky na správné HTTP status kódy.
 
 \subsection{Ověřování uživatelů}
-Implementoval jsem vlastní systém pro ověřování uživatelu s využitím knihovny \mintinline{text}{jsonwebtoken}. Uživatel se příhlásí požadavkem na endpoint \mintinline{text}{/users/login}, kde se zkontroluje shoda hashí uloženého a poskytnutého hesla pomocí knihovny \mintinline{text}{bcrypt}. Pokud je přihlášení úspěšné, uživateli je vygenerován JWT token, pomocí kterého pak může přistupovat na další endpointy. V tokenu jsou pak zakódovány informace o uživateli, čehož lze využít při kontrole zda má uživatel oprávnění číst daný zdroj. Tento token je pak potřeba nastavit do hlavičky požadavku na \mintinline{text}{x-access-token}. Dále je uživateli vygenerován RefreshToken pro obnovení ověřovacího tokenu po jeho vypršení bez nutnosti zadávat znovu přihlašovací údaje.
+Implementoval jsem vlastní systém pro ověřování uživatelů s využitím knihovny \mintinline{text}{jsonwebtoken}. Uživatel se přihlásí požadavkem na endpoint \mintinline{text}{/users/login}, kde se zkontroluje shoda hashí uloženého a poskytnutého hesla pomocí knihovny \mintinline{text}{bcrypt}. Pokud je přihlášení úspěšné, uživateli je vygenerován JWT token, pomocí kterého pak může přistupovat na další endpointy. V tokenu jsou pak zakódovány informace o uživateli, čehož lze využít při kontrole, zda má uživatel oprávnění číst daný zdroj. Tento token je pak potřeba nastavit do hlavičky požadavku na \mintinline{text}{x-access-token}. Dále je uživateli vygenerován RefreshToken pro obnovení ověřovacího tokenu po jeho vypršení bez nutnosti zadávat znovu přihlašovací údaje.
 
-K samotnému ověření uživatele jsem implementoval middleware, který nejdříve kontroluje zda požadavek obsahuje ověřovací token. Pokud požadavek token obsahuje, následuje dekódování tokenu a rozšíření objektu požadavku o informace o přihlášeném uživateli. V opačném případě požadavek skončí chybou ověření.
+K samotnému ověření uživatele jsem implementoval middleware, který nejdříve kontroluje, zda požadavek obsahuje ověřovací token. Pokud požadavek token obsahuje, následuje dekódování tokenu a rozšíření objektu požadavku o informace o přihlášeném uživateli. V opačném případě požadavek skončí chybou ověření.
 
 
 \subsection{WebSocket}
-Na rozdíl od implemetace gRPC streaming, Express nativně nepodporuje WebSockety. Pro implementaci WebSocketů jsem zvolil knihovnu \mintinline{text}{express-ws}, která umožňuje použití routerů i pro WebSockety. Při inicializaci Express serveru ho pak stačí předat jako parametr této knihovně \mintinline{ts}{expressWs(express()).app;}.
+Na rozdíl od implementace gRPC streaming, Express nativně nepodporuje WebSockety. Pro implementaci WebSocketů jsem zvolil knihovnu \mintinline{text}{express-ws}, která umožňuje použití routerů i pro WebSockety. Při inicializaci Express serveru ho pak stačí předat jako parametr této knihovně.
 
 WebSocket router je pak definován obdobně jako klasický router, s výjimkou toho, že místo HTTP metod se použije metoda \mintinline{text}{.ws()}, viz ukázka kódu \ref{lst:ws_router}.
 
-Pro demonstraci WebSocketů jsem implementoval endpoint \mintinline{text}{products/:id/quantity}, který umožňuje klientům zaregistrovat se k real-time odběru informací o změně dostupnosti produktu. Využil jsem k tomu \mintinline{text}{EventEmitter} z knihovny \mintinline{text}{events}, který umožňuje posílat notifikace a zaregistrovat se k jejich odběru. Pokaždé, když je změněn počet dostupných položek daného produktu, je vyslána notifikace. Lze poslouchat buď všechny notifikace, nebo se přihlásit k odběru jen určitých uživatelem definovaných typů -- v tomto případě se jedná o typ \mintinline{text}{update}.
+Pro demonstraci WebSocketů jsem implementoval endpoint \\* \mintinline{text}{products/:id/quantity}, který umožňuje klientům zaregistrovat se k real-time odběru informací o změně dostupnosti produktu. Využil jsem k tomu \mintinline{text}{EventEmitter} z knihovny \mintinline{text}{events}, který umožňuje posílat notifikace a zaregistrovat se k jejich odběru. Pokaždé, když je změněn počet dostupných položek daného produktu, je vyslána notifikace. Lze poslouchat buď všechny notifikace, nebo se přihlásit k odběru jen určitých uživatelem definovaných typů -- v tomto případě se jedná o typ \mintinline{text}{update}.
 
 \begin{listing}[h]
 \begin{minted}{ts}
@@ -1103,10 +1120,10 @@ await supertest(app)
 \section{GraphQL API}
 Při tvorbě GraphQL API máme na výběr dva přístupy -- design first a code first -- a podle nich výběr dostupných knihoven. Protože REST API jsem měl už navržené a implementované, rozhodl jsem se vydat přístupem code first. K tomu jsem využil knihovnu \mintinline{text}{type-graphql}. Tato knihovna umožňuje automatické vygenerování GraphQL schématu, stačí k tomu pouze doplnit psaný kód o dekorátory. Kromě generování schématu, dekorátory dělají kód čitelnější a jednodušší. Pokud k danému dotazu má mít přístup jen ověřený uživatel, stačí použít dekorátor \mintinline{text}{@Authorized()}.
 
-Rozhodl jsem se pro podobnou strukturu aplikace jako při implementace REST API, s tím rozdílem, že GraphQL nepoužívá routery ale resolvery. GraphQL
+Rozhodl jsem se pro podobnou strukturu aplikace jako při implementace REST API, s tím rozdílem, že GraphQL nepoužívá routery ale resolvery.
 
 \subsection{Inicializace serveru}
-Před samotným spuštěním serveru je potřeba vytvořit GraphQL schéma. Protože využívám code first přístupu, schéma se sestavuje automaticky pomocí metody \mintinline{text}{buildSchema} z knihovny \mintinline{text}{type-graphql}. Ta příjímá za parametry implementované resolvery, implementaci ověřování uživatelů, formát serializace data, příznak jestli se vygenerované schéma má uložit do souboru a jako poslední zda se má implicitně spouštět validace pomocí dekorátorů z knihovny \mintinline{text}{class-validator}.
+Před samotným spuštěním serveru je potřeba vytvořit GraphQL schéma. Protože využívám code first přístupu, schéma se sestavuje automaticky pomocí metody \mintinline{text}{buildSchema} z knihovny \mintinline{text}{type-graphql}. Ta přijímá za parametry implementované resolvery, implementaci ověřování uživatelů, formát serializace data, příznak, jestli se vygenerované schéma má uložit do souboru a jako poslední příznak, zda se má implicitně spouštět validace pomocí dekorátorů z knihovny \mintinline{text}{class-validator}.
 
 K inicializaci serveru je potřeba předat vygenerované schéma, pluginy (pokud jsou potřeba, v tomto případě používám plugin Apollo Playground pro zjednodušení testování API) a context, ve kterém je možné definovat vlastní middleware. Poté je server připravený na spuštění příkazem \mintinline{text}{server.start()}
 
@@ -1159,7 +1176,7 @@ export class ProductResolver {
 \label{lst:graphql_resolver}
 \end{listing}
 
-Na ukázce \ref{lst:graphql_resolver} je vidět příklad resolver pro manipulaci s produkty. Třída resolveru je obalena dekorátorem, který popisuje že se jedná o resolver a jaký typ obsluhuje. Uvnitř resolveru následuje implementace mutace pro editaci dat produktů. Ta je doplněna dekorátorem, který označuje že se jedná o mutaci společně s jejím návratovým typem. Následuje samotná implementace mutace, kde vstupní parametry jsou označeny dekorátory \mintinline{text}{@Arg()} a PubSubEngin, který je použit k implementaci subscription, která je popsána dále. Pak už zbýva samotná implementace logiky, která je delegována službě ProductService a vrácení výsledku.
+Na ukázce \ref{lst:graphql_resolver} je vidět příklad resolver pro manipulaci s produkty. Třída resolveru je obalena dekorátorem, který popisuje že se jedná o resolver a jaký typ obsluhuje. Uvnitř resolveru následuje implementace mutace pro editaci dat produktů. Ta je doplněna dekorátorem, který označuje že se jedná o mutaci společně s jejím návratovým typem. Následuje samotná implementace mutace, kde vstupní parametry jsou označeny dekorátory \mintinline{text}{@Arg()} a PubSubEngin, který je použit k implementaci subscription, která je popsána dále. Pak už zbývá samotná implementace logiky, která je delegována službě ProductService a vrácení výsledku.
 
 O kontrolu vstupních hodnot se stará sama knihovna \mintinline{text}{type-graphql}, díky definici typů a dekorátorům. Samozřejmě, že kdybychom potřebovali nějakou sofistikovanější kontrolu, musíme si ji sami implementovat, např. pomocí dříve zmíněného \mintinline{text}{class-validatoru}. 
 
@@ -1187,18 +1204,18 @@ export class UpdateProductInput {
 \label{lst:graphql_inputtype}
 \end{listing}
 
-Dekorátor \mintinline{text}{@InputType()} u třídy označuje, že se jedná o typ, ve kterém budou přicházet uživatelem zadaná data. Každé pole, je pak potřeba doplnit o dekorátor \mintinline{text}{@Field()}, který obsahuje zda je pole povinné a jeho typ (pokud nejde zjistit pomocí reflexe).
+Dekorátor \mintinline{text}{@InputType()} u třídy označuje, že se jedná o typ, ve kterém budou přicházet uživatelem zadaná data. Každé pole, je pak potřeba doplnit o dekorátor \mintinline{text}{@Field()}, který obsahuje informaci, zda je pole povinné a jeho typ (pokud nejde zjistit pomocí reflexe).
 
 \subsection{Error Handling}
-Ošetřování chyb je součást GraphQL specifikace a je součástí výchozí implementace GraphQL odpovědí. K označování chybových stavů používám výjimky definované v knihovně \mintinline{text}{apollo-server-core}, které poté doplním o vhodnou chybovou hlášku a jsou pak zpracovány Apollo Serverem.
+Ošetřování chyb je součást GraphQL specifikace a je součástí výchozí implementace GraphQL odpovědí. K označování chybových stavů používám výjimky definované v knihovně \mintinline{text}{apollo-server-core}, které jsou doplněny o vhodnou chybovou hlášku a jsou pak zpracovány Apollo Serverem.
 
 \subsection{Ověření uživatele}
-Stejně jako v REST implementaci používám i zde k ověřování uživatelů knihovnu \mintinline{text}{jsonwebtoken}. Uživatelé se přihlašují zasláním požadavku na mutaci \mintinline{text}{loginUser}, která jim vrátí přístupový token a token k jeho obnovení. Ověřovací middleware se pak stará o rozšíření objektu požadavků o data přihlášeného uživatele. Knihovna \mintinline{text}{type-graphql} obsahuje funkci na kontrolu ověření uživatelů, kde je možné si doimplementovat další funkce jako kontrola přístupových práv. Tato kontrola se pak aktivuje dekorátorem \mintinline{text}{@Authorized()}, který jde umístit na úroveň resolveru, dotazu nebo mutace.
+Stejně jako v REST implementaci používám i zde k ověřování uživatelů knihovnu \mintinline{text}{jsonwebtoken}. Uživatelé se přihlašují zasláním požadavku na mutaci \mintinline{text}{loginUser}, která jim vrátí přístupový token a token k jeho obnovení. Ověřovací middleware se pak stará o rozšíření objektu požadavků o data přihlášeného uživatele. Knihovna \mintinline{text}{type-graphql} obsahuje funkci na kontrolu ověření uživatelů, kde je možné si doimplementovat další funkce jako např. kontrola přístupových práv. Tato kontrola se pak aktivuje dekorátorem \mintinline{text}{@Authorized()}, který jde umístit na úroveň resolveru, dotazu nebo mutace.
 
 \subsection{GraphQL subscription}
 Apollo Server nepodporuje nativně subscriptions, proto je potřeba vytvořit vlastní WebScocket server, který bude subscriptions obsluhovat. Samotné definování subscription je pak vcelku jednoduché, viz ukázka \ref{lst:graphql_subscription}. V dekorátoru \mintinline{text}{@Subscription} určíme jaké téma toto subscription obsluhuje a volitelnou filtrovací funkci -- v tomto případě filtruje produkty, k jejichž notifikaci o změně jsme se přihlásili. Poté už následuje samotná implementace vrácení výsledku. Můžeme si všimnout, že oproti implementaci v REST API, implementace subscription vyžaduje výrazně méně kódu.
 
-V předchozí ukázce \ref{lst:graphql_resolver} je demonstrováno poslání notifikace subscription enginu. Knihovna Prisma ve své první verzi obsahovala implementaci subscriptions, tato funkce ale už v nových verzích není dostupná.
+V předchozí ukázce \ref{lst:graphql_resolver} je demonstrováno poslání notifikace subscription enginu. Knihovna Prisma ve své první verzi obsahovala implementaci subscriptions. Tato funkce ale už v nových verzích není dostupná.
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -1223,7 +1240,7 @@ quantityUpdate(
 K implementaci testů pro GraphQL jsem také použil kombinaci knihoven \mintinline{text}{jest} a \mintinline{text}{supertest}. Samotné testování probíhá obdobně, kdy supertest slouží jako klient, který volá jednotlivé dotazy a mutace. Největší rozdíl je v samotném odesílání požadavků -- nejdříve je nutné sepsat celý dotaz, který musí obsahovat všechna pole, které chceme zobrazit, a poté jsou všechny dotazy posílány na jediný endpoint na serveru. Díky konstrukci dotazovacího řetězce vyžaduje psaní testů pro GraphQL napsat větší množství kódu a času.
 
 \section{gRPC API}
-gRPc je ukázkovým příkladem design driven přístupu, protože pro implementaci API je potřeba nejdříve jeho strukturu definovat v protobuf souborech a až poté je možné implementovat samotné API. Implementace pro REST byla rozdělena na jednotlivé routery, GraphQL na resolvery a u gRPC je rozdělená na jednotlivé služby. Každé této službě odpovídá jeden protobuf soubor. Jakmile jsou tyto služby nadefinovány, je potřeba z nich vygenerovat kód, který použijeme při implementaci serveru. Pro kompilaci těchto souborů je vhodné nastavit např. npm script abychom se vyhnuli psaní dlouhého příkazu s mnoha argumenty viz \ref{lst:protobuf_comp}. Příkaz nejdříve smaže a znovu vytvoří složku pro vygenerované soubory, poté následuje samotná kompilace -- pomocí parametrů můžeme nastavit styl vygenerovaného JavaScriptu, TypeScriptu.
+gRPC je ukázkovým příkladem design driven přístupu, protože pro implementaci API je potřeba nejdříve jeho strukturu definovat v protobuf souborech a až poté je možné implementovat samotné API. Implementace pro REST byla rozdělena na jednotlivé routery, GraphQL na resolvery a u gRPC je rozdělená na jednotlivé služby. Každé této službě odpovídá jeden protobuf soubor. Jakmile jsou tyto služby nadefinovány, je potřeba z nich vygenerovat kód, který použijeme při implementaci serveru. Pro kompilaci těchto souborů je vhodné nastavit např. npm script abychom se vyhnuli psaní dlouhého příkazu s mnoha argumenty viz \ref{lst:protobuf_comp}. Příkaz nejdříve smaže a znovu vytvoří složku pro vygenerované soubory, poté následuje samotná kompilace -- pomocí parametrů můžeme nastavit styl vygenerovaného JavaScriptu, TypeScriptu.
 
 \begin{listing}[H]
 \begin{minted}{text}
@@ -1245,7 +1262,7 @@ Kompilátor vytvoří pro každý \mintinline{text}{.proto} soubor jednu složku
 
 \subsection{Inicializace serveru}
 Inicializace ProtoCat serveru je pak záležitost na několik řádek kódu, viz ukázka \ref{lst:grpc_init}. Nejdříve je potřeba vytvořit instanci serveru. 
-Poté můžeme pokračovat přidáním middlewaru, v tomto případě používám middleware pro ověřování uživatelů. Pak následuje registrace implementovaných gRPC, pro které jsem si vytvořil vlastní metody (samotná implementace služby je v ukázce kódu \ref{lst:grpc_service}). Nakonec pak stačí spustit server příkazem \mintinline{text}{app.start("0.0.0.0:3000");}, kterému jako parametr zadáme adresu a port.
+Poté můžeme pokračovat přidáním middlewaru, v tomto případě používám middleware pro ověřování uživatelů. Pak následuje registrace implementovaných gRPC služeb, pro které jsem si vytvořil vlastní metody (samotná implementace služby je v ukázce kódu \ref{lst:grpc_service}). Nakonec pak stačí spustit server příkazem \\* \mintinline{text}{app.start("0.0.0.0:3000")}, kterému jako parametr zadáme adresu a port.
 
 \begin{listing}
 \begin{minted}{ts}
@@ -1264,7 +1281,7 @@ addUserServiceRegister(app);
 \end{listing}
 
 
-Ukázka kódu \ref{lst:grpc_service} zobrazuje definici metody \mintinline{text}{updateProduct} ve službě \mintinline{text}{ProductRegisterService}. V metoda nejdříve zkontroluje, jestli je uživatel přihlášený a poté načte vstupní data. Třída \mintinline{text}{UpdateProductInput} je wrapper třída pro vstupní data, která využívá vygenerovaných metod pro načtení vstupních dat z gRPC zprávy. Poté jsou vstupní data zkontrolována pomocí knihovny \mintinline{text}{class-validator} a předána do ProductService, která implementuje logiku API, stejně jako tomu bylo v předchozích případech. Zbývá už jen notifikovat emmiter o aktualizaci produktu a vrátit výsledek. Pro nastavení výsledku zde používám další wrapper metodu, který nastavuje příslušné atributy do gRPC zprávy s odpovědí.
+Ukázka kódu \ref{lst:grpc_service} zobrazuje definici metody \mintinline{text}{updateProduct} ve službě \mintinline{text}{ProductRegisterService}. Metoda nejdříve zkontroluje, jestli je uživatel přihlášený a poté načte vstupní data. Třída \mintinline{text}{UpdateProductInput} je wrapper třída pro vstupní data, která využívá vygenerovaných metod pro načtení vstupních dat z gRPC zprávy. Poté jsou vstupní data zkontrolována pomocí knihovny \mintinline{text}{class-validator} a předána do ProductService, která implementuje logiku API, stejně jako tomu bylo v předchozích případech. Zbývá už jen notifikovat emitter o aktualizaci produktu a vrátit výsledek. Pro nastavení výsledku zde používám další wrapper metodu, který nastavuje příslušné atributy do gRPC zprávy s odpovědí.
 
 Pro každý atribut ve zprávě totiž protoc kompilátor vygeneroval metody na jeho získání a nastavení. Pro každý z těchto atributu je pak tedy potřeba zavolat jeho odpovídající metodu s hodnotou, na kterou ho chceme nastavit.
 
@@ -1275,7 +1292,8 @@ app.addService(ProductRegisterService, {
     if (!call.user || !call.user.id) {
       throw new UnauthorizedError("Unauthorized");
     }
-    const updateProductInput = new UpdateProductInput(call.request);
+    const updateProductInput = 
+        new UpdateProductInput(call.request);
     await validate(updateProductInput).then((errors) => {
       if (errors.length > 0) {
         throw new InvalidArgumentError("Invalid input");
@@ -1296,16 +1314,16 @@ app.addService(ProductRegisterService, {
 Pro zachytávání a obsluhu výjimek jsem si implementoval vlastní middleware, který zachytává mou definované výjimky. Middleware pak definované výjimky mapuje na odpovídající gRPC stavové kódy a nastavuje odpovídající metadata.
 
 \subsection{Ověření uživatele}
-Pro přihlašování uživatelů slouží metoda \mintinline{text}{loginUser} ve službě \mintinline{text}{UserRegisterService}. Obdobně jako u předchozích implementací, tato metoda vrací ověřovací JWT token společně s tokenem na jeho obnovení po jeho vypršení. K ověřování uživatelů jsem si pak implementoval vlastní gRPC middleware, který po úspěšném ověření uživatele doplní objekt zprávy o jeho data.
+Pro přihlašování uživatelů slouží metoda \mintinline{text}{loginUser} ve službě \\* \mintinline{text}{UserRegisterService}. Obdobně jako u předchozích implementací, tato metoda vrací ověřovací JWT token společně s tokenem na jeho obnovení po jeho vypršení. K ověřování uživatelů jsem si pak implementoval vlastní gRPC middleware, který po úspěšném ověření uživatele doplní objekt zprávy o jeho data.
 
 Ověřovací token se nastavuje v metadatech do atributu \mintinline{text}{authorization}. Metadata jsou gRPC obdobou HTTP hlavičkám.
 
 \subsection{gRPC streaming}
-Na rozdíl od implementace WebSocketů a GraphQL subscriptions, ProtoCat implementuje streaming nativně a není k tomu potřeba nastavovat další server. Pro porovnání s předchozími implementaci jsem si vybral server streaming (odpovídá GraphQL substiption).
+Na rozdíl od implementace WebSocketů a GraphQL subscriptions, ProtoCat implementuje streaming nativně a není k tomu potřeba nastavovat další server. Pro porovnání s předchozími implementaci jsem si vybral server streaming (odpovídá GraphQL subscription).
 
-Pro implementaci streamingu je nejdříve nutné popsat metodu pro streaming v protobuf souboru, viz ukázka \ref{lst:grpc_stream}. To že se jedná o stream poznáme podle toho, že definice gRPC metody obsahuje klíčové slovo stream buď v požadavku (client streaming), v odpovědi (server streaming) nebo v obou (bidirectional streaming).
+Pro implementaci streamingu je nejdříve nutné popsat metodu pro streaming v protobuf souboru, \\* viz ukázka \ref{lst:grpc_stream}. To že se jedná o stream poznáme podle toho, že definice gRPC metody obsahuje klíčové slovo stream buď v požadavku (client streaming), v odpovědi (server streaming) nebo v obou (bidirectional streaming).
 
-\begin{listing}[H]
+\begin{listing}
 \begin{minted}{protobuf}
 rpc GetProductQuantityStream (GetProductQuantityStreamRequest)
   returns (stream GetProductQuantityStreamResponse) {};
@@ -1314,7 +1332,7 @@ rpc GetProductQuantityStream (GetProductQuantityStreamRequest)
 \label{lst:grpc_stream}
 \end{listing}
 
-Pak už můžeme implementovat samotnou metodu pro streamování, viz ukázka \ref{lst:grpc_stream implementation}. Prvním krokem je z požadavku získat identifikátor produktu, u kterého budeme sledovat jeho dostupné množství. Pro odpověď vytvoříme novou instanci vygenerované třídy \mintinline{text}{GetProductQuantityStreamResponse} a nastavíme hodnotu dostupných produktů. Data pak pošleme klientovi zavoláním metody \mintinline{text}{write}. Potom obdobně jako u implementace WebSocketu i zde využívám \mintinline{text}{EventEmmiter} z knihovny \mintinline{text}{events}. Emitter naslouchá po notifikaci typu update, a jakmile vyhodnotí dostupné množství produktu, pošle ho zpět klientovi.
+Pak už můžeme implementovat samotnou metodu pro streamování,\\* viz ukázka \ref{lst:grpc_stream implementation}. Prvním krokem je z požadavku získat identifikátor produktu, u kterého budeme sledovat jeho dostupné množství. Pro odpověď vytvoříme novou instanci vygenerované třídy \mintinline{text}{GetProductQuantityStreamResponse} a nastavíme hodnotu dostupných produktů. Data pak pošleme klientovi zavoláním metody \mintinline{text}{write}. Potom obdobně jako u implementace WebSocketu i zde využívám \mintinline{text}{EventEmitter} z knihovny \mintinline{text}{events}. Emitter naslouchá po notifikaci typu update, a jakmile vyhodnotí dostupné množství produktu, pošle ho zpět klientovi.
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -1324,7 +1342,7 @@ getProductQuantityStream: async (stream) => {
   const response = new GetProductQuantityStreamResponse()
     .setQuantity(product.quantity);
   stream.write(response);
-  productEmmiter.on("update", async (quantity: number | null) => {
+  productEmmiter.on("update", async (quantity) => {
     if (!quantity) {
       const updatedProduct = await ProductService.find(1);
       quantity = updatedProduct.quantity;
@@ -1339,9 +1357,9 @@ getProductQuantityStream: async (stream) => {
 \end{listing}
 
 \subsection{Testy}
-Pro testování gRPC API využívám knihovnu Jest. Bohužel zde nelze využít knihovny supertest pro testování HTTP API a bylo potřeba implementovat vlastního gRPC klienta pro účely testování. Poté bylo ještě potřeba pomocí beforeAll a afterALL metod spustit a zastavit gRPC server.
+Pro testování gRPC API využívám knihovnu \mintinline{text}{jest}. Bohužel zde nelze využít knihovny \mintinline{text}{supertest} pro testování HTTP API a bylo potřeba implementovat vlastního gRPC klienta pro účely testování. Poté bylo ještě potřeba pomocí beforeAll a afterAll metod spustit a zastavit gRPC server.
 
-ProtoCat umožnuje velmi snadnou inicializaci klienta, viz \ref{lst:grpc_client}. Opět zde využívá vygenerované implementace pomocí protoc kompilátoru. Metodě \mintinline{text}{createClient} předáme implementace klienta pro služby, které chceme používat, adresu s portem, na které server běží a přístupové údaje k serveru.
+ProtoCat umožnuje velmi snadnou inicializaci klienta, viz \ref{lst:grpc_client}. Opět zde využívá vygenerované implementace pomocí protoc kompilátoru. Metodě \\* \mintinline{text}{createClient} předáme implementace klienta pro služby, které chceme používat, adresu s portem, na které server běží a přístupové údaje k serveru.
 
 \begin{listing}[H]
 \begin{minted}{ts}
@@ -1362,7 +1380,8 @@ Ukázka \ref{lst:gRPC_client_call} ukazuje jak lze klienta použít. Přes objek
 
 \begin{listing}[H]
 \begin{minted}{ts}
-const { response } = await client.category.getCategory((req, metadata) => {
+const { response } = await 
+    client.category.getCategory((req, metadata) => {
   metadata.set("authorization", token);
   req.setId(2);
 });
@@ -1372,15 +1391,15 @@ const { response } = await client.category.getCategory((req, metadata) => {
 \end{listing}
 
 \chapter{Výkonnostní testování}
-Pro výkonnostní testování jsem využil nástroj K6 od Grafana Labs. K6 jako jeden z mála dostupných nástrojů pro zátěžové testování umožňuje testování REST, GraphLQ a gRPC API bez nutnosti instalace dodatečných pluginů. K programování testů se používá JavaScript a není tak potřeba učit se další syntaxi a umožňuje použití populárních JavaScript knihoven.
+Pro výkonnostní testování jsem využil nástroj k6 od Grafana Labs \cite{k6}. K6 jako jeden z mála dostupných nástrojů pro zátěžové testování umožňuje testování REST, GraphLQ a gRPC API bez nutnosti instalace dodatečných pluginů. K programování testů se používá JavaScript a není tak potřeba učit se další syntaxi a umožňuje použití populárních JavaScript knihoven.
 
-Testování pomocí tohoto nástroje probíhá tak, že pomocí JavaScriptu si definujeme scénář testu, který pak poskytneme K6 jako parametr společně s konfigurací samotného testu -- např. délce testu, počet procesů, které se spustí...
+Testování pomocí tohoto nástroje probíhá tak, že pomocí JavaScriptu si definujeme scénář testu, který pak poskytneme K6 jako parametr společně s konfigurací samotného testu -- např. délce testu, počet procesů, které se spustí.
 
 Bohužel tento nástroj zatím nepodporuje testování gRPC streamů, a tak bylo nutné pro test streamování implementovat vlastní testovací skript.
 
-Každý ze tří serverů byl spušten v Docker kontejneru s vlastní Postgres databází, která byla taktéž spuštěna v Docker kontejneru.
+Každý ze tří serverů byl spuštěn v Docker kontejneru s vlastní Postgres databází, která byla taktéž spuštěna v Docker kontejneru.
 
-Počítač na kterém testování probíhalo měl následující parametry:
+Počítač, na kterém testování probíhalo měl následující parametry:
 
 \begin{itemize}
   \item operační systém Ubuntu 20.04.4 LTS 64bit
@@ -1392,9 +1411,9 @@ Počítač na kterém testování probíhalo měl následující parametry:
 Každý test jsem třikrát zopakoval a výsledek zprůměroval, abych se vyhnul případným anomáliím při měření.
 
 \section{Zobrazení detailu produktu}
-Test probíhal s 10 virtuálním uživateli běžícími paralelně po dobu 30s. Každý virtuální uživatel po vyhodnocení požadavku pokračoval odeslání dalšího. Z výsledků na obrázku \ref{test_get_product} můžeme vidět, že nejrychleji požadavky odbavovaly REST a GraphQL API, přibližně stejnou rychlostí. gRPC bylo nejpomalejejší, přisuzuji to režiji při serializaci a deserializaci zpráv.
+Test probíhal s 10 virtuálním uživateli běžícími paralelně po dobu 30 s. Každý virtuální uživatel po vyhodnocení požadavku pokračoval odeslání dalšího. Z výsledků na obrázku \ref{test_get_product} můžeme vidět, že nejrychleji požadavky odbavovaly REST a GraphQL API, přibližně stejnou rychlostí. gRPC bylo nejpomalejší, přisuzuji to režii při serializaci a deserializaci zpráv.
 
-\begin{figure}[H]
+\begin{figure}[]
   \includegraphics[width=\linewidth]{img/get-product.eps}
   \caption{Detail produktu -- Počet odbavených požadavků za sekundu}
 \label{test_get_product}
@@ -1406,16 +1425,17 @@ Požadavky nejmenší velikosti mělo gRPC a následně REST. GraphQL požadavky
 
 Nejmenší velikost odpovědi mělo opět gRPC API, což přisuzuji kompresi dat při serializaci odpovědí. Následovalo GraphQL s omezenou podmnožinou polí v odpovědi. Na třetím místě se pak umístil REST. Největší velikost odpovědi pak měly GraphQL dotazy, které obsahovaly všechny pole produktu.
 
-\begin{figure}[H]
+\begin{figure}[]
   \includegraphics[width=\linewidth]{img/req-size.eps}
   \caption{Detail produktu -- Průměrná velikost odpovědi}
 \label{test_get_product_size}
 \end{figure}
 
+\clearpage
 \section{Vytvoření nového produktu}
-Graf \ref{test_create_product} zobrazuje porovnání výkonu API při vytváření nových produktů. Pro tvorbu nových produktů dokáže zpracovat nejvíce požadavku REST a gRPC API. které podaly téměř stejné výsledky. Výrazně pomalejší pak bylo GrapQL API -- jak verze se zobrazením podmnožiny polí, tak verze se zobrazením všech polí.
+Graf \ref{test_create_product} zobrazuje porovnání výkonu API při vytváření nových produktů. Pro tvorbu nových produktů dokáže zpracovat nejvíce požadavku REST a gRPC API. které podaly téměř stejné výsledky. Výrazně pomalejší pak bylo GraphQL API -- jak verze se zobrazením podmnožiny polí, tak verze se zobrazením všech polí.
 
-\begin{figure}[H]
+\begin{figure}[]
   \includegraphics[width=\linewidth]{img/create-product.eps}
   \caption{Vytvoření produktu -- Počet odbavených požadavků za sekundu}
 \label{test_create_product}
@@ -1426,22 +1446,23 @@ Graf \ref{test_create_product_size} pak zobrazuje průměrnou velikost požadavk
 Stejně jako v předchozím testu, gRPC má nejmenší velikost požadavků. Za ním následuje GraphQL zobrazující podmnožinu polí produktu. Následuje REST API a s největší velikostí požadavků GraphQL vracející celý detail produktu.
 
 gRPC má také stále i nejmenší velikost odpovědí. Následuje GraphQL API vracející omezenou podmnožinu polí, poté REST API a následně GraphQL vracející všechna pole produktu.
-\begin{figure}[H]
+\begin{figure}[]
   \includegraphics[width=\linewidth]{img/req-size-create.eps}
   \caption{Vytvoření produktu -- Průměrná velikost odpovědi}
 \label{test_create_product_size}
 \end{figure}
 
+\clearpage
 \section{WebSocket, GraphQL subscription a gRPC stream}
-Tyto specialní endpointy jsem zkoumal ze svou ohledů -- maximální počet možných spojení a odezva odpovědi s přibývajícím počtem spojení.
+Tyto speciální endpointy jsem zkoumal ze dvou pohledů -- maximální počet možných spojení a odezva odpovědi s přibývajícím počtem spojení.
 
 \begin{itemize}
-  \item Maximální počet spojení -- pomocí vlastního scriptu jsem testoval následující počty ssoučasných spojení --  10, 100, 1000, 10 000, 20 000, 30 000
+  \item Maximální počet spojení -- pomocí vlastního scriptu jsem testoval následující počty současných spojení --  10, 100, 1000, 10 000, 20 000, 30 000
   \item Odezva odpovědi -- na serveru jsem nastavil odesílání odpovědi po době 100 milisekund a v klientu jsem měřil prodlevu mezi jednotlivými odpověďmi
 \end{itemize}
 
 \subsubsection*{WebSocket}
-WebSocket bez problému zvládl 20 000 příchozích spojení, při testování 30 000 příchozích spojení jsem dosáhl lkmitu počítače na kterém testování probíhalo a z důvodu nedostatku portů už nová spojení nešla vytvářet.
+WebSocket bez problému zvládl 20 000 příchozích spojení, při testování 30 000 příchozích spojení jsem dosáhl limitu počítače na kterém testování probíhalo a z důvodu nedostatku portů už nová spojení nešla vytvářet.
 
 Prodleva pro 1000 spojení se pohybovala okolo 100ms, pro 10000 vzrostla na 144ms a pro 20 000 příchozích spojení se pohybovala průměrně 382ms
 
@@ -1460,25 +1481,25 @@ V této kapitole provedu srovnání technologií REST, GraphQL a gRPC a jejich i
 
 
 \section{Srovnávací kritéria}
-Abychom mohli tyto technologie mezi sebou porovnat, je nejdříve potřeba stanovit kritéria, podle kterých tyto technologie budeme hodnotit.Popisované technologie porovnám podle následujících kritérií.
+Abychom mohli tyto technologie mezi sebou porovnat, je nejdříve potřeba stanovit kritéria, podle kterých tyto technologie budeme hodnotit. Popisované technologie porovnám podle následujících kritérií.
 
 \subsection{Velikost kódu a závislostí}
-Přestože v dnešní době již není diskový prostor tak drahý jako v minulosti, může být velikost kódu dané implementace přispět k rozhodnutí kterou technologii použijeme. Čím méně závislostí tento kód obsahuje, je větší šance že dojde k nějaké komplikaci. Sice to nemusí být tak dramatické jako incident z roku 2016, kdy stažení knihovny \mintinline{text}{left-pad} z npm došlo ke znemožnění instalace velkého možství projektů \cite{left_pad},  ale může dojít ke vzniku chyb s aktualizací verze knihovny.
+Přestože v dnešní době již není diskový prostor tak drahý jako v minulosti, může být velikost kódu dané implementace přispět k rozhodnutí kterou technologii použijeme. Čím méně závislostí tento kód obsahuje, je větší šance že dojde k nějaké komplikaci. Sice to nemusí být tak dramatické jako incident z roku 2016, kdy stažení knihovny \mintinline{text}{left-pad} z npm došlo ke znemožnění instalace velkého množství projektů \cite{left_pad},  ale může dojít ke vzniku chyb s aktualizací verze knihovny.
 
-Velikost knihoven zjistím následovně -- v novém docker kontejneru si nainstaluji pomocí npm samotnou knihovnu a spočítám počet a velikost závislostí nainstalovaných ve složce \mintinline{text}{node_modules}
+Velikost knihoven zjistím následovně -- v novém Docker kontejneru si nainstaluji pomocí npm samotnou knihovnu a spočítám počet a velikost závislostí nainstalovaných ve složce \mintinline{text}{node_modules}
 
 
 \subsection{Oblíbenost}
-Oblíbenost dané technologie je velmi důležitým kritériem. Souvisí s ní dostupnost a kvalita dokumentace, rychlost opravy chyb a vývoj nových funkcionalit. Čím více je daná technologie populární mezi vývojáři, je také pravděpodobnější, že v případě nějakého problému s implementací najdeme pomoc právě v nějaké komunitě jako je např. Stack Overlow%todo ref%.
+Oblíbenost dané technologie je velmi důležitým kritériem. Souvisí s ní dostupnost a kvalita dokumentace, rychlost opravy chyb a vývoj nových funkcionalit. Čím více je daná technologie populární mezi vývojáři, je také pravděpodobnější, že v případě nějakého problému s implementací najdeme pomoc právě v nějaké komunitě jako je např. Stack Overlow \cite{stack_overflow}.
 
 Oblíbenost dané technologie se dá kvantifikovat několika způsoby. Poměrně dobrým indikátorem popularity může být například počet hvězd v GitHub repozitáři dané knihovny nebo počet stažení v balíčkovacím systému npm. Další metrikou k porovnání popularity je počet otevřených otázek na Stack Overflow
 
 Vzhledem k tomu, že tyto technologie nejsou závislé na platformě a v rámci jednotlivých programovacích jazyků existuje mnoho jejich implementací pomocí různých knihoven, je velmi náročné shromáždit data o jejich používání. Rozhodl jsem se proto, že shromáždím nejvíce používané knihovny implementující danou technologii a srovnání provedu nad nimi.
 
 \subsection{Developer experience}
-V této části popíšu svoje zkušenosti které jsem získal při vývoji API pomocí těchto technologií. Přestože se jedná o víceméně subjektivní, věřím že bude přínosem pro každého, kdo přemýšlí o využítí některé z těchto technologií.
+V této části popíšu svoje zkušenosti, které jsem získal při vývoji API pomocí těchto technologií. Přestože se jedná o víceméně subjektivní, věřím že bude přínosem pro každého, kdo přemýšlí o využití některé z těchto technologií.
 
-Práce s dokumentací je nedílnou součástí vývoje a její čitelnost přímo ovliňuje rychlost s jakou jsme schopni danou knihovnu začít používat nebo jak efektivně vyřešíme problém, na který při vývoji narazíme. Protože tato část je také velmi subjektivní, ke svojí zkušenosti také poskytnu ukázky dokumentaci aby si čtenář mohl udělat svůj názor. 
+Práce s dokumentací je nedílnou součástí vývoje a její čitelnost přímo ovlivňuje rychlost s jakou jsme schopni danou knihovnu začít používat nebo jak efektivně vyřešíme problém, na který při vývoji narazíme. Protože tato část je také velmi subjektivní, ke svojí zkušenosti také poskytnu ukázky dokumentaci aby si čtenář mohl udělat svůj názor. 
 
 \subsection{Dokumentace API}
 Kvalitní dokumentace API pomáhá ostatní vývojářům pochopit jakými způsoby lze API používat
@@ -1486,13 +1507,13 @@ Kvalitní dokumentace API pomáhá ostatní vývojářům pochopit jakými způs
 \subsection{Výkon}
 Potřebujeme-li vybudovat API, které by dokázalo odbavovat velké množství požadavků najednou a co nejrychleji, je výkon nejspíše jedno z hlavních kritérií, které zvažujeme při výběru technologie pro tvorbu API.
 
-V této části porovnám výkon implementovaných API na datech posbíraných během výkonnostního testování v kapitole \ref{load_test} z několika pohledů:
+V této části porovnám výkon implementovaných API na datech posbíraných během výkonnostního testování z několika pohledů:
 
 \begin{itemize}
     \item Počet odbavených požadavků za sekundu
     \item Velikost odesílaných dat v odpovědi
     \item Průchodnost WebSocket, GraphQL subscription a gRPC streaming
-    \item Počet otevřených spojení HTTP WebSocket, GraphQL subscription a gRPC streaming
+    \item Počet otevřených spojení HTTP WebSocket, GraphQL subscription \\* a gRPC streaming
 \end{itemize}
 
 \section{Samotné srovnání}
@@ -1535,12 +1556,12 @@ Jak lze vyčíst z počtu stažení balíčku v npm nebo počtu hvězd jednotliv
   \textbf{protocat}                                & 359                                                 & 42                     \\ \hline
   \end{tabular}
 \end{table}
-\subsubsection*{Stack Overflow otázky}
+% \subsubsection*{Stack Overflow otázky}
 %https://insights.stackoverflow.com/trends?tags=grpc%2Crest%2Cgraphql%
 
 \subsection{Developer Experience}
 \subsubsection*{REST}
-Implementace RESTového API s použitím Expressu je určitě nejjednoduší a nejrychlejší ze všech tří způsobů. K prvotnímu nastavení a spuštění serveru stačí napsat pár řádek kódu a nic nebrání pokračování na implementaci.
+Implementace RESTového API s použitím Expressu je určitě nejjednodušší a nejrychlejší ze všech tří způsobů. K prvotnímu nastavení a spuštění serveru stačí napsat pár řádek kódu a nic nebrání pokračování na implementaci.
 Nespornou výhodou Expressu je jeho popularita. Pokud by nám nestačila oficiální dokumentace, existuje velké množství návodů nebo odpovědí na Stack Overflow, které nám mohou pomoci.
 
 \subsubsection*{GraphQL}
@@ -1558,15 +1579,15 @@ Ještě musím jako výhodu zmínit jednoduchou implementaci streamů. Narozdíl
 
 \subsection*{Dokumentace API}
 \subsubsection*{REST}
-Pro dokumentaci REST API existují dva způsoby jak přistupovat ke tvorbě API jeho dokumentace: design first a program first.%todo% 
+Pro dokumentaci REST API existují dva způsoby, jak přistupovat ke tvorbě API jeho dokumentace: design first a program first.%todo% 
 V prvním případě nejdříve navrhujeme samotné API např. ve specifikaci OpenAPI a poté využijeme nějaký program třetí strany k vygenerování kostry API nebo typů pro TypeScript.
 
-Ve druhém případě API nejdříve naprogramujeme a poté pomocí knihovny vygenerujeme samotnou dokumentaci, také např. ve formátu OpenAPI. Tento přístup má hlavní výhodu v tom, že dokumentaci nemusíme věnovat takovou práci údržbě dokumentace. Na druhou stranu může být práce programátora snažší pokud už má návrh připravený a programuje podle něj.
+Ve druhém případě API nejdříve naprogramujeme a poté pomocí knihovny vygenerujeme samotnou dokumentaci, také např. ve formátu OpenAPI. Tento přístup má hlavní výhodu v tom, že dokumentaci nemusíme věnovat takovou práci údržbě dokumentace. Na druhou stranu může být práce programátora snazší, pokud už má návrh připravený a programuje podle něj.
 
 \subsubsection*{GraphQL}
-GraphQL je na tom o něco lépe co se týče dokumentace. Pro prozkoumání možnéstí API si můžeme buď zobrazit GraphQL schéma, kde je celá struktura API definována, nebo můžeme využít vlastnosti introspekce a aplikační rozhraní si pomocí GraphQL dotazů vyzkoušet.
+GraphQL je na tom o něco lépe co se týče dokumentace. Pro prozkoumání možností API si můžeme buď zobrazit GraphQL schéma, kde je celá struktura API definována, nebo můžeme využít vlastnosti introspekce a aplikační rozhraní si pomocí GraphQL dotazů vyzkoušet.
 
-Samozřejmě je možné využít nějaký nástroj k zobrazení a práci s API. Při programování GraphQL API se mi osvědčil nástroj GraphQL Playground. %https://www.apollographql.com/docs/apollo-server/v2/testing/graphql-playground/%
+Samozřejmě je možné využít nějaký nástroj k zobrazení a práci s API. Při programování GraphQL API se mi osvědčil nástroj GraphQL Playground \cite{apollo_playground}. 
 Jedná se o nástroj vyvinutý Prismou a založený na GraphiQL, který umožňuje v prohlížeči interaktivně provolávat GraphQL API. Mezi jeho hlavní funkcionality patří automatické doplňování textu a zvýrazňování chyb nebo testování GraphQL subscriptions. Zároveň je velmi jednoduché tento nástroj začít používat, stačí ho aktivovat jako plugin při inicializaci serveru.
 
 
@@ -1574,13 +1595,12 @@ Jedná se o nástroj vyvinutý Prismou a založený na GraphiQL, který umožňu
 Stejně jako GraphQL, tak i gRPC nutí vývojáře udržovat kontrakt 
 Protože při tvorbě gRPC API je potřeba vytvořit definici služeb a metod pomocí \mintinline{text}{.proto} souborů, máme tak určitou formu dokumentace API přímo dostupnou.
 
-Kromě samotného čtení můžeme využít nástrojů třetích stran, které je možné použít jak k prozkoumávání možností API tak zároveň k jeho testování. Mohu například zmínít nástroj BloomRPC, %https://github.com/bloomrpc/bloomrpc
-který jsem používal k testování API při implementaci. Tento nástroj podporuje všechny typy gRPC metod od \mintinline{text}{unary call} po \mintinline{text}{bidirectional streaming}. Na rozdíl od GraphQL Playground, tato aplikace není dostupná jako plugin serveru, ale je potřeba si ji doinstalovat. Poté stačí importovat si příslušné \mintinline{text}{.proto} soubory, nakonfigurovat k jakému serveru se chceme připojit a začít testovat API.
+Kromě samotného čtení můžeme využít nástrojů třetích stran, které je možné použít jak k prozkoumávání možností API, tak zároveň k jeho testování. Mohu například zmínit nástroj BloomRPC \cite{bloomrpc}, který jsem používal k testování API při implementaci. Tento nástroj podporuje všechny typy gRPC metod od \mintinline{text}{unary call} po \mintinline{text}{bidirectional streaming}. Díky specifikaci typů zpráv v protocol bufferu, tento nástroj připraví dotazy na jednotlivé metody s vyplněnými výchozími hodnotami. Na rozdíl od GraphQL Playground, tato aplikace není dostupná jako plugin serveru, ale je potřeba si ji doinstalovat. Poté stačí importovat si příslušné \mintinline{text}{.proto} soubory, nakonfigurovat k jakému serveru se chceme připojit a začít testovat API.
 
 \subsubsection*{Zhodnocení}
 Z hlediska dokumentace API mi jako nejlepší vycházejí GraphQL a gRPC. Obě technologie z principu nutí udržovat vývojáře nějaký způsob dokumentace API, s tím že GraphQL je na tom ještě o něco lépe díky introspekci.
 
-REST z tohoto úhlu pohledu vychází na poslední místě, ale to neznamená, že by na tom byl špatně. Je jen nutno počítat s tím, že je potřeba věnovat čas a rozmyslet si jak budeme dokumentaci API tvořit a udržovat.
+REST z tohoto úhlu pohledu vychází na poslední místě, ale to neznamená, že by na tom byl špatně. Je jen nutno počítat s tím, že je potřeba věnovat čas a rozmyslet si, jak budeme dokumentaci API tvořit a udržovat.
 
 \subsection{Výkon}
 
@@ -1594,12 +1614,22 @@ Nejlépe zatížení zvládal WebSocket, který pro 10 000 aktivních spojeních
 Největší počet aktivních spojení zvládl obsloužit WebSocket. gRPC zvládl obsloužit přibližně 15 000 spojení a další pak už odmítal. GraphQL server zvládl obsloužit 10 000 předplatných, ale při větším počtu přestal na předplatná úplně reagovat a zamrzl.
 
 \subsubsection*{Zhodnocení}
-Na základě výkonnostního testování je těžké vybrat technologii, která by byla jasný vítěz, protože velmi záleží na implementaci použitého frameworku
+Na základě výkonnostního testování je těžké vybrat technologii, která by byla jasným vítězem, protože velmi záleží na volbě a implementaci použitého frameworku
 
 \begin{conclusion}
-Cílem práce bylo představit tři technologie pro tvorbu API -- REST, GraphQL a gRPC -- a následně pomocí nich implementovat tři shodná API a provést srovnání z hlediska výkonu, dokumentace a .
+Cílem práce bylo představení tří technologií pro tvorbu API -- REST, GraphQL a gRPC, implementace shodných API v Node.js pomocí každé technologie a následné porovnání z hlediska výkonu, DX a dokumentace.
 
-Výsledkem jsou tři různé implementace API pro chod e-shopu, na kterých jsem demonstroval tyto technologie.
+V kapitole \textit{Analýza} jsou představeny principy, na kterých tyto technologie fungují. Dále je zde také představen jazyk TypeScript, ve kterém byly ukázky API implementovány, společně s prostředím Node.js
+
+Návrhem ukázkového aplikačního rozhraní jsem se zabýval v kapitole \textit{Návrh}
+
+V kapitole \textit{Dostupné technologie} jsem zkoumal dostupné knihovny pro implementaci aplikačních rozhraní a pro každou technologii jsem jednu z knihoven vybral pro ukázkovou implementaci.
+
+Různé aspekty implementace a testů jednotlivých API jsou popsány v kapitole \textit{Implementace}. Tyto implementace jsem poté podrobil zátěžovým testům a provedl zhodnocení podle rychlosti, dokumentace a vývojářské zkušenosti.
+
+Z porovnání jednotlivých technologií nevyšel jasný vítěz, záleží na konkrétním způsobu užití %todo dokoncit formulaci
+
+
 \end{conclusion}
 
 \bibliographystyle{csn690}
@@ -1610,26 +1640,37 @@ Výsledkem jsou tři různé implementace API pro chod e-shopu, na kterých jsem
 \chapter{Seznam použitých zkratek}
 % \printglossaries
 \begin{description}
-	\item[REST] Representational state transfer
+	\item[API] Application programming interface
+	\item[CPU] Central processing unit
+	\item[GUI] Graphic user interface
+	\item[HTTP] Hypertext Transfer Protocol
+	\item[IDE] Integrated development environment
+	\item[JSON] JavaScript Object Notation
+	\item[JWT] JSON Web token
+	\item[NPM] Node Package Manager
+	\item[ORM] Object-relational mapping
+	\item[REST] Representational State Transfer
 	\item[RPC] Remote procedure call
-	\item[XML] Extensible markup language
+	\item[SQL] Structured Query Language
+	\item[URI] Uniform Resource Identifier
+	\item[URL] Uniform Resource Locator  
 \end{description} 
 
 \chapter{Obsah přiloženého CD}
 
-%upravte podle skutecnosti
-
-% \begin{figure}
-% 	\dirtree{
-% 		.1 readme.txt\DTcomment{stručný popis obsahu CD}.
-% 		.1 exe\DTcomment{adresář se spustitelnou formou implementace}.
-% 		.1 src.
-% 		.2 impl\DTcomment{zdrojové kódy implementace}.
-% 		.2 thesis\DTcomment{zdrojová forma práce ve formátu \LaTeX{}}.
-% 		.1 text\DTcomment{text práce}.
-% 		.2 thesis.pdf\DTcomment{text práce ve formátu PDF}.
-% 		.2 thesis.ps\DTcomment{text práce ve formátu PS}.
-% 	}
-% \end{figure}
+\begin{figure}
+	\dirtree{%
+		.1 readme.txt\DTcomment{stručný popis obsahu CD}.
+		% .1 exe\DTcomment{adresář se spustitelnou formou implementace}.
+		.1 src.
+		.2 shop-graphql\DTcomment{GraphQL implementace}.
+    .2 shop-grpc\DTcomment{gRPC implementace}.
+    .2 shop-rest\DTcomment{REST implementace}.
+    .2 test\DTcomment{implementace zátěžových testů}.
+		.2 text\DTcomment{zdrojová forma práce ve formátu \LaTeX{}}.
+		.1 text\DTcomment{text práce}.
+		.2 DP\_Bunata\_Tomas\_2022.pdf\DTcomment{text práce ve formátu PDF}.
+	}
+\end{figure}
 
 \end{document}
