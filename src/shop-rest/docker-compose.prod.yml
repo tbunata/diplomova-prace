@@ -4,4 +4,4 @@ services:
     container_name: shop-rest-api
     environment:
       - NODE_ENV=production
-    command: npm run start
+    command: bash -c "npx prisma migrate deploy && npm run start"

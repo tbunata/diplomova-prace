@@ -7,7 +7,6 @@ import { validate } from "class-validator";
 
 export const categoriesRouter = express.Router();
 
-categoriesRouter.use(verifyToken);
 
 // GET categories
 categoriesRouter.get("/", async (req: Request, res: Response) => {
@@ -30,7 +29,7 @@ categoriesRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 // POST category
-categoriesRouter.post("/", async (req: Request, res: Response) => {
+categoriesRouter.post("/", verifyToken, async (req: Request, res: Response) => {
   try {
     const newCategoryInput = new NewCategoryInput(req.body);
     await validate(newCategoryInput).then((errors) => {
@@ -46,7 +45,7 @@ categoriesRouter.post("/", async (req: Request, res: Response) => {
 });
 
 // PUT category
-categoriesRouter.put("/:id", async (req: Request, res: Response) => {
+categoriesRouter.put("/:id", verifyToken,  async (req: Request, res: Response) => {
   try {
     const id: number = parseInt(req.params.id, 10);
     const categoryUpdateInput = new UpdateCategoryInput(req.body);
@@ -63,7 +62,7 @@ categoriesRouter.put("/:id", async (req: Request, res: Response) => {
 });
 
 //DELETE category
-categoriesRouter.delete("/:id", async (req: Request, res: Response) => {
+categoriesRouter.delete("/:id", verifyToken, async (req: Request, res: Response) => {
   try {
     const id: number = parseInt(req.params.id, 10);
 

@@ -11,10 +11,9 @@ import { logger } from "../logger";
 export const productsRouter = express.Router();
 export const productEmmiter = new EventEmitter();
 
-productsRouter.use(verifyToken);
 
 // GET products
-productsRouter.get("/", async (req: GetProductsRequest, res: Response) => {
+productsRouter.get("/",  async (req: GetProductsRequest, res: Response) => {
   try {
     let productIds: number[] = [];
     if (req.query.productIds) {
@@ -47,7 +46,7 @@ productsRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 // POST products
-productsRouter.post("/", async (req: Request, res: Response) => {
+productsRouter.post("/", verifyToken, async (req: Request, res: Response) => {
   try {
     const newProductInput = new NewProductInput(req.body);
     await validate(newProductInput).then((errors) => {
@@ -63,7 +62,7 @@ productsRouter.post("/", async (req: Request, res: Response) => {
 });
 
 // PUT products
-productsRouter.put("/:id", async (req: Request, res: Response) => {
+productsRouter.put("/:id", verifyToken, async (req: Request, res: Response) => {
   try {
     const id: number = parseInt(req.params.id, 10);
     const updateProductInput = new UpdateProductInput(req.body);
@@ -81,7 +80,7 @@ productsRouter.put("/:id", async (req: Request, res: Response) => {
 });
 
 //DELETE products
-productsRouter.delete("/:id", async (req: Request, res: Response) => {
+productsRouter.delete("/:id", verifyToken, async (req: Request, res: Response) => {
   try {
     const id: number = parseInt(req.params.id, 10);
 
