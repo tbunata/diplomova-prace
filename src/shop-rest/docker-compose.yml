@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 services:
   shop-rest-api:
     container_name: shop-rest-api
@@ -17,3 +17,16 @@ services:
     env_file:
       - .env
     command: bash -c "npx prisma migrate deploy && npm run start:dev"
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - database-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+volumes:
+  database-data:

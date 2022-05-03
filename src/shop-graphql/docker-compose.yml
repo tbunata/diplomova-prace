@@ -1,6 +1,6 @@
 version: "3"
 services:
-  shop-rest-api:
+  shop-graphql-api:
     container_name: shop-graphql-api
     build:
       context: .
@@ -9,11 +9,24 @@ services:
       - ./src:/app/src
       - ./nodemon.json:/app/nodemon.json
     expose:
-      - 3000 # todo change ports
+      - 3333 
     ports:
-      - 3000:3000
+      - 3333:3333
     depends_on:
       - postgres
     env_file:
       - .env
     command: bash -c "npx prisma migrate deploy && npm run start:dev"
+
+  postgres:
+    image: postgres
+    container_name: postgres-graphql
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - database-data:/var/lib/postgresql_graphql/data/  # persist data even if container shuts down
+volumes:
+  database-data:
