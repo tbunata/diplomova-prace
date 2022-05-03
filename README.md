@@ -6,5 +6,5 @@ Cílem práce je vytvořit shodné API v REST, GraphQL a gRPC nad Node.js. Souč
 3. Popište metodologii porovnání (dokumentace, rychlost a DX vývoje, výkonnostní testování, …).
 4. Proveďte srovnání a zhodnoťte.
 
-## Návrh API `in progress`
+## Návrh API
 https://app.swaggerhub.com/apis/tbunata/shop/1.0.0
