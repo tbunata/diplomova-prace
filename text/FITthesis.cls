@@ -506,6 +506,8 @@ sp\^ osobom, ktor\'y nezni\v zuje hodnotu Diela (vr\'atane komer\v cn\'eho vyu\v
 \AfterEndPreamble{
 % fix the memoir bug generating structured numbers (e.g., a figure number) without dot
 \renewcommand{\counterwithin}{\@ifstar{\@csinstar}{\@csin}}
+\renewcommand{\listoflistingscaption}{Seznam ukázek kódu}
+\renewcommand{\listingscaption}{Ukázka kódu}
 
 	% \thispagestyle{empty}
 	\includepdf[pages={1}]{zadani.pdf}
@@ -530,7 +532,11 @@ sp\^ osobom, ktor\'y nezni\v zuje hodnotu Diela (vr\'atane komer\v cn\'eho vyu\v
 	\listoffigures*
 
 	\cleardoublepage
+	\listoflistings
+
+	\cleardoublepage
 	\listoftablescond
+
 
 	\pagestyle{ruled}
 	\mainmatter
