@@ -19,8 +19,10 @@ tags:
     description: ""
   - name: "order"
     description: ""
+  - name: "category"
+    description: ""  
 paths:
-  /user:
+  /users:
     post:
       tags:
       - "user"
@@ -40,12 +42,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  userId:
-                    type: "integer"
-                    format: "int64"
-                    example: "3141"
+                $ref: '#/components/schemas/User'
         "400":
           description: "Invalid input"
   /users/{userId}:
@@ -88,10 +85,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/EditUser'
       responses:
         "200":
           description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
         "404":
           description: "User not found"
     delete:
@@ -111,142 +112,74 @@ paths:
           description: "The user was deleted successfully"
         "404":
           description: "User not found"
-  /user/login:
-    get:
+  /users/login:
+    post:
       tags:
       - "user"
       summary: "logs user into the system"
       description: ""
       operationId: "loginUser"
-      parameters:
-      - in: "query"
-        name: "userName"
-        description: "The user name for logim"
-        required: True
-        schema:
-          type: "string"
-      - in: "query"
-        name: "password"
-        description: "Password in plain text"
-        required: True
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "Succesful login"
-        "400":
-          description: "Invalid username/password"
-  /user/logout:
-    get:
-      tags:
-      - "user"
-      summary: "Logs out the current user"
-      operationId: "logoutUser"
-      parameters: []
-      responses:
-        "200":
-          description: "Succesful logout"
-  /user/{userId}/changePassword:
-    put:
-      tags:
-      - "user"
-      summary: "Change password for a given user"
-      operationId: "changePassword"
-      parameters:
-        - in: "path"
-          name: "userId"
-          schema:
-            type: "integer"
-          required: true
-          description: "Numeric id of the user to edit"
       requestBody:
-        description: ""
         required: true
         content:
           application/json:
             schema:
               type: "object"
               properties:
-                oldPassword:
+                email:
                   type: "string"
-                newPassword:
+                  example: "user@email.com"
+                password:
                   type: "string"
+                  example: "secret"
       responses:
         "200":
-          description: "OK"
-        "404":
-          description: "User not found"
-  /user/{userId}/myOrders:
-    get:
-      tags:
-      - "user"
-      summary: "Lists all orders for a given user"
-      operationId: "myOrders"
-      parameters:
-      - in: "path"
-        name: "userId"
-        required: true
-        schema:
-          type: "integer"
-      responses:
-        "200":
-          description: "Successful operation"
+          description: "Succesful login"
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Order"
-        "404":
-          description: "User not found"
-  /user/{userId}/myOrders{orderId}:
-    get:
+                type: "object"
+                properties:
+                  token:
+                    type: "string"
+                  refreshToken:
+                    type: "string"
+        "400":
+          description: "Invalid username/password"
+  /users/refresh:
+    post:
       tags:
       - "user"
-      summary: "Get detail of a user's order"
-      operationId: "userOrderDetail"
-      parameters:
-      - in: "path"
-        name: "userId"
+      summary: "refreshes token"
+      description: ""
+      operationId: "refreshToken"
+      requestBody:
         required: true
-        schema:
-          type: "integer"
-      - in: "path"
-        name: "orderId"
-        required: true
-        schema:
-          type: "integer"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                email:
+                  type: "string"
+                  example: "user@email.com"
+                refreshToken:
+                  type: "string"
+
       responses:
         "200":
-          description: "Successful operation"
+          description: "Succesful login"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Order"
-        "404":
-          description: "User/order not found"
-  /user/{userId}/myOrders/{orderId}/cancelOrder:
-    delete:
-      tags:
-      - "user"
-      summary: "Cancel target order for given user"
-      parameters:
-      - in: "path"
-        name: "userId"
-        required: true
-        schema:
-          type: "integer"
-      - in: "path"
-        name: "orderId"
-        required: true
-        schema:
-          type: "integer"
-      responses:
-        "204":
-          description: "Order successfully canceled"
-        "404":
-          description: "User/order not found"
-  /product:
+                type: "object"
+                properties:
+                  token:
+                    type: "string"
+        "400":
+          description: "Invalid username/password"
+
+  /products:
     post:
       tags:
       - "product"
@@ -266,15 +199,9 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  id:
-                    type: "integer"
-                    format: "int64"
-                    example: "42"
+                $ref: '#/components/schemas/Product'
         "400":
           description: "Invalid input"
-  /products:
     get:
       tags:
       - "product"
@@ -293,26 +220,12 @@ paths:
           schema:
             type: "number"
         - in: query
-          name: "statuses"
+          name: "ids"
           required: false
           schema:
             type: "array"
             items:
-              type: "string"
-        - in: query
-          name: "categories"
-          required: false
-          schema:
-            type: "array"
-            items:
-              type: "string"
-        - in: query
-          name: "brands"
-          required: false
-          schema:
-            type: "array"
-            items:
-              type: "string"
+              type: "integer"
       responses:
         "200":
           description: "Succesful operation"
@@ -364,10 +277,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/UpdateProduct'
       responses:
         "200":
           description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
         "404":
           description: "Product not found"
     delete:
@@ -387,80 +304,14 @@ paths:
           description: "The product was deleted successfully"
         "404":
           description: "Product not found"
-  /product/category:
-    get:
-      tags:
-      - "product"
-      summary: "List all categories"
-      operationId: "listCategories"
-      parameters: []
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: '#/components/schemas/Category'
-  /product/category/{categoryId}:
-    get:
-      tags:
-      - "product"
-      summary: "List products in a given category"
-      operationId: "listCategoryProducts"
-      parameters:
-        - in: "path"
-          name: "categoryId"
-          schema:
-            type: "integer"
-          required: true
-          description: "Numeric id of the category"
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: '#/components/schemas/Product'
-        "404":
-          description: "Category not found"
-  /cart/{userId}:
-    post:
-      tags:
-      - "cart"
-      summary: "Create an empty cart for given user"
-      operationId: "createCart"
-      parameters:
-        - in: "path"
-          name: "userId"
-          schema:
-            type: integer
-          required: true
-      responses:
-        "201":
-          description: "Cart operation"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  cartId:
-                    type: "integer"
-                    format: "int64"
-                    example: "698"
-        "404":
-          description: "User not found"
-  /cart/{cartId}:
+  /carts/detail:
     get:
       tags:
       - "cart"
       summary: "List items in a given cart"
       parameters:
-        - in: "path"
-          name: "cartId"
+        - in: cookie
+          name: "userId"
           schema:
             type: "integer"
           required: true
@@ -470,20 +321,18 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/CartItem"
+                $ref: "#/components/schemas/Cart"
         "404":
           description: "Cart not found"
-  /cart/{cartId}/addItem:
+  /carts/addItem:
     post:
       tags:
       - "cart"
       summary: "Add an item into given cart"
       operationId: "cartAddItem"
       parameters:
-      - in: "path"
-        name: "cartId"
+      - in: "cookie"
+        name: "userId"
         schema:
           type: "integer"
         required: true
@@ -505,23 +354,18 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  cartId:
-                    type: "integer"
-                    format: "int64"
-                    example: "3141"
+                $ref: "#/components/schemas/Cart"
         "404":
           description: "Cart/product not found"
-  /cart/{cartId}/editItem:
+  /carts/updateItem:
     put:
       tags:
       - "cart"
       summary: "Edit an item in a given cart"
       operationId: "cartEditItem"
       parameters:
-      - in: "path"
-        name: "cartId"
+      - in: "cookie"
+        name: "userId"
         schema:
           type: "integer"
         required: true
@@ -531,23 +375,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CartItem"
+              type: "object"
+              properties:
+                quantity:
+                  type: "integer"
+                productId:
+                  type: "integer"
       responses:
         "200":
           description: "Succesful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
         "400":
           description: "Invalid data"
         "404":
           description: "Cart/product not found"
-  /cart/{cartId}/emptyCart:
+  /carts/clearCart:
     delete:
       tags:
       - "cart"
       summary: "Delete all items from given cart"
       operationId: "emptyCart"
       parameters:
-      - in: "path"
-        name: "cartId"
+      - in: "cookie"
+        name: "userId"
         schema:
           type: "integer"
         required: true
@@ -556,14 +409,14 @@ paths:
           description: "Cart deleted"
         "404":
           description: "Cart/product not found"
-  /cart/{cartId}/checkout:
+  /carts/checkout:
     post:
       tags:
       - "cart"
       summary: "Checkout the given cart"
       parameters:
-      - in: "path"
-        name: "cartId"
+      - in: "cookie"
+        name: "userId"
         schema:
           type: "integer"
         required: true
@@ -573,11 +426,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  orderId:
-                    type: "integer"
-                    format: "int64"
+                $ref: "#/components/schemas/Order"
         "404":
           description: "Cart not found"
   /orders:
@@ -633,6 +482,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+    delete:
+      tags:
+      - "order"
+      summary: "Cancel Order"
+      operationId: "deleteOrder"
+      parameters:
+        - in: "path"
+          name: "orderId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the order to cancel"
+      responses:
+        "204":
+          description: "The order was cancelled successfully"
+        "404":
+          description: "Order not found"
+  /orders/{orderId}/updateStatus:
     put:
       tags:
       - "order"
@@ -647,51 +514,128 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Order"
+              type: "object"
+              properties:
+                id:
+                  type: "integer"
+                  example: 2
         required: true
       responses:
         "200":
           description: "Successful operation"
-
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+  /categories:
+    post:
+      tags:
+      - "category"
+      summary: "Create a new category"
+      description: ""
+      operationId: "createCategory"
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategory'
+      responses:
+        "201":
+          description: "Category created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        "400":
+          description: "Invalid input"
+    get:
+      tags:
+      - "category"
+      summary: "List categories"
+      description: ""
+      operationId: "listCategories"
+      responses:
+        "200":
+          description: "Succesful operation"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Category"
+        "400":
+          description: "Invalid input"
+  /categories/{categoryId}:
+    get:
+      tags:
+      - "category"
+      summary: "Get category"
+      operationId: "getCategory"
+      parameters:
+        - in: "path"
+          name: "categoryId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the category to get"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        "404":
+          description: "Category not found"
+    put:
+      tags:
+      - "category"
+      summary: "Edit category"
+      operationId: "editCategory"
+      parameters:
+        - in: "path"
+          name: "categoryId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the category to edit"
+      requestBody:
+        description: "New values to be set"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        "404":
+          description: "Category not found"
+    delete:
+      tags:
+      - "category"
+      summary: "Delete category"
+      operationId: "deleteCategory"
+      parameters:
+        - in: "path"
+          name: "categoryId"
+          schema:
+            type: "integer"
+          required: true
+          description: "Numeric id of the category to delete"
+      responses:
+        "204":
+          description: "The category was deleted successfully"
+        "404":
+          description: "Category not found"
 components:
   schemas:
-    User:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-          example: 3120
-        firstName:
-          type: "string"
-          example: "Samuel"
-        lastName:
-          type: "string"
-          example: "Vimes"
-        email:
-          type: "string"
-          example: "commander@citywatch.am"
-        password:
-          type: "string"
-        phone:
-          type: "string"
-          example: "555431609"
-        address:
-          type: "string"
-        city:
-          type: "string"
-        zipCode:
-          type: "string"
-        userStatus:
-          type: "integer"
-          format: "int32"
-          description: "User Status"
-        roles:
-          type: "array"
-          items:
-              type: "integer"
-              format: "int64"
-              description: "Role id"
     CreateUser:
       type: "object"
       properties:
@@ -706,29 +650,110 @@ components:
           example: "commander@citywatch.am"
         password:
           type: "string"
+          example: "secret"
         phone:
           type: "string"
           example: "555431609"
         address:
           type: "string"
+          example: "Ramkin residence"
         city:
           type: "string"
+          example: "Ankh-Morpork"
         zipCode:
           type: "string"
-        roles:
-          type: "array"
-          items:
+          example: "123 00"
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          example: 1
+        firstName:
+          type: "string"
+          example: "Samuel"
+        lastName:
+          type: "string"
+          example: "Vimes"
+        email:
+          type: "string"
+          example: "commander@citywatch.am"
+        phone:
+          type: "string"
+          example: "555431609"
+        address:
+          type: "string"
+          example: "Ramkin residence"
+        city:
+          type: "string"
+          example: "Ankh-Morpork"
+        zipCode:
+          type: "string"
+          example: "123 00"
+        status:
+          type: "object"
+          properties:
+            id:
               type: "integer"
-              format: "int64"
-              description: "Role id"
+              example: 1
+            name:
+              type: "string"
+              example: "Created"
+    EditUser:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          example: 1
+        firstName:
+          type: "string"
+          example: "Samuel"
+        lastName:
+          type: "string"
+          example: "Vimes"
+        email:
+          type: "string"
+          example: "commander@citywatch.am"
+        password:
+          type: "string"
+          example: "secret"
+        phone:
+          type: "string"
+          example: "555431609"
+        address:
+          type: "string"
+          example: "Ramkin residence"
+        city:
+          type: "string"
+          example: "Ankh-Morpork"
+        zipCode:
+          type: "string"
+          example: "123 00"
+        statusId:
+          type: "integer"
+          example: 1
     Category:
       type: "object"
       properties:
         id:
           type: "integer"
           format: "int64"
+          example: 1
         name:
           type: "string"
+          example: "Men"
+        description:
+          type: "string"
+          example: "Products for men"
+    CreateCategory:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "Men"
+        description:
+          type: "string"
+          example: "Products for men"
     Product:
       type: "object"
       properties:
@@ -737,32 +762,91 @@ components:
           format: "int64"
           example: 42
         category:
-          $ref: "#/components/schemas/Category"
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Category"
         name:
           type: "string"
+          example: "Leather jacket"
         description:
           type: "string"
+          example: "Jacket for tough weather"
         status:
-          type: "string"
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+              example: 1
+            name:
+              type: "string"
+              example: "New"
         price:
           type: "number"
+          example: 10
         brand:
-          type: "string"
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+              example: 1
+            name:
+              type: "string"
+              example: "Jacket company"
     CreateProduct:
       type: "object"
       properties:
-        category:
-          $ref: "#/components/schemas/Category"
         name:
           type: "string"
+          example: "Leather jacket"
         description:
           type: "string"
-        status:
-          type: "string"
+          example: "Jacket for tough weather"
+        statusId:
+          type: "integer"
+          example: 1
         price:
           type: "number"
-        brand:
+          example: 9999
+        quantity:
+          type: "number"
+          example: 10
+        brandId:
+          type: "integer"
+          example: 1
+        categoryIds:
+          type: "array"
+          items:
+            type: "integer"
+            example: 1
+    UpdateProduct:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          example: 1
+        name:
           type: "string"
+          example: "Leather jacket"
+        description:
+          type: "string"
+          example: "Jacket for tough weather"
+        statusId:
+          type: "integer"
+          example: 1
+        price:
+          type: "number"
+          example: 9999
+        quantity:
+          type: "number"
+          example: 10
+        brandId:
+          type: "integer"
+          example: 1
+        categoryIds:
+          type: "array"
+          items:
+            type: "integer"
+            example: 1
     CartItem:
       type: "object"
       properties:
@@ -774,17 +858,19 @@ components:
           type: "integer"
           format: "int64"
           example: 16
-        productName:
-            type: "string"
-        productDescription:
+        name:
           type: "string"
-        productPrice:
+          example: "Leather jacket"
+        description:
+          type: "string"
+          example: "Orlando Oxfords' leather jacket"
+        price:
           type: "number"
-        itemPrice:
-          type: "number"
+          example: 12000
         quantity:
           type: "integer"
           format: "int32"
+          example: 1
     Cart:
       type: "object"
       properties:
@@ -792,8 +878,12 @@ components:
           type: "integer"
           format: "int64"
           example: 16
+        userId:
+          type: "integer"
+          example: 1
         totalPrice:
           type: "number"
+          example: 12000
         items:
           type: "array"
           items: 
@@ -805,13 +895,28 @@ components:
           type: "integer"
           format: "int64"
           example: 16
+        userId:
+          type: "integer"
+          example: 1
         totalPrice:
           type: "number"
+          example: 12000
         items:
           type: "array"
           items: 
             $ref: "#/components/schemas/CartItem"
         status:
-          type: "string"
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+              example: 1
+            name:
+              type: "string"
+              example: "New"
         createdDate:
           type: "string"
+          example: "2017-08-19 12:17:55 -0400"
+        updatedDate:
+          type: "string"
+          example: "2017-08-19 12:17:55 -0400"
